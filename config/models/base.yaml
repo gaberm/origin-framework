@@ -4,5 +4,6 @@ base_model:
   routing_key: ???
   queue_name: ???
   adapter: ???
+  output_type: ???
 
   # --- model parameters ---

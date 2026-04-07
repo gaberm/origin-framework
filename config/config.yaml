@@ -4,4 +4,5 @@ defaults:
 - models:
   - charging
   - transportation
+- rabbitmq: rabbitmq
 - simulation: simulation

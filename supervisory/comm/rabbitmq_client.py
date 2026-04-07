@@ -6,6 +6,15 @@ from .commands import Operation, Message, Response
 
 
 class RabbitMQClient:
+    @classmethod
+    def from_config(cls, config) -> "RabbitMQClient":
+        return cls(
+            host=config.rabbitmq.host,
+            port=config.rabbitmq.port,
+            username=config.rabbitmq.username,
+            password=config.rabbitmq.password,
+        )
+
     def __init__(self, host="localhost", port=5672, username="guest", password="guest"):
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(
@@ -15,6 +24,7 @@ class RabbitMQClient:
             )
         )
         self.channel = self.connection.channel()
+        self.channel.exchange_declare(exchange="tasks", exchange_type="direct", durable=True)
         result = self.channel.queue_declare(queue="", exclusive=True)
         self.reply_queue = result.method.queue
         self.pending = {}
@@ -42,7 +52,7 @@ class RabbitMQClient:
         correlation_id = str(uuid.uuid4())
         self.pending[correlation_id] = on_ack
         self.channel.basic_publish(
-            exchange="",
+            exchange="tasks",
             routing_key=worker,
             properties=pika.BasicProperties(
                 reply_to=self.reply_queue, correlation_id=correlation_id

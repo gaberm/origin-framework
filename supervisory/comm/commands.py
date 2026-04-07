@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Any
+from dataclasses import dataclass
 
 
 class Operation(str, Enum):
@@ -13,7 +14,7 @@ class Operation(str, Enum):
 @dataclass
 class Message:
     command: Operation
-    payload: Any
+    payload: Any = None
 
     def to_dict(self) -> dict:
         return {

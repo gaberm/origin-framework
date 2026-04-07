@@ -1,11 +1,13 @@
-from logging import config
 import multiprocessing
-
-from adapters.base_adapter import BaseAdapter
 import hydra
 import logging
+from omegaconf import OmegaConf
 from supervisory.supervisory_model import SupervisoryModel
-from adapters import AdapterWorker, ChargingAdapter, TransportationAdapter
+from adapters import AdapterWorker
+
+
+def run_worker(model_name: str, config_dict: dict):
+    AdapterWorker.from_config(model_name, OmegaConf.create(config_dict)).run()
 
 
 @hydra.main(version_base=None, config_path="config", config_name="config")
@@ -16,15 +18,14 @@ def main(config):
         handlers=[logging.StreamHandler()],
     )
 
-    workers = [
-        AdapterWorker.from_config(config.rabbitmq, model_cfg)
-        for model_cfg in config.models.values()
-    ]
+    config_dict = OmegaConf.to_container(config, resolve=True)
 
-    for w in workers:
-        multiprocessing.Process(target=w.run).start()
+    for model_name in config.models.keys():
+        multiprocessing.Process(
+            target=run_worker, args=(model_name, config_dict)
+        ).start()
 
-    model = SupervisoryModel(config)
+    model = SupervisoryModel.from_config(config)
     if getattr(config.simulation, "reset_tables", False):
         model.reset_state_memory(drop_tables=True)
     model.run()

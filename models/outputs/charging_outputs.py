@@ -30,3 +30,44 @@ class ChargedVehicle:
 class ChargingOutputs:
     charging_vehicles: tuple[ChargingVehicle, ...]
     charged_vehicles: tuple[ChargedVehicle, ...]
+
+    def to_dict(self) -> dict:
+        return {
+            "charging_vehicles": [
+                {
+                    "vehicle_id": v.vehicle_id,
+                    "soc": v.soc,
+                    "timestamp": v.timestamp,
+                }
+                for v in self.charging_vehicles
+            ],
+            "charged_vehicles": [
+                {
+                    "vehicle_id": v.vehicle_id,
+                    "soc": v.soc,
+                    "ended_at": v.ended_at,
+                }
+                for v in self.charged_vehicles
+            ],
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "ChargingOutputs":
+        return cls(
+            charging_vehicles=tuple(
+                ChargingVehicle(
+                    vehicle_id=v["vehicle_id"],
+                    soc=v["soc"],
+                    timestamp=v["timestamp"],
+                )
+                for v in d.get("charging_vehicles", [])
+            ),
+            charged_vehicles=tuple(
+                ChargedVehicle(
+                    vehicle_id=v["vehicle_id"],
+                    soc=v["soc"],
+                    ended_at=v["ended_at"],
+                )
+                for v in d.get("charged_vehicles", [])
+            ),
+        )

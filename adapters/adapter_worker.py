@@ -6,17 +6,17 @@ from supervisory.comm.commands import Message, Response
 
 class AdapterWorker:
     @classmethod
-    def from_config(
-        cls, rabbitmq_cfg, model_cfg, adapter: BaseAdapter
-    ) -> "AdapterWorker":
+    def from_config(cls, model, config) -> "AdapterWorker":
         return cls(
-            host=rabbitmq_cfg.host,
-            port=rabbitmq_cfg.port,
-            username=rabbitmq_cfg.username,
-            password=rabbitmq_cfg.password,
-            routing_key=model_cfg.routing_key,
-            queue_name=model_cfg.queue_name,
-            adapter=BaseAdapter._registry[model_cfg.adapter](model_cfg),
+            host=config.rabbitmq.host,
+            port=config.rabbitmq.port,
+            username=config.rabbitmq.username,
+            password=config.rabbitmq.password,
+            routing_key=config.models[model].routing_key,
+            queue_name=config.models[model].queue_name,
+            adapter=BaseAdapter._registry[config.models[model].adapter].from_config(
+                config.models[model]
+            ),
         )
 
     def __init__(
@@ -92,8 +92,7 @@ class AdapterWorker:
         return Response(success=True, payload=outputs.to_dict())
 
     def advance(self, payload):
-        timestep = payload.get("timestep") if payload else None
-        self.adapter.advance(timestep)
+        self.adapter.advance(payload)
         return Response(success=True)
 
     def terminate(self, payload):

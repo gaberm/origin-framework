@@ -5,7 +5,7 @@ data/inputs
 models/__pycache__
 models/inputs/__pycache__
 models/outputs/__pycache__
-outputs
+/outputs
 state_memory/__pycache__
 supervisory/__pycache__
 supervisory/loaders/__pycache__

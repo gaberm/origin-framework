@@ -1,102 +1,68 @@
 import dataclasses
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 import psycopg2 as psycopg
-from .type_mapping import sql_type
+from state_memory.validation import validate_run_id
+from .schema_manager import SchemaManager
+from records.model_output import ModelOutput
+
+
+def _generate_run_id() -> str:
+    return datetime.now().strftime("run_%Y%m%d_%H%M%S")
 
 
 class StateMemory:
-    def __init__(self, db_url: str):
-        self.conn = psycopg.connect(db_url)
+    @classmethod
+    def from_config(cls, config) -> "StateMemory":
+        from adapters import BaseAdapter
 
-    def reset_tables(self, drop_tables: bool = False):
-        with self.conn.cursor() as cur:
-            if drop_tables:
-                cur.execute(
-                    """
-                    SELECT table_name
-                    FROM information_schema.tables
-                    WHERE table_schema = 'public'
-                    """
-                )
-                tables = cur.fetchall()
-                for (table_name,) in tables:
-                    cur.execute(f"DROP TABLE IF EXISTS {table_name} CASCADE")
-            self.conn.commit()
-
-    def create_output_tables(self, cls):
-        for sql in self._generate_create_table_sql(cls):
-            with self.conn.cursor() as cur:
-                cur.execute(sql)
-            self.conn.commit()
-
-    def _generate_create_table_sql(self, cls) -> list[str]:
-        output_classes = self._extract_output_classes(cls)
-        return [self._table_sql(output_cls) for output_cls in output_classes]
-
-    def _extract_output_classes(self, cls):
-        """Recursively extract all dataclasses that are decorated with @record."""
-        output_classes = set()
-
-        for field in dataclasses.fields(cls):
-            field_type = field.type
-            if hasattr(field_type, "__origin__"):  # Generic type
-                args = getattr(field_type, "__args__", ())
-                for arg in args:
-                    if dataclasses.is_dataclass(arg) and hasattr(arg, "__record__"):
-                        output_classes.add(arg)
-                        output_classes.update(self._extract_output_classes(arg))
-
-        return output_classes
-
-    def _column_sql(self, cls) -> list[str]:
-        return [
-            f"{field.name} {sql_type(field.type)}" for field in dataclasses.fields(cls)
+        record_classes = [
+            BaseAdapter._registry[config.models[name].adapter].OutputType
+            for name in config.models
         ]
+        return cls(record_classes=record_classes, **config.db)
 
-    def _primary_key_sql(self, cls) -> str:
-        key = cls.__record__["key"]
-        return f", PRIMARY KEY ({', '.join(key)})" if key else ""
+    def __init__(self, db_url: str, record_classes: list, run_id: str = None):
+        self.run_id = run_id or _generate_run_id()
+        validate_run_id(self.run_id)
 
-    def _table_sql(self, cls) -> str:
-        table = cls.__record__["table"]
-        return f"""
-                CREATE TABLE IF NOT EXISTS {table} (
-                    {', '.join(self._column_sql(cls))}
-                    {self._primary_key_sql(cls)}
-                );
-        """.strip()
+        self.conn = psycopg.connect(db_url)
+        self._schema = SchemaManager(self.conn, self.run_id)
+        self._executor = ThreadPoolExecutor(max_workers=2)
+        self._schema.setup(record_classes)
 
-    def insert_output(self, output):
-        for field in dataclasses.fields(output):
-            value = getattr(output, field.name)
-            if not value:
-                continue
-            if isinstance(value, tuple):
-                for record in value:
-                    self._insert_record(record)
-            elif dataclasses.is_dataclass(value):
-                self._insert_record(value)
+    def insert_output(self, output: ModelOutput):
+        for record in output.all_records():
+            if record.diagnostic:
+                self._executor.submit(self._write_record, record)
+            else:
+                self._write_record(record)
 
-    def _insert_record(self, record):
+    def _write_record(self, record):
         record_cls = type(record)
-        if not hasattr(record_cls, "__record__"):
-            raise ValueError(
-                f"Record {record_cls.__name__} is missing __record__ metadata."
-            )
-        sql = self._generate_insert_sql(record_cls)
-        values = self._extract_values(record)
+        query = self._create_insert_query(record_cls)
+        values = [getattr(record, f.name) for f in dataclasses.fields(record_cls)]
         with self.conn.cursor() as cur:
-            cur.execute(sql, values)
+            cur.execute(query, values)
         self.conn.commit()
 
-    def _extract_values(self, record) -> list:
-        return [getattr(record, field.name) for field in dataclasses.fields(record)]
+    def _create_insert_query(self, record) -> str:
+        table_name = record.table_name
+        fields = [f.name for f in dataclasses.fields(record)]
+        return (
+            f"INSERT INTO {self.run_id}.{table_name} "
+            f"({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(fields))})"
+        )
 
-    def _generate_insert_sql(self, cls) -> str:
-        table = cls.__record__["table"]
-        fields = [field.name for field in dataclasses.fields(cls)]
-        placeholders = ", ".join(["%s"] * len(fields))
-        sql = f"INSERT INTO {table} ({', '.join(fields)}) VALUES ({placeholders})"
-        return sql
+    def reset_tables(self):
+        self._schema.reset_tables()
+
+    def delete_run(self, run_id: str):
+        self._schema.delete_run(run_id)
+
+    def list_runs(self) -> list[str]:
+        return self._schema.list_runs()
 
     def close_conn(self):
+        self._executor.shutdown(wait=True)
         self.conn.close()

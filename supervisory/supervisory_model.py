@@ -7,6 +7,7 @@ from supervisory.loaders import (
     ChargingInputLoader,
     TransportationInputLoader,
 )
+from supervisory.space.cell_assigner import assign_cells
 from supervisory.time import TimeRange
 import logging
 from tqdm import tqdm
@@ -33,7 +34,7 @@ class SupervisoryModel:
                 for name in model_names
             },
             input_loaders=cls._create_input_loaders(config, model_names),
-            state_memory=StateMemory(**config.db),
+            state_memory=StateMemory.from_config(config),
             max_global_time=config.simulation.max_global_time,
             rabbitmq_client=RabbitMQClient(**config.rabbitmq),
             adapter_time_steps={
@@ -65,9 +66,7 @@ class SupervisoryModel:
         self.adapter_time_steps = adapter_time_steps
 
     @staticmethod
-    def _create_input_loaders(
-        config, model_names: list
-    ) -> Dict[str, BaseInputLoader]:
+    def _create_input_loaders(config, model_names: list) -> Dict[str, BaseInputLoader]:
         input_loaders = {}
         for name in model_names:
             loader_class = INPUTS_LOADERS.get(name)
@@ -91,14 +90,6 @@ class SupervisoryModel:
         if failed:
             details = "\n".join(f"  {name}: {error}" for name, error in failed.items())
             raise RuntimeError(f"{operation} failed for adapters:\n{details}")
-
-    def _create_tables(self):
-        for name, output_type in self.output_types.items():
-            if output_type is None:
-                raise ValueError(
-                    f"Adapter '{name}' does not have an OutputType defined."
-                )
-            self.state_memory.create_output_tables(output_type)
 
     def initialize_adapters(self):
         responses = {}
@@ -154,6 +145,7 @@ class SupervisoryModel:
         self._wait_for_all(responses, self.lagging_adapter_names, "read_outputs")
         for name in self.lagging_adapter_names:
             output = self.output_types[name].from_dict(responses[name].payload)
+            output = assign_cells(output, resolution=9)
             self.state_memory.insert_output(output)
 
     def find_lagging_adapters(self):
@@ -184,7 +176,6 @@ class SupervisoryModel:
 
     def run(self):
         logger.info("Starting simulation run.")
-        self._create_tables()
         self.initialize_adapters()
         self.find_lagging_adapters()
         with tqdm(total=self.max_global_time, desc="Simulation Progress") as pbar:

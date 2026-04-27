@@ -3,14 +3,14 @@ from dataclasses import dataclass
 from literalai import Optional
 
 
-class BaseAdapter(ABC):
+class ModelAdapter(ABC):
     InputType: type[dataclass] = None
     OutputType: type[dataclass] = None
-    _registry: dict[str, type["BaseAdapter"]] = {}
+    _registry: dict[str, type["ModelAdapter"]] = {}
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        BaseAdapter._registry[cls.__name__] = cls
+        ModelAdapter._registry[cls.__name__] = cls
 
     def __init__(self, name: str, timestep_length: Optional[float] = None):
         self.name = name

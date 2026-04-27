@@ -1,5 +1,5 @@
 from typing import Dict, List, Type
-from adapters import BaseAdapter
+from adapters import ModelAdapter
 from state_memory import StateMemory
 from supervisory.comm.rabbitmq_client import RabbitMQClient
 from supervisory.loaders import (
@@ -30,7 +30,7 @@ class SupervisoryModel:
                 name: config.models[name].routing_key for name in model_names
             },
             output_types={
-                name: BaseAdapter._registry[config.models[name].adapter].OutputType
+                name: ModelAdapter._registry[config.models[name].adapter].OutputType
                 for name in model_names
             },
             input_loaders=cls._create_input_loaders(config, model_names),
@@ -91,7 +91,14 @@ class SupervisoryModel:
             details = "\n".join(f"  {name}: {error}" for name, error in failed.items())
             raise RuntimeError(f"{operation} failed for adapters:\n{details}")
 
-    def initialize_adapters(self):
+    def load_data(self):
+        for data_adapter in self.data_adapters:
+            for dataset in data_adapter.load_data():
+                if dataset.h3_index:
+                    dataset = assign_cells(dataset, resolution=9)
+                self.state_memory.insert_external_dataset(dataset)
+
+    def initialize_components(self):
         responses = {}
         for name, routing_key in self.routing_keys.items():
 
@@ -99,7 +106,7 @@ class SupervisoryModel:
                 responses[n] = response
 
             self.rabbitmq_client.initialize(routing_key, on_ack=on_ack)
-        self._wait_for_all(responses, list(self.routing_keys), "initialize_adapters")
+        self._wait_for_all(responses, list(self.routing_keys), "initialize_components")
 
     def write_inputs(self):
         responses = {}
@@ -176,7 +183,8 @@ class SupervisoryModel:
 
     def run(self):
         logger.info("Starting simulation run.")
-        self.initialize_adapters()
+        self.load_data()
+        self.initialize_components()
         self.find_lagging_adapters()
         with tqdm(total=self.max_global_time, desc="Simulation Progress") as pbar:
             while self.lagging_adapter_names:

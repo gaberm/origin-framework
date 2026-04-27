@@ -1,4 +1,4 @@
-from adapters import BaseAdapter
+from adapters import ModelAdapter
 from records import (
     ArrivedVehicleRecord,
     DepartedVehicleRecord,
@@ -6,12 +6,12 @@ from records import (
     VehicleStateRecord,
 )
 from models.inputs import TransportationInputs
-from records.base_record import ShapeType
+from shapely.geometry import Point
 import traci
 from traci.constants import VAR_ROAD_ID
 
 
-class TransportationAdapter(BaseAdapter):
+class TransportationAdapter(ModelAdapter):
     @classmethod
     def from_config(cls, model_cfg) -> "TransportationAdapter":
         return cls(
@@ -42,18 +42,17 @@ class TransportationAdapter(BaseAdapter):
         output.add_many(self._get_vehicle_states())
         return output
 
-    def _vehicle_coord(self, v_id: str) -> list[tuple[float, float]]:
+    def _vehicle_point(self, v_id: str) -> Point:
         lon, lat = self._traci.simulation.convertGeo(
             *self._traci.vehicle.getPosition(v_id)
         )
-        return [(lat, lon)]
+        return Point(lon, lat)
 
     def _get_arrived_vehicles(self) -> tuple[ArrivedVehicleRecord, ...]:
         return tuple(
             ArrivedVehicleRecord(
                 global_time=self.model_time,
-                shape_type=ShapeType.POINT,
-                shape_coord=self._vehicle_coord(v_id),
+                geometry=self._vehicle_point(v_id),
                 vehicle_id=v_id,
                 road_id=self._last_edge_by_vid.get(v_id, "unknown"),
                 soc_at_arrival=0.0,
@@ -65,8 +64,7 @@ class TransportationAdapter(BaseAdapter):
         return tuple(
             DepartedVehicleRecord(
                 global_time=self.model_time,
-                shape_type=ShapeType.POINT,
-                shape_coord=self._vehicle_coord(v_id),
+                geometry=self._vehicle_point(v_id),
                 vehicle_id=v_id,
                 road_id=self._last_edge_by_vid.get(v_id, "unknown"),
             )
@@ -77,8 +75,7 @@ class TransportationAdapter(BaseAdapter):
         return tuple(
             VehicleStateRecord(
                 global_time=self.model_time,
-                shape_type=ShapeType.POINT,
-                shape_coord=self._vehicle_coord(v_id),
+                geometry=self._vehicle_point(v_id),
                 vehicle_id=v_id,
                 road_id=self._last_edge_by_vid.get(v_id, "unknown"),
                 speed=self._traci.vehicle.getSpeed(v_id),

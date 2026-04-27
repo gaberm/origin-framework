@@ -1,10 +1,10 @@
-from adapters import BaseAdapter
+from adapters import ModelAdapter
 from models.charging_model import ChargingModel
 from records import ChargingVehicleRecord, ChargedVehicleRecord, ChargingOutputs
 from models.inputs import ChargingInputs
 
 
-class ChargingAdapter(BaseAdapter):
+class ChargingAdapter(ModelAdapter):
     InputType = ChargingInputs
     OutputType = ChargingOutputs
 

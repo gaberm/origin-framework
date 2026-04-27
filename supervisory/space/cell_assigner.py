@@ -1,43 +1,64 @@
 import dataclasses
 import h3
-from records import ModelOutput, ShapeType
+from shapely.geometry import Point, LineString, Polygon
+from records import ModelOutput
+import Any
+from adapters.data_adapter import ExternalDataset
 
 
-def assign_cells(output: ModelOutput, resolution: int) -> ModelOutput:
+def assign_cells(output: Any, resolution: int) -> ModelOutput:
+    if isinstance(output, ModelOutput):
+        return assign_model_output(output, resolution)
+    elif isinstance(output, ExternalDataset):
+        return assign_external_dataset(output, resolution)
+    else:
+        raise TypeError(
+            "Cannot assign cells to output of type: {}".format(type(output))
+        )
+
+
+def assign_external_dataset(
+    dataset: ExternalDataset, resolution: int
+) -> ExternalDataset:
+    if dataset.h3_index:
+        dataset.data["cell_ids"] = dataset.data[dataset.geometry_column].apply(
+            lambda geom: _cells_for_shape(geom, resolution)
+        )
+    return dataset
+
+
+def assign_model_output(output: ModelOutput, resolution: int):
     indexed = ModelOutput()
     for record in output.all_records():
-        shape_type = getattr(record, "shape_type", None)
-        shape_coord = getattr(record, "shape_coord", None)
-        if shape_type and shape_coord:
+        geometry = getattr(record, "geometry", None)
+        if geometry is not None:
             record = dataclasses.replace(
-                record, cell_ids=_cells_for_shape(shape_type, shape_coord, resolution)
+                record, cell_ids=_cells_for_shape(geometry, resolution)
             )
         indexed.add(record)
     return indexed
 
 
 def _cells_for_shape(
-    shape_type: str, shape_coord: list[tuple[float, float]], resolution: int
+    geometry: Point | LineString | Polygon, resolution: int
 ) -> list[str]:
-    if shape_type == ShapeType.POINT:
-        lat, lon = shape_coord[0]
-        return [h3.geo_to_h3(lat, lon, resolution)]
+    if isinstance(geometry, Point):
+        return [h3.geo_to_h3(geometry.y, geometry.x, resolution)]
 
-    if shape_type == ShapeType.LINESTRING:
+    if isinstance(geometry, LineString):
+        coords = list(geometry.coords)
         cells = []
-        for i in range(len(shape_coord) - 1):
-            lat1, lon1 = shape_coord[i]
-            lat2, lon2 = shape_coord[i + 1]
-            start = h3.geo_to_h3(lat1, lon1, resolution)
-            end = h3.geo_to_h3(lat2, lon2, resolution)
+        for i in range(len(coords) - 1):
+            start = h3.geo_to_h3(coords[i][1], coords[i][0], resolution)
+            end = h3.geo_to_h3(coords[i + 1][1], coords[i + 1][0], resolution)
             cells.extend(h3.h3_line(start, end))
         return list(dict.fromkeys(cells))
 
-    if shape_type == ShapeType.POLYGON:
+    if isinstance(geometry, Polygon):
         geo = {
             "type": "Polygon",
-            "coordinates": [[[lon, lat] for lat, lon in shape_coord]],
+            "coordinates": [list(geometry.exterior.coords)],
         }
         return list(h3.polyfill_geojson(geo, resolution))
 
-    raise ValueError(f"Unknown shape type: {shape_type}")
+    raise ValueError(f"Unsupported geometry type: {type(geometry)}")

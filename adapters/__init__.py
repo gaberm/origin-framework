@@ -2,7 +2,7 @@ import pkgutil
 import importlib
 import os
 
-from .base_adapter import BaseAdapter
+from .model_adapter import ModelAdapter
 from .adapter_worker import AdapterWorker
 
 models_path = os.path.join(os.path.dirname(__file__), "model_adapter")

@@ -1,6 +1,6 @@
 import pika
 import json
-from adapters.base_adapter import BaseAdapter
+from adapters.model_adapter import ModelAdapter
 from supervisory.comm.commands import Message, Response
 
 
@@ -14,7 +14,7 @@ class AdapterWorker:
             password=config.rabbitmq.password,
             routing_key=config.models[model].routing_key,
             queue_name=config.models[model].queue_name,
-            adapter=BaseAdapter._registry[config.models[model].adapter].from_config(
+            adapter=ModelAdapter._registry[config.models[model].adapter].from_config(
                 config.models[model]
             ),
         )
@@ -27,7 +27,7 @@ class AdapterWorker:
         password: str,
         routing_key: str,
         queue_name: str,
-        adapter: BaseAdapter,
+        adapter: ModelAdapter,
     ):
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(

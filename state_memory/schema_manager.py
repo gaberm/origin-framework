@@ -1,4 +1,6 @@
 import dataclasses
+from records.model_output import ModelOutput
+from adapters.data_adapter import ExternalDataset
 
 SQL_TYPE_MAP = {
     int: "INTEGER",
@@ -42,18 +44,31 @@ class SchemaManager:
             cur.execute(f"CREATE SCHEMA {self.run_id}")
         self.conn.commit()
 
-    def _create_table(self, cls):
-        query = self._generate_create_table_query(cls)
+    def create_table(self, cls) -> str:
+        if isinstance(cls, ModelOutput):
+            query = self._query_for_model_output(cls)
+        elif isinstance(cls, ExternalDataset):
+            query = self._query_for_external_dataset(cls)
+        else:
+            raise ValueError(f"Unsupported record class type: {type(cls)}")
         with self.conn.cursor() as cur:
             cur.execute(query)
         self.conn.commit()
 
-    def _generate_create_table_query(self, cls) -> str:
+    def _query_for_model_output(self, cls) -> str:
         table = f"{self.run_id}.{cls.table_name}"
         columns = ", ".join(
             f"{f.name} {SQL_TYPE_MAP.get(f.type, 'TEXT')}"
             for f in dataclasses.fields(cls)
         )
-        key = cls.primary_key
-        pk = f", PRIMARY KEY ({', '.join(key)})" if key else ""
+        pk = f", PRIMARY KEY ({', '.join(cls.primary_key)})" if cls.primary_key else ""
+        return f"CREATE TABLE IF NOT EXISTS {table} ({columns}{pk});"
+
+    def _query_for_external_dataset(self, cls) -> str:
+        table = f"{self.run_id}.{cls.table_name}"
+        columns = ", ".join(
+            f"{key} {SQL_TYPE_MAP.get(type(val[0]), 'TEXT')}"
+            for key, val in cls.data.items()
+        )
+        pk = f", PRIMARY KEY ({', '.join(cls.primary_key)})" if cls.primary_key else ""
         return f"CREATE TABLE IF NOT EXISTS {table} ({columns}{pk});"

@@ -78,7 +78,7 @@ class VehicleToRemoveLoader(BaseLoader[VehicleToRemove]):
 
     @staticmethod
     def _build(rows: list[tuple[Any, ...]]) -> tuple[VehicleToRemove, ...]:
-        return (
+        return tuple(
             VehicleToRemove(
                 vehicle_id=row[0],
             )

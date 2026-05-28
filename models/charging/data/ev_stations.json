@@ -1,0 +1,8341 @@
+[
+  {
+    "id": "station-0",
+    "source": "doe",
+    "source_id": 39815,
+    "latitude": 36.29057,
+    "longitude": -86.70486,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 50.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 50.0
+      }
+    ]
+  },
+  {
+    "id": "station-1",
+    "source": "doe",
+    "source_id": 39822,
+    "latitude": 36.11033,
+    "longitude": -86.74373,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 50.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 50.0
+      }
+    ]
+  },
+  {
+    "id": "station-2",
+    "source": "doe",
+    "source_id": 46470,
+    "latitude": 36.15403028286782,
+    "longitude": -86.81379926522062,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-3",
+    "source": "doe",
+    "source_id": 47831,
+    "latitude": 36.29057,
+    "longitude": -86.70486,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-4",
+    "source": "doe",
+    "source_id": 47842,
+    "latitude": 36.11033,
+    "longitude": -86.74373,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-5",
+    "source": "doe",
+    "source_id": 47843,
+    "latitude": 36.191029587,
+    "longitude": -86.793130254,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-6",
+    "source": "doe",
+    "source_id": 52836,
+    "latitude": 36.148816,
+    "longitude": -86.799577,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-8",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-9",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-7",
+    "source": "doe",
+    "source_id": 62807,
+    "latitude": 36.137258,
+    "longitude": -86.788609,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-8",
+    "source": "doe",
+    "source_id": 63039,
+    "latitude": 36.15557,
+    "longitude": -86.813431,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-9",
+    "source": "doe",
+    "source_id": 64552,
+    "latitude": 36.153934,
+    "longitude": -86.767472,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-10",
+    "source": "doe",
+    "source_id": 68034,
+    "latitude": 36.176653,
+    "longitude": -86.762976,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-11",
+    "source": "doe",
+    "source_id": 68143,
+    "latitude": 36.160453,
+    "longitude": -86.774698,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-12",
+    "source": "doe",
+    "source_id": 68381,
+    "latitude": 36.12718,
+    "longitude": -86.84697,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-13",
+    "source": "doe",
+    "source_id": 70728,
+    "latitude": 36.156447,
+    "longitude": -86.815539,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-14",
+    "source": "doe",
+    "source_id": 73707,
+    "latitude": 36.06949,
+    "longitude": -86.936094,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-15",
+    "source": "doe",
+    "source_id": 74075,
+    "latitude": 36.091731,
+    "longitude": -86.826441,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-16",
+    "source": "doe",
+    "source_id": 75502,
+    "latitude": 36.079471,
+    "longitude": -86.908649,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-17",
+    "source": "doe",
+    "source_id": 76199,
+    "latitude": 36.17576,
+    "longitude": -86.784768,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-18",
+    "source": "doe",
+    "source_id": 79332,
+    "latitude": 36.110741,
+    "longitude": -86.672007,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-19",
+    "source": "doe",
+    "source_id": 105044,
+    "latitude": 36.15142052533904,
+    "longitude": -86.81668020370485,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-20",
+    "source": "doe",
+    "source_id": 105045,
+    "latitude": 36.14971387324612,
+    "longitude": -86.81877232673646,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-21",
+    "source": "doe",
+    "source_id": 105046,
+    "latitude": 36.15220020175303,
+    "longitude": -86.81565023544312,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-22",
+    "source": "doe",
+    "source_id": 105377,
+    "latitude": 36.130669,
+    "longitude": -86.667492,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-23",
+    "source": "doe",
+    "source_id": 115575,
+    "latitude": 36.043992,
+    "longitude": -86.648099,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-24",
+    "source": "doe",
+    "source_id": 115576,
+    "latitude": 36.044874,
+    "longitude": -86.647955,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-25",
+    "source": "doe",
+    "source_id": 115603,
+    "latitude": 36.159949,
+    "longitude": -86.777271,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-26",
+    "source": "doe",
+    "source_id": 115605,
+    "latitude": 36.150445,
+    "longitude": -86.79679,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-27",
+    "source": "doe",
+    "source_id": 115606,
+    "latitude": 36.163688,
+    "longitude": -86.782274,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-28",
+    "source": "doe",
+    "source_id": 115608,
+    "latitude": 36.212449,
+    "longitude": -86.696838,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-29",
+    "source": "doe",
+    "source_id": 115609,
+    "latitude": 36.152491,
+    "longitude": -86.784039,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-30",
+    "source": "doe",
+    "source_id": 115610,
+    "latitude": 36.142152,
+    "longitude": -86.701271,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-8",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-9",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-10",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-11",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-12",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-13",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-14",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-15",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-31",
+    "source": "doe",
+    "source_id": 115611,
+    "latitude": 36.15033,
+    "longitude": -86.781542,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-32",
+    "source": "doe",
+    "source_id": 116720,
+    "latitude": 36.142179,
+    "longitude": -86.739249,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-33",
+    "source": "doe",
+    "source_id": 117616,
+    "latitude": 36.151278,
+    "longitude": -86.855062,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-34",
+    "source": "doe",
+    "source_id": 117699,
+    "latitude": 36.052522,
+    "longitude": -86.656983,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-35",
+    "source": "doe",
+    "source_id": 117772,
+    "latitude": 36.167275,
+    "longitude": -86.777527,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-36",
+    "source": "doe",
+    "source_id": 121675,
+    "latitude": 36.067571,
+    "longitude": -86.630697,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-37",
+    "source": "doe",
+    "source_id": 122548,
+    "latitude": 36.188956,
+    "longitude": -86.797155,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-38",
+    "source": "doe",
+    "source_id": 146988,
+    "latitude": 36.080818,
+    "longitude": -86.950784,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-39",
+    "source": "doe",
+    "source_id": 146989,
+    "latitude": 36.080881,
+    "longitude": -86.950813,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-40",
+    "source": "doe",
+    "source_id": 149537,
+    "latitude": 36.0767,
+    "longitude": -86.7212,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 8.6
+      }
+    ]
+  },
+  {
+    "id": "station-41",
+    "source": "doe",
+    "source_id": 150215,
+    "latitude": 36.110515,
+    "longitude": -86.723904,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-6",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-8",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-9",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-10",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-11",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-12",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-13",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-14",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-15",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-16",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-17",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-18",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-19",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-20",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-21",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-22",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-23",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      }
+    ]
+  },
+  {
+    "id": "station-42",
+    "source": "doe",
+    "source_id": 153325,
+    "latitude": 36.148162,
+    "longitude": -86.665805,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-43",
+    "source": "doe",
+    "source_id": 154079,
+    "latitude": 36.152315,
+    "longitude": -86.807851,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-44",
+    "source": "doe",
+    "source_id": 155530,
+    "latitude": 36.171381,
+    "longitude": -86.781701,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-45",
+    "source": "doe",
+    "source_id": 164671,
+    "latitude": 36.072285,
+    "longitude": -86.934091,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-46",
+    "source": "doe",
+    "source_id": 164736,
+    "latitude": 36.115736,
+    "longitude": -86.752546,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 8.6
+      }
+    ]
+  },
+  {
+    "id": "station-47",
+    "source": "doe",
+    "source_id": 164857,
+    "latitude": 36.126212,
+    "longitude": -86.77796,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-48",
+    "source": "doe",
+    "source_id": 164864,
+    "latitude": 36.126204,
+    "longitude": -86.777957,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-49",
+    "source": "doe",
+    "source_id": 165230,
+    "latitude": 36.132627,
+    "longitude": -86.667087,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-50",
+    "source": "doe",
+    "source_id": 167403,
+    "latitude": 36.127888,
+    "longitude": -86.841022,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 21.6
+      }
+    ]
+  },
+  {
+    "id": "station-51",
+    "source": "doe",
+    "source_id": 168866,
+    "latitude": 36.152586,
+    "longitude": -86.797059,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-52",
+    "source": "doe",
+    "source_id": 170149,
+    "latitude": 36.154393,
+    "longitude": -86.78763,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-53",
+    "source": "doe",
+    "source_id": 170150,
+    "latitude": 36.154798,
+    "longitude": -86.787408,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-54",
+    "source": "doe",
+    "source_id": 171286,
+    "latitude": 36.16067,
+    "longitude": -86.77889,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-55",
+    "source": "doe",
+    "source_id": 171310,
+    "latitude": 36.16119,
+    "longitude": -86.77919,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-56",
+    "source": "doe",
+    "source_id": 171311,
+    "latitude": 36.160225,
+    "longitude": -86.78049,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-57",
+    "source": "doe",
+    "source_id": 171312,
+    "latitude": 36.160645,
+    "longitude": -86.78044,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-58",
+    "source": "doe",
+    "source_id": 171313,
+    "latitude": 36.160923,
+    "longitude": -86.78056,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-59",
+    "source": "doe",
+    "source_id": 171421,
+    "latitude": 36.154701,
+    "longitude": -86.789639,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-60",
+    "source": "doe",
+    "source_id": 171710,
+    "latitude": 36.153755,
+    "longitude": -86.767851,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-61",
+    "source": "doe",
+    "source_id": 171712,
+    "latitude": 36.153968,
+    "longitude": -86.767386,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-62",
+    "source": "doe",
+    "source_id": 171761,
+    "latitude": 36.175775,
+    "longitude": -86.784728,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-63",
+    "source": "doe",
+    "source_id": 171799,
+    "latitude": 36.155398,
+    "longitude": -86.813525,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-64",
+    "source": "doe",
+    "source_id": 171949,
+    "latitude": 36.160422,
+    "longitude": -86.774678,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-65",
+    "source": "doe",
+    "source_id": 172250,
+    "latitude": 36.130683,
+    "longitude": -86.667512,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-66",
+    "source": "doe",
+    "source_id": 173640,
+    "latitude": 36.130677,
+    "longitude": -86.667501,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-67",
+    "source": "doe",
+    "source_id": 173641,
+    "latitude": 36.130658,
+    "longitude": -86.667497,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-68",
+    "source": "doe",
+    "source_id": 173676,
+    "latitude": 36.142237,
+    "longitude": -86.739507,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-69",
+    "source": "doe",
+    "source_id": 173677,
+    "latitude": 36.1422,
+    "longitude": -86.739328,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-70",
+    "source": "doe",
+    "source_id": 173678,
+    "latitude": 36.142266,
+    "longitude": -86.739534,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-71",
+    "source": "doe",
+    "source_id": 173779,
+    "latitude": 36.052518,
+    "longitude": -86.65697,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-72",
+    "source": "doe",
+    "source_id": 173786,
+    "latitude": 36.16733,
+    "longitude": -86.777483,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-73",
+    "source": "doe",
+    "source_id": 174555,
+    "latitude": 36.080823,
+    "longitude": -86.95075,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-74",
+    "source": "doe",
+    "source_id": 174556,
+    "latitude": 36.080902,
+    "longitude": -86.950746,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-75",
+    "source": "doe",
+    "source_id": 175251,
+    "latitude": 36.152193,
+    "longitude": -86.807851,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-76",
+    "source": "doe",
+    "source_id": 175252,
+    "latitude": 36.152202,
+    "longitude": -86.807787,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-77",
+    "source": "doe",
+    "source_id": 175253,
+    "latitude": 36.152323,
+    "longitude": -86.807819,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-78",
+    "source": "doe",
+    "source_id": 175254,
+    "latitude": 36.152263,
+    "longitude": -86.807723,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-79",
+    "source": "doe",
+    "source_id": 175255,
+    "latitude": 36.152271,
+    "longitude": -86.807755,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-80",
+    "source": "doe",
+    "source_id": 175256,
+    "latitude": 36.152245,
+    "longitude": -86.807905,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-81",
+    "source": "doe",
+    "source_id": 175257,
+    "latitude": 36.153634,
+    "longitude": -86.804615,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-82",
+    "source": "doe",
+    "source_id": 181008,
+    "latitude": 36.132575,
+    "longitude": -86.667069,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-83",
+    "source": "doe",
+    "source_id": 181009,
+    "latitude": 36.132598,
+    "longitude": -86.667076,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-84",
+    "source": "doe",
+    "source_id": 181010,
+    "latitude": 36.132581,
+    "longitude": -86.667048,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-85",
+    "source": "doe",
+    "source_id": 181011,
+    "latitude": 36.132604,
+    "longitude": -86.667055,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-86",
+    "source": "doe",
+    "source_id": 181012,
+    "latitude": 36.132601,
+    "longitude": -86.667066,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-87",
+    "source": "doe",
+    "source_id": 181013,
+    "latitude": 36.132628,
+    "longitude": -86.66708,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-88",
+    "source": "doe",
+    "source_id": 181014,
+    "latitude": 36.132578,
+    "longitude": -86.667058,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-89",
+    "source": "doe",
+    "source_id": 181015,
+    "latitude": 36.132631,
+    "longitude": -86.66707,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-90",
+    "source": "doe",
+    "source_id": 181946,
+    "latitude": 36.154311,
+    "longitude": -86.787417,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-91",
+    "source": "doe",
+    "source_id": 182230,
+    "latitude": 36.160652,
+    "longitude": -86.779015,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-92",
+    "source": "doe",
+    "source_id": 182231,
+    "latitude": 36.1606,
+    "longitude": -86.778915,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-93",
+    "source": "doe",
+    "source_id": 182232,
+    "latitude": 36.16055,
+    "longitude": -86.778854,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-94",
+    "source": "doe",
+    "source_id": 182233,
+    "latitude": 36.1606,
+    "longitude": -86.77885,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-95",
+    "source": "doe",
+    "source_id": 182234,
+    "latitude": 36.160835,
+    "longitude": -86.779076,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-96",
+    "source": "doe",
+    "source_id": 182235,
+    "latitude": 36.160587,
+    "longitude": -86.77883,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-97",
+    "source": "doe",
+    "source_id": 182236,
+    "latitude": 36.16066,
+    "longitude": -86.778854,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-98",
+    "source": "doe",
+    "source_id": 182246,
+    "latitude": 36.161053,
+    "longitude": -86.77924,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-99",
+    "source": "doe",
+    "source_id": 182247,
+    "latitude": 36.16119,
+    "longitude": -86.77928,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-100",
+    "source": "doe",
+    "source_id": 182248,
+    "latitude": 36.16103,
+    "longitude": -86.77917,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-101",
+    "source": "doe",
+    "source_id": 182249,
+    "latitude": 36.16122,
+    "longitude": -86.77928,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-102",
+    "source": "doe",
+    "source_id": 182250,
+    "latitude": 36.16127,
+    "longitude": -86.77925,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-103",
+    "source": "doe",
+    "source_id": 182251,
+    "latitude": 36.161175,
+    "longitude": -86.77925,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-104",
+    "source": "doe",
+    "source_id": 182252,
+    "latitude": 36.16023,
+    "longitude": -86.78032,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-105",
+    "source": "doe",
+    "source_id": 182253,
+    "latitude": 36.160217,
+    "longitude": -86.780426,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-106",
+    "source": "doe",
+    "source_id": 182254,
+    "latitude": 36.160057,
+    "longitude": -86.7804,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-107",
+    "source": "doe",
+    "source_id": 182255,
+    "latitude": 36.1601,
+    "longitude": -86.7801,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-108",
+    "source": "doe",
+    "source_id": 182256,
+    "latitude": 36.159996,
+    "longitude": -86.78047,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-109",
+    "source": "doe",
+    "source_id": 182257,
+    "latitude": 36.160744,
+    "longitude": -86.780251,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-110",
+    "source": "doe",
+    "source_id": 182895,
+    "latitude": 36.183577,
+    "longitude": -86.634813,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-111",
+    "source": "doe",
+    "source_id": 182896,
+    "latitude": 36.183997,
+    "longitude": -86.633993,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-112",
+    "source": "doe",
+    "source_id": 182899,
+    "latitude": 36.183577,
+    "longitude": -86.634813,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-113",
+    "source": "doe",
+    "source_id": 182900,
+    "latitude": 36.183915,
+    "longitude": -86.633955,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-114",
+    "source": "doe",
+    "source_id": 183265,
+    "latitude": 36.178294,
+    "longitude": -86.790855,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-115",
+    "source": "doe",
+    "source_id": 184083,
+    "latitude": 36.128822,
+    "longitude": -86.77856,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-116",
+    "source": "doe",
+    "source_id": 184342,
+    "latitude": 36.1417,
+    "longitude": -86.803693,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-117",
+    "source": "doe",
+    "source_id": 184517,
+    "latitude": 36.150269,
+    "longitude": -86.685166,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-118",
+    "source": "doe",
+    "source_id": 184878,
+    "latitude": 36.132586,
+    "longitude": -86.667029,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-119",
+    "source": "doe",
+    "source_id": 184879,
+    "latitude": 36.132583,
+    "longitude": -86.667039,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-120",
+    "source": "doe",
+    "source_id": 184880,
+    "latitude": 36.132606,
+    "longitude": -86.667046,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-121",
+    "source": "doe",
+    "source_id": 184889,
+    "latitude": 36.132609,
+    "longitude": -86.667037,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-122",
+    "source": "doe",
+    "source_id": 186536,
+    "latitude": 36.201006,
+    "longitude": -86.608176,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-123",
+    "source": "doe",
+    "source_id": 189352,
+    "latitude": 36.134009,
+    "longitude": -86.891923,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-6",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-8",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-9",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-10",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-11",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-12",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-13",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-14",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-15",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-16",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-17",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-18",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-19",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-20",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-21",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-22",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-23",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      }
+    ]
+  },
+  {
+    "id": "station-124",
+    "source": "doe",
+    "source_id": 189939,
+    "latitude": 36.136593,
+    "longitude": -86.801711,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-125",
+    "source": "doe",
+    "source_id": 189940,
+    "latitude": 36.136593,
+    "longitude": -86.80171,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-126",
+    "source": "doe",
+    "source_id": 190999,
+    "latitude": 36.1098,
+    "longitude": -86.72716,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-6",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      }
+    ]
+  },
+  {
+    "id": "station-127",
+    "source": "doe",
+    "source_id": 191339,
+    "latitude": 36.190622,
+    "longitude": -86.795607,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-128",
+    "source": "doe",
+    "source_id": 191530,
+    "latitude": 36.17165,
+    "longitude": -86.781297,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-129",
+    "source": "doe",
+    "source_id": 193891,
+    "latitude": 36.160506,
+    "longitude": -86.787571,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-130",
+    "source": "doe",
+    "source_id": 193892,
+    "latitude": 36.160116,
+    "longitude": -86.787729,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-131",
+    "source": "doe",
+    "source_id": 193893,
+    "latitude": 36.159934,
+    "longitude": -86.787959,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-132",
+    "source": "doe",
+    "source_id": 193894,
+    "latitude": 36.160065,
+    "longitude": -86.78763,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-133",
+    "source": "doe",
+    "source_id": 193895,
+    "latitude": 36.16005,
+    "longitude": -86.787674,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-134",
+    "source": "doe",
+    "source_id": 193896,
+    "latitude": 36.160311,
+    "longitude": -86.787557,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-135",
+    "source": "doe",
+    "source_id": 193897,
+    "latitude": 36.160986,
+    "longitude": -86.785594,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-136",
+    "source": "doe",
+    "source_id": 193898,
+    "latitude": 36.160324,
+    "longitude": -86.78736,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-137",
+    "source": "doe",
+    "source_id": 193899,
+    "latitude": 36.161004,
+    "longitude": -86.78559,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-138",
+    "source": "doe",
+    "source_id": 193900,
+    "latitude": 36.160988,
+    "longitude": -86.78593,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-139",
+    "source": "doe",
+    "source_id": 193901,
+    "latitude": 36.160028,
+    "longitude": -86.787757,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-140",
+    "source": "doe",
+    "source_id": 193902,
+    "latitude": 36.160163,
+    "longitude": -86.787549,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-141",
+    "source": "doe",
+    "source_id": 193904,
+    "latitude": 36.160343,
+    "longitude": -86.78775,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-142",
+    "source": "doe",
+    "source_id": 193905,
+    "latitude": 36.160206,
+    "longitude": -86.78788,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-143",
+    "source": "doe",
+    "source_id": 193906,
+    "latitude": 36.160029,
+    "longitude": -86.787386,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-144",
+    "source": "doe",
+    "source_id": 193907,
+    "latitude": 36.161064,
+    "longitude": -86.785576,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-145",
+    "source": "doe",
+    "source_id": 193908,
+    "latitude": 36.16163,
+    "longitude": -86.785355,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-146",
+    "source": "doe",
+    "source_id": 193909,
+    "latitude": 36.160282,
+    "longitude": -86.78751,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-147",
+    "source": "doe",
+    "source_id": 193910,
+    "latitude": 36.160341,
+    "longitude": -86.787604,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-148",
+    "source": "doe",
+    "source_id": 193930,
+    "latitude": 36.160208,
+    "longitude": -86.787614,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-149",
+    "source": "doe",
+    "source_id": 195613,
+    "latitude": 36.1925886,
+    "longitude": -86.7893509,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.2
+      }
+    ]
+  },
+  {
+    "id": "station-150",
+    "source": "doe",
+    "source_id": 198080,
+    "latitude": 36.314372,
+    "longitude": -86.71014,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-151",
+    "source": "doe",
+    "source_id": 201871,
+    "latitude": 36.139418,
+    "longitude": -86.801205,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.9
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.6
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.6
+      }
+    ]
+  },
+  {
+    "id": "station-152",
+    "source": "doe",
+    "source_id": 204654,
+    "latitude": 36.31438,
+    "longitude": -86.71021,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-153",
+    "source": "doe",
+    "source_id": 206118,
+    "latitude": 36.283643,
+    "longitude": -86.696213,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-154",
+    "source": "doe",
+    "source_id": 207612,
+    "latitude": 36.144836,
+    "longitude": -86.767916,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-155",
+    "source": "doe",
+    "source_id": 207613,
+    "latitude": 36.144843,
+    "longitude": -86.767932,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-156",
+    "source": "doe",
+    "source_id": 207614,
+    "latitude": 36.145579,
+    "longitude": -86.768181,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-157",
+    "source": "doe",
+    "source_id": 207615,
+    "latitude": 36.14557,
+    "longitude": -86.768198,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-158",
+    "source": "doe",
+    "source_id": 207616,
+    "latitude": 36.145573,
+    "longitude": -86.768191,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-159",
+    "source": "doe",
+    "source_id": 207617,
+    "latitude": 36.145563,
+    "longitude": -86.768203,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-160",
+    "source": "doe",
+    "source_id": 212954,
+    "latitude": 36.155648,
+    "longitude": -86.813396,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-161",
+    "source": "doe",
+    "source_id": 213411,
+    "latitude": 36.150986,
+    "longitude": -86.78168,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-162",
+    "source": "doe",
+    "source_id": 213412,
+    "latitude": 36.150997,
+    "longitude": -86.78171,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-163",
+    "source": "doe",
+    "source_id": 213413,
+    "latitude": 36.150821,
+    "longitude": -86.781381,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-164",
+    "source": "doe",
+    "source_id": 213414,
+    "latitude": 36.151149,
+    "longitude": -86.781393,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-165",
+    "source": "doe",
+    "source_id": 213415,
+    "latitude": 36.150725,
+    "longitude": -86.781359,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-166",
+    "source": "doe",
+    "source_id": 213416,
+    "latitude": 36.150797,
+    "longitude": -86.781441,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-167",
+    "source": "doe",
+    "source_id": 214982,
+    "latitude": 36.154585,
+    "longitude": -86.771998,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-168",
+    "source": "doe",
+    "source_id": 218517,
+    "latitude": 36.283447,
+    "longitude": -86.696002,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 125.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 125.0
+      }
+    ]
+  },
+  {
+    "id": "station-169",
+    "source": "doe",
+    "source_id": 219003,
+    "latitude": 36.13201,
+    "longitude": -86.75288,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-8",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-9",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-10",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-11",
+        "level": "2",
+        "power_kw": 9.6
+      }
+    ]
+  },
+  {
+    "id": "station-170",
+    "source": "doe",
+    "source_id": 221286,
+    "latitude": 36.153492,
+    "longitude": -86.76732,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-171",
+    "source": "doe",
+    "source_id": 223752,
+    "latitude": 36.1967754,
+    "longitude": -86.8090888,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.2
+      }
+    ]
+  },
+  {
+    "id": "station-172",
+    "source": "doe",
+    "source_id": 225309,
+    "latitude": 36.1499978,
+    "longitude": -86.8209358,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.2
+      }
+    ]
+  },
+  {
+    "id": "station-173",
+    "source": "doe",
+    "source_id": 227289,
+    "latitude": 36.155868,
+    "longitude": -86.788251,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-174",
+    "source": "doe",
+    "source_id": 227404,
+    "latitude": 36.2484615,
+    "longitude": -86.6457552,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-175",
+    "source": "doe",
+    "source_id": 227487,
+    "latitude": 36.16341,
+    "longitude": -86.779297,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-176",
+    "source": "doe",
+    "source_id": 228937,
+    "latitude": 36.155868,
+    "longitude": -86.788251,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-177",
+    "source": "doe",
+    "source_id": 229478,
+    "latitude": 36.142222,
+    "longitude": -86.739494,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-178",
+    "source": "doe",
+    "source_id": 231742,
+    "latitude": 36.28376,
+    "longitude": -86.69596,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 125.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 125.0
+      }
+    ]
+  },
+  {
+    "id": "station-179",
+    "source": "doe",
+    "source_id": 232925,
+    "latitude": 36.139238,
+    "longitude": -86.821552,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-180",
+    "source": "doe",
+    "source_id": 232926,
+    "latitude": 36.139197,
+    "longitude": -86.821374,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-181",
+    "source": "doe",
+    "source_id": 234664,
+    "latitude": 36.07793,
+    "longitude": -86.97781,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 9.6
+      }
+    ]
+  },
+  {
+    "id": "station-182",
+    "source": "doe",
+    "source_id": 234682,
+    "latitude": 36.160238,
+    "longitude": -86.773916,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-183",
+    "source": "doe",
+    "source_id": 234683,
+    "latitude": 36.160279,
+    "longitude": -86.773893,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-184",
+    "source": "doe",
+    "source_id": 234684,
+    "latitude": 36.160313,
+    "longitude": -86.773914,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-185",
+    "source": "doe",
+    "source_id": 235468,
+    "latitude": 36.185885,
+    "longitude": -86.816809,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 100.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 100.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 100.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 100.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      }
+    ]
+  },
+  {
+    "id": "station-186",
+    "source": "doe",
+    "source_id": 250802,
+    "latitude": 36.146941,
+    "longitude": -86.692287,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.6
+      }
+    ]
+  },
+  {
+    "id": "station-187",
+    "source": "doe",
+    "source_id": 250900,
+    "latitude": 36.159105,
+    "longitude": -86.773764,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-188",
+    "source": "doe",
+    "source_id": 251570,
+    "latitude": 36.1790632,
+    "longitude": -86.792345,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-189",
+    "source": "doe",
+    "source_id": 252655,
+    "latitude": 36.113418,
+    "longitude": -86.800514,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-190",
+    "source": "doe",
+    "source_id": 252946,
+    "latitude": 36.139281,
+    "longitude": -86.820851,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-191",
+    "source": "doe",
+    "source_id": 254105,
+    "latitude": 36.163962,
+    "longitude": -86.781801,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.6
+      }
+    ]
+  },
+  {
+    "id": "station-192",
+    "source": "doe",
+    "source_id": 254106,
+    "latitude": 36.163423,
+    "longitude": -86.781679,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.6
+      }
+    ]
+  },
+  {
+    "id": "station-193",
+    "source": "doe",
+    "source_id": 257408,
+    "latitude": 36.16294,
+    "longitude": -86.782825,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.6
+      }
+    ]
+  },
+  {
+    "id": "station-194",
+    "source": "doe",
+    "source_id": 258894,
+    "latitude": 36.10901,
+    "longitude": -86.81348,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 9.6
+      }
+    ]
+  },
+  {
+    "id": "station-195",
+    "source": "doe",
+    "source_id": 259596,
+    "latitude": 36.176823,
+    "longitude": -86.608305,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 8.6
+      }
+    ]
+  },
+  {
+    "id": "station-196",
+    "source": "doe",
+    "source_id": 260512,
+    "latitude": 36.045123,
+    "longitude": -86.654418,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 24.0
+      }
+    ]
+  },
+  {
+    "id": "station-197",
+    "source": "doe",
+    "source_id": 260563,
+    "latitude": 36.135103,
+    "longitude": -86.763202,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-198",
+    "source": "doe",
+    "source_id": 261045,
+    "latitude": 36.159358,
+    "longitude": -86.773256,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-199",
+    "source": "doe",
+    "source_id": 261517,
+    "latitude": 36.07533,
+    "longitude": -86.697138,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-200",
+    "source": "doe",
+    "source_id": 262227,
+    "latitude": 36.1442448,
+    "longitude": -86.7663715,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-201",
+    "source": "doe",
+    "source_id": 262923,
+    "latitude": 36.153448,
+    "longitude": -86.814574,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-202",
+    "source": "doe",
+    "source_id": 302158,
+    "latitude": 36.153208,
+    "longitude": -86.814438,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-203",
+    "source": "doe",
+    "source_id": 302159,
+    "latitude": 36.154016,
+    "longitude": -86.813717,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-204",
+    "source": "doe",
+    "source_id": 302160,
+    "latitude": 36.153973,
+    "longitude": -86.813753,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-205",
+    "source": "doe",
+    "source_id": 302544,
+    "latitude": 36.156803,
+    "longitude": -86.788015,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-206",
+    "source": "doe",
+    "source_id": 302545,
+    "latitude": 36.156812,
+    "longitude": -86.787961,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-207",
+    "source": "doe",
+    "source_id": 302546,
+    "latitude": 36.156803,
+    "longitude": -86.788037,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-208",
+    "source": "doe",
+    "source_id": 302547,
+    "latitude": 36.156794,
+    "longitude": -86.787983,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-209",
+    "source": "doe",
+    "source_id": 302548,
+    "latitude": 36.156794,
+    "longitude": -86.788015,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-210",
+    "source": "doe",
+    "source_id": 302969,
+    "latitude": 36.1648,
+    "longitude": -86.790931,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-6",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-8",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-9",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-10",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-11",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      }
+    ]
+  },
+  {
+    "id": "station-211",
+    "source": "doe",
+    "source_id": 303061,
+    "latitude": 36.154024,
+    "longitude": -86.774742,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-212",
+    "source": "doe",
+    "source_id": 307570,
+    "latitude": 36.157241,
+    "longitude": -86.777245,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-213",
+    "source": "doe",
+    "source_id": 307572,
+    "latitude": 36.157245,
+    "longitude": -86.777261,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-214",
+    "source": "doe",
+    "source_id": 307573,
+    "latitude": 36.157241,
+    "longitude": -86.777209,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-215",
+    "source": "doe",
+    "source_id": 307575,
+    "latitude": 36.157231,
+    "longitude": -86.777273,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-216",
+    "source": "doe",
+    "source_id": 307576,
+    "latitude": 36.157226,
+    "longitude": -86.7773,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-217",
+    "source": "doe",
+    "source_id": 307652,
+    "latitude": 36.157226,
+    "longitude": -86.777257,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-218",
+    "source": "doe",
+    "source_id": 309518,
+    "latitude": 36.1496775,
+    "longitude": -86.7773708,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-8",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-9",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-10",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-11",
+        "level": "2",
+        "power_kw": 6.2
+      }
+    ]
+  },
+  {
+    "id": "station-219",
+    "source": "doe",
+    "source_id": 309548,
+    "latitude": 36.13492,
+    "longitude": -86.91232,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 10.8
+      }
+    ]
+  },
+  {
+    "id": "station-220",
+    "source": "doe",
+    "source_id": 309660,
+    "latitude": 36.104011,
+    "longitude": -86.814294,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.6
+      }
+    ]
+  },
+  {
+    "id": "station-221",
+    "source": "doe",
+    "source_id": 312022,
+    "latitude": 36.1548886,
+    "longitude": -86.7754139,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 6.2
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 10.0
+      }
+    ]
+  },
+  {
+    "id": "station-222",
+    "source": "doe",
+    "source_id": 312333,
+    "latitude": 36.308526,
+    "longitude": -86.683103,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      }
+    ]
+  },
+  {
+    "id": "station-223",
+    "source": "doe",
+    "source_id": 312334,
+    "latitude": 36.308502,
+    "longitude": -86.683092,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      }
+    ]
+  },
+  {
+    "id": "station-224",
+    "source": "doe",
+    "source_id": 316894,
+    "latitude": 36.244436,
+    "longitude": -86.755338,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-6",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-8",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-9",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-10",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-11",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-12",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-13",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-14",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-15",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      }
+    ]
+  },
+  {
+    "id": "station-225",
+    "source": "doe",
+    "source_id": 319467,
+    "latitude": 36.22,
+    "longitude": -86.78,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-226",
+    "source": "doe",
+    "source_id": 319475,
+    "latitude": 36.09,
+    "longitude": -86.83,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-227",
+    "source": "doe",
+    "source_id": 322606,
+    "latitude": 36.1351474,
+    "longitude": -86.8060674,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 40.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 40.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 40.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 40.0
+      }
+    ]
+  },
+  {
+    "id": "station-228",
+    "source": "doe",
+    "source_id": 324252,
+    "latitude": 36.170835,
+    "longitude": -86.680899,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-229",
+    "source": "doe",
+    "source_id": 324253,
+    "latitude": 36.170664,
+    "longitude": -86.680093,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-230",
+    "source": "doe",
+    "source_id": 324330,
+    "latitude": 36.10777,
+    "longitude": -86.81795,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      }
+    ]
+  },
+  {
+    "id": "station-231",
+    "source": "doe",
+    "source_id": 327945,
+    "latitude": 36.153683,
+    "longitude": -86.767461,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-232",
+    "source": "doe",
+    "source_id": 328044,
+    "latitude": 36.153665,
+    "longitude": -86.767547,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-233",
+    "source": "doe",
+    "source_id": 328523,
+    "latitude": 36.151587,
+    "longitude": -86.802536,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-8",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-9",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-10",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-11",
+        "level": "2",
+        "power_kw": 10.0
+      }
+    ]
+  },
+  {
+    "id": "station-234",
+    "source": "doe",
+    "source_id": 329307,
+    "latitude": 36.15989862288491,
+    "longitude": -86.78285723267264,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 16.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 16.6
+      }
+    ]
+  },
+  {
+    "id": "station-235",
+    "source": "doe",
+    "source_id": 329479,
+    "latitude": 36.19949,
+    "longitude": -86.69244,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-6",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      }
+    ]
+  },
+  {
+    "id": "station-236",
+    "source": "doe",
+    "source_id": 332450,
+    "latitude": 36.3250464,
+    "longitude": -86.698103,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 16.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 16.6
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 8.3
+      }
+    ]
+  },
+  {
+    "id": "station-237",
+    "source": "doe",
+    "source_id": 333658,
+    "latitude": 36.14959034395564,
+    "longitude": -86.77971494602274,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 8.3
+      }
+    ]
+  },
+  {
+    "id": "station-238",
+    "source": "doe",
+    "source_id": 333659,
+    "latitude": 36.14959034395564,
+    "longitude": -86.77971494602274,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 6.2
+      }
+    ]
+  },
+  {
+    "id": "station-239",
+    "source": "doe",
+    "source_id": 341706,
+    "latitude": 36.1489296,
+    "longitude": -86.79025269,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.6
+      }
+    ]
+  },
+  {
+    "id": "station-240",
+    "source": "doe",
+    "source_id": 341852,
+    "latitude": 36.13830185,
+    "longitude": -86.77220154,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.6
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.6
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.6
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 6.6
+      }
+    ]
+  },
+  {
+    "id": "station-241",
+    "source": "doe",
+    "source_id": 341880,
+    "latitude": 36.039876,
+    "longitude": -86.636044,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 13.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 13.5
+      }
+    ]
+  },
+  {
+    "id": "station-242",
+    "source": "doe",
+    "source_id": 347554,
+    "latitude": 36.253606,
+    "longitude": -86.683545,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 11.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 11.5
+      }
+    ]
+  },
+  {
+    "id": "station-243",
+    "source": "doe",
+    "source_id": 352141,
+    "latitude": 36.152875,
+    "longitude": -86.830657,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-244",
+    "source": "doe",
+    "source_id": 352146,
+    "latitude": 36.15284,
+    "longitude": -86.830678,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-245",
+    "source": "doe",
+    "source_id": 355253,
+    "latitude": 36.0749556,
+    "longitude": -86.6973007,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 16.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 16.6
+      }
+    ]
+  },
+  {
+    "id": "station-246",
+    "source": "doe",
+    "source_id": 356058,
+    "latitude": 36.105754,
+    "longitude": -86.763241,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-6",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-8",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-9",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-10",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-11",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-12",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-13",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-14",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-15",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-16",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-17",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-18",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-19",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-20",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-21",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-22",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      },
+      {
+        "port_id": "port-23",
+        "level": "dc_fast",
+        "power_kw": 250.0
+      }
+    ]
+  },
+  {
+    "id": "station-247",
+    "source": "doe",
+    "source_id": 356415,
+    "latitude": 36.180734,
+    "longitude": -86.796714,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-248",
+    "source": "doe",
+    "source_id": 356416,
+    "latitude": 36.180756,
+    "longitude": -86.796659,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-249",
+    "source": "doe",
+    "source_id": 358835,
+    "latitude": 36.153731,
+    "longitude": -86.82124,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-250",
+    "source": "doe",
+    "source_id": 358917,
+    "latitude": 36.145917,
+    "longitude": -86.687114,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-251",
+    "source": "doe",
+    "source_id": 358988,
+    "latitude": 36.123989,
+    "longitude": -86.697003,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-252",
+    "source": "doe",
+    "source_id": 359453,
+    "latitude": 36.216038,
+    "longitude": -86.587614,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-253",
+    "source": "doe",
+    "source_id": 361138,
+    "latitude": 36.03348648046288,
+    "longitude": -86.64586381823844,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 6.7
+      }
+    ]
+  },
+  {
+    "id": "station-254",
+    "source": "doe",
+    "source_id": 361297,
+    "latitude": 36.179661,
+    "longitude": -86.809883,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-255",
+    "source": "doe",
+    "source_id": 367612,
+    "latitude": 36.12698671557051,
+    "longitude": -86.90978798823839,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 16.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.6
+      }
+    ]
+  },
+  {
+    "id": "station-256",
+    "source": "doe",
+    "source_id": 371967,
+    "latitude": 36.20884886347618,
+    "longitude": -86.79910606136164,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 3.3
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 3.3
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 3.3
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 3.3
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 3.7
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 3.7
+      }
+    ]
+  },
+  {
+    "id": "station-257",
+    "source": "doe",
+    "source_id": 374471,
+    "latitude": 36.166858,
+    "longitude": -86.662689,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      }
+    ]
+  },
+  {
+    "id": "station-258",
+    "source": "doe",
+    "source_id": 374472,
+    "latitude": 36.200509,
+    "longitude": -86.617813,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      }
+    ]
+  },
+  {
+    "id": "station-259",
+    "source": "doe",
+    "source_id": 375102,
+    "latitude": 36.085726,
+    "longitude": -86.698045,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 62.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 62.0
+      }
+    ]
+  },
+  {
+    "id": "station-260",
+    "source": "doe",
+    "source_id": 375103,
+    "latitude": 36.085952,
+    "longitude": -86.69776,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-261",
+    "source": "doe",
+    "source_id": 375104,
+    "latitude": 36.086152,
+    "longitude": -86.696868,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-262",
+    "source": "doe",
+    "source_id": 375105,
+    "latitude": 36.086276,
+    "longitude": -86.697299,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-263",
+    "source": "doe",
+    "source_id": 375108,
+    "latitude": 36.049101,
+    "longitude": -86.649298,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 62.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 62.0
+      }
+    ]
+  },
+  {
+    "id": "station-264",
+    "source": "doe",
+    "source_id": 375900,
+    "latitude": 36.10637,
+    "longitude": -86.81459,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-6",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "dc_fast",
+        "power_kw": 350.0
+      }
+    ]
+  },
+  {
+    "id": "station-265",
+    "source": "doe",
+    "source_id": 376292,
+    "latitude": 36.159613,
+    "longitude": -86.785481,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-266",
+    "source": "doe",
+    "source_id": 376294,
+    "latitude": 36.159588,
+    "longitude": -86.785497,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-267",
+    "source": "doe",
+    "source_id": 376295,
+    "latitude": 36.159612,
+    "longitude": -86.785529,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-268",
+    "source": "doe",
+    "source_id": 376296,
+    "latitude": 36.159601,
+    "longitude": -86.785451,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-269",
+    "source": "doe",
+    "source_id": 376297,
+    "latitude": 36.15958,
+    "longitude": -86.785511,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-270",
+    "source": "doe",
+    "source_id": 376334,
+    "latitude": 36.27452033582186,
+    "longitude": -86.69084173246402,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.7
+      }
+    ]
+  },
+  {
+    "id": "station-271",
+    "source": "doe",
+    "source_id": 376359,
+    "latitude": 36.159564,
+    "longitude": -86.785494,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-272",
+    "source": "doe",
+    "source_id": 383840,
+    "latitude": 36.151939,
+    "longitude": -86.796025,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 9.6
+      }
+    ]
+  },
+  {
+    "id": "station-273",
+    "source": "doe",
+    "source_id": 383969,
+    "latitude": 36.159613,
+    "longitude": -86.785494,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-274",
+    "source": "doe",
+    "source_id": 383970,
+    "latitude": 36.15954,
+    "longitude": -86.785488,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-275",
+    "source": "doe",
+    "source_id": 383971,
+    "latitude": 36.159602,
+    "longitude": -86.785489,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-276",
+    "source": "doe",
+    "source_id": 383972,
+    "latitude": 36.159521,
+    "longitude": -86.785493,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 3.8
+      }
+    ]
+  },
+  {
+    "id": "station-277",
+    "source": "doe",
+    "source_id": 383973,
+    "latitude": 36.159597,
+    "longitude": -86.785499,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-278",
+    "source": "doe",
+    "source_id": 383974,
+    "latitude": 36.159609,
+    "longitude": -86.785473,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-279",
+    "source": "doe",
+    "source_id": 383975,
+    "latitude": 36.159573,
+    "longitude": -86.785497,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-280",
+    "source": "doe",
+    "source_id": 383976,
+    "latitude": 36.159593,
+    "longitude": -86.785645,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-281",
+    "source": "doe",
+    "source_id": 383977,
+    "latitude": 36.159654,
+    "longitude": -86.785535,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-282",
+    "source": "doe",
+    "source_id": 383978,
+    "latitude": 36.159557,
+    "longitude": -86.785474,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-283",
+    "source": "doe",
+    "source_id": 383979,
+    "latitude": 36.159608,
+    "longitude": -86.785546,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-284",
+    "source": "doe",
+    "source_id": 383980,
+    "latitude": 36.159591,
+    "longitude": -86.785444,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-285",
+    "source": "doe",
+    "source_id": 383981,
+    "latitude": 36.159586,
+    "longitude": -86.785472,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-286",
+    "source": "doe",
+    "source_id": 383982,
+    "latitude": 36.159531,
+    "longitude": -86.785514,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-287",
+    "source": "doe",
+    "source_id": 383983,
+    "latitude": 36.159585,
+    "longitude": -86.785464,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-288",
+    "source": "doe",
+    "source_id": 383984,
+    "latitude": 36.159572,
+    "longitude": -86.785454,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-289",
+    "source": "doe",
+    "source_id": 384744,
+    "latitude": 36.128497,
+    "longitude": -86.788909,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-290",
+    "source": "doe",
+    "source_id": 384745,
+    "latitude": 36.128516,
+    "longitude": -86.788906,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-291",
+    "source": "doe",
+    "source_id": 384888,
+    "latitude": 36.128535,
+    "longitude": -86.788901,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-292",
+    "source": "doe",
+    "source_id": 384889,
+    "latitude": 36.12855,
+    "longitude": -86.788903,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-293",
+    "source": "doe",
+    "source_id": 384890,
+    "latitude": 36.128533,
+    "longitude": -86.788924,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-294",
+    "source": "doe",
+    "source_id": 387243,
+    "latitude": 36.0621835,
+    "longitude": -86.8338488,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.2
+      }
+    ]
+  },
+  {
+    "id": "station-295",
+    "source": "doe",
+    "source_id": 387875,
+    "latitude": 36.170204,
+    "longitude": -86.667093,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.8
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.9
+      }
+    ]
+  },
+  {
+    "id": "station-296",
+    "source": "doe",
+    "source_id": 390352,
+    "latitude": 36.158552,
+    "longitude": -86.769569,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-297",
+    "source": "doe",
+    "source_id": 390353,
+    "latitude": 36.158825,
+    "longitude": -86.76983,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-298",
+    "source": "doe",
+    "source_id": 390354,
+    "latitude": 36.158829,
+    "longitude": -86.76982,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-299",
+    "source": "doe",
+    "source_id": 390355,
+    "latitude": 36.158798,
+    "longitude": -86.769881,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-300",
+    "source": "doe",
+    "source_id": 390356,
+    "latitude": 36.158439,
+    "longitude": -86.769364,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-301",
+    "source": "doe",
+    "source_id": 390359,
+    "latitude": 36.158893,
+    "longitude": -86.768843,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-302",
+    "source": "doe",
+    "source_id": 390360,
+    "latitude": 36.158887,
+    "longitude": -86.768848,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-303",
+    "source": "doe",
+    "source_id": 390405,
+    "latitude": 36.11201,
+    "longitude": -86.75629,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 240.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 240.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 240.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 240.0
+      }
+    ]
+  },
+  {
+    "id": "station-304",
+    "source": "doe",
+    "source_id": 391109,
+    "latitude": 36.062978,
+    "longitude": -86.809912,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 11.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 11.0
+      }
+    ]
+  },
+  {
+    "id": "station-305",
+    "source": "doe",
+    "source_id": 391152,
+    "latitude": 36.092698,
+    "longitude": -86.5558136,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 11.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 11.0
+      }
+    ]
+  },
+  {
+    "id": "station-306",
+    "source": "doe",
+    "source_id": 391615,
+    "latitude": 36.177018,
+    "longitude": -86.756559,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 9.6
+      }
+    ]
+  },
+  {
+    "id": "station-307",
+    "source": "doe",
+    "source_id": 395889,
+    "latitude": 36.176043,
+    "longitude": -86.76213,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-308",
+    "source": "doe",
+    "source_id": 396218,
+    "latitude": 36.1522201,
+    "longitude": -86.820563,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-8",
+        "level": "2",
+        "power_kw": 8.3
+      },
+      {
+        "port_id": "port-9",
+        "level": "2",
+        "power_kw": 8.3
+      }
+    ]
+  },
+  {
+    "id": "station-309",
+    "source": "doe",
+    "source_id": 396243,
+    "latitude": 36.158918,
+    "longitude": -86.768936,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-310",
+    "source": "doe",
+    "source_id": 396244,
+    "latitude": 36.158907,
+    "longitude": -86.768892,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-311",
+    "source": "doe",
+    "source_id": 396249,
+    "latitude": 36.158848,
+    "longitude": -86.768786,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-312",
+    "source": "doe",
+    "source_id": 396250,
+    "latitude": 36.158881,
+    "longitude": -86.768813,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-313",
+    "source": "doe",
+    "source_id": 396251,
+    "latitude": 36.158874,
+    "longitude": -86.768809,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-314",
+    "source": "doe",
+    "source_id": 396252,
+    "latitude": 36.158869,
+    "longitude": -86.768832,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-315",
+    "source": "doe",
+    "source_id": 396253,
+    "latitude": 36.158866,
+    "longitude": -86.76885,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-316",
+    "source": "doe",
+    "source_id": 396254,
+    "latitude": 36.158866,
+    "longitude": -86.768853,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-317",
+    "source": "doe",
+    "source_id": 396255,
+    "latitude": 36.158883,
+    "longitude": -86.768879,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-318",
+    "source": "doe",
+    "source_id": 396256,
+    "latitude": 36.158848,
+    "longitude": -86.768897,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-319",
+    "source": "doe",
+    "source_id": 396257,
+    "latitude": 36.158816,
+    "longitude": -86.768898,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-320",
+    "source": "doe",
+    "source_id": 396258,
+    "latitude": 36.158794,
+    "longitude": -86.768867,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-321",
+    "source": "doe",
+    "source_id": 396259,
+    "latitude": 36.158844,
+    "longitude": -86.768896,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-322",
+    "source": "doe",
+    "source_id": 396260,
+    "latitude": 36.158837,
+    "longitude": -86.768941,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-323",
+    "source": "doe",
+    "source_id": 396261,
+    "latitude": 36.158805,
+    "longitude": -86.768901,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-324",
+    "source": "doe",
+    "source_id": 396262,
+    "latitude": 36.158826,
+    "longitude": -86.768911,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-325",
+    "source": "doe",
+    "source_id": 396263,
+    "latitude": 36.158638,
+    "longitude": -86.768684,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 3.8
+      }
+    ]
+  },
+  {
+    "id": "station-326",
+    "source": "doe",
+    "source_id": 396264,
+    "latitude": 36.158822,
+    "longitude": -86.768897,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-327",
+    "source": "doe",
+    "source_id": 396265,
+    "latitude": 36.158807,
+    "longitude": -86.76886,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-328",
+    "source": "doe",
+    "source_id": 396266,
+    "latitude": 36.158822,
+    "longitude": -86.768928,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-329",
+    "source": "doe",
+    "source_id": 396267,
+    "latitude": 36.158687,
+    "longitude": -86.768807,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-330",
+    "source": "doe",
+    "source_id": 396338,
+    "latitude": 36.158753,
+    "longitude": -86.768807,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-331",
+    "source": "doe",
+    "source_id": 397459,
+    "latitude": 36.18083263996053,
+    "longitude": -86.77890410369214,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-8",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-9",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-10",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-11",
+        "level": "2",
+        "power_kw": 6.7
+      }
+    ]
+  },
+  {
+    "id": "station-332",
+    "source": "doe",
+    "source_id": 397977,
+    "latitude": 36.15917550373572,
+    "longitude": -86.77434003366217,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 6.7
+      }
+    ]
+  },
+  {
+    "id": "station-333",
+    "source": "doe",
+    "source_id": 398247,
+    "latitude": 36.040726,
+    "longitude": -86.71423,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-334",
+    "source": "doe",
+    "source_id": 399715,
+    "latitude": 36.09099,
+    "longitude": -86.73529,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-6",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-7",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-8",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-9",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-10",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-11",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-12",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-13",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-14",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-15",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-16",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-17",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-18",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-19",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-20",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-21",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-22",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-23",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-24",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-25",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-26",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-27",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-28",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-29",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-30",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-31",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-32",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-33",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-34",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-35",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-335",
+    "source": "doe",
+    "source_id": 399716,
+    "latitude": 36.1336,
+    "longitude": -86.75625,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-336",
+    "source": "doe",
+    "source_id": 405641,
+    "latitude": 36.159607,
+    "longitude": -86.786118,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-337",
+    "source": "doe",
+    "source_id": 405642,
+    "latitude": 36.159333,
+    "longitude": -86.786008,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 3.8
+      }
+    ]
+  },
+  {
+    "id": "station-338",
+    "source": "doe",
+    "source_id": 405643,
+    "latitude": 36.159349,
+    "longitude": -86.786004,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-339",
+    "source": "doe",
+    "source_id": 417547,
+    "latitude": 36.15052870011672,
+    "longitude": -86.78152046113895,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 5.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 5.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 10.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 10.0
+      }
+    ]
+  },
+  {
+    "id": "station-340",
+    "source": "doe",
+    "source_id": 417557,
+    "latitude": 36.150544,
+    "longitude": -86.802403,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 8.6
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 8.6
+      }
+    ]
+  },
+  {
+    "id": "station-341",
+    "source": "doe",
+    "source_id": 417707,
+    "latitude": 36.1624893,
+    "longitude": -86.7904811,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 9.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 9.6
+      }
+    ]
+  },
+  {
+    "id": "station-342",
+    "source": "doe",
+    "source_id": 417810,
+    "latitude": 36.105354,
+    "longitude": -86.799949,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-343",
+    "source": "doe",
+    "source_id": 417811,
+    "latitude": 36.10538,
+    "longitude": -86.79994,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-344",
+    "source": "doe",
+    "source_id": 417814,
+    "latitude": 36.102963,
+    "longitude": -86.800138,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 11.5
+      }
+    ]
+  },
+  {
+    "id": "station-345",
+    "source": "doe",
+    "source_id": 417815,
+    "latitude": 36.103036,
+    "longitude": -86.800122,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 11.5
+      }
+    ]
+  },
+  {
+    "id": "station-346",
+    "source": "doe",
+    "source_id": 417816,
+    "latitude": 36.103086,
+    "longitude": -86.800115,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 11.5
+      }
+    ]
+  },
+  {
+    "id": "station-347",
+    "source": "doe",
+    "source_id": 417817,
+    "latitude": 36.103085,
+    "longitude": -86.799936,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 11.5
+      }
+    ]
+  },
+  {
+    "id": "station-348",
+    "source": "doe",
+    "source_id": 417990,
+    "latitude": 36.13437334254355,
+    "longitude": -86.89731346299419,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 14.3
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 14.5
+      }
+    ]
+  },
+  {
+    "id": "station-349",
+    "source": "doe",
+    "source_id": 417993,
+    "latitude": 36.13437334254355,
+    "longitude": -86.89731346299419,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.6
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 16.2
+      }
+    ]
+  },
+  {
+    "id": "station-350",
+    "source": "doe",
+    "source_id": 420247,
+    "latitude": 36.159892,
+    "longitude": -86.786027,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 3.8
+      }
+    ]
+  },
+  {
+    "id": "station-351",
+    "source": "doe",
+    "source_id": 420268,
+    "latitude": 36.159875,
+    "longitude": -86.78592,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-352",
+    "source": "doe",
+    "source_id": 420269,
+    "latitude": 36.159979,
+    "longitude": -86.785941,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-353",
+    "source": "doe",
+    "source_id": 420270,
+    "latitude": 36.159814,
+    "longitude": -86.785974,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-354",
+    "source": "doe",
+    "source_id": 428562,
+    "latitude": 36.148972,
+    "longitude": -86.820136,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-355",
+    "source": "doe",
+    "source_id": 428563,
+    "latitude": 36.148941,
+    "longitude": -86.820114,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.5
+      }
+    ]
+  },
+  {
+    "id": "station-356",
+    "source": "doe",
+    "source_id": 434906,
+    "latitude": 36.16574592635821,
+    "longitude": -86.83790801881096,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.7
+      }
+    ]
+  },
+  {
+    "id": "station-357",
+    "source": "doe",
+    "source_id": 437904,
+    "latitude": 36.18891,
+    "longitude": -86.79744,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.7
+      }
+    ]
+  },
+  {
+    "id": "station-358",
+    "source": "doe",
+    "source_id": 438189,
+    "latitude": 36.18813,
+    "longitude": -86.79554,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.7
+      }
+    ]
+  },
+  {
+    "id": "station-359",
+    "source": "doe",
+    "source_id": 438190,
+    "latitude": 36.15096,
+    "longitude": -86.80416,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 11.1
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 11.1
+      }
+    ]
+  },
+  {
+    "id": "station-360",
+    "source": "doe",
+    "source_id": 438195,
+    "latitude": 36.18859,
+    "longitude": -86.7951,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      }
+    ]
+  },
+  {
+    "id": "station-361",
+    "source": "doe",
+    "source_id": 438421,
+    "latitude": 36.14919,
+    "longitude": -86.79555,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      }
+    ]
+  },
+  {
+    "id": "station-362",
+    "source": "doe",
+    "source_id": 439288,
+    "latitude": 36.11698,
+    "longitude": -86.6778,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-4",
+        "level": "2",
+        "power_kw": 6.7
+      },
+      {
+        "port_id": "port-5",
+        "level": "2",
+        "power_kw": 6.7
+      }
+    ]
+  },
+  {
+    "id": "station-363",
+    "source": "doe",
+    "source_id": 445472,
+    "latitude": 36.150269,
+    "longitude": -86.685166,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "1",
+        "power_kw": 1.4
+      }
+    ]
+  },
+  {
+    "id": "station-364",
+    "source": "doe",
+    "source_id": 451083,
+    "latitude": 36.1381688,
+    "longitude": -86.7245832,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 11.5
+      }
+    ]
+  },
+  {
+    "id": "station-365",
+    "source": "doe",
+    "source_id": 453197,
+    "latitude": 36.1523904067291,
+    "longitude": -86.7905721187113,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 7.7
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 7.7
+      }
+    ]
+  },
+  {
+    "id": "station-366",
+    "source": "doe",
+    "source_id": 454071,
+    "latitude": 36.037086,
+    "longitude": -86.643156,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 19.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 19.2
+      }
+    ]
+  },
+  {
+    "id": "station-367",
+    "source": "doe",
+    "source_id": 454072,
+    "latitude": 36.036705,
+    "longitude": -86.643149,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 19.2
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 19.2
+      }
+    ]
+  },
+  {
+    "id": "station-368",
+    "source": "doe",
+    "source_id": 455213,
+    "latitude": 36.15622,
+    "longitude": -86.772799,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 11.5
+      },
+      {
+        "port_id": "port-1",
+        "level": "2",
+        "power_kw": 11.5
+      },
+      {
+        "port_id": "port-2",
+        "level": "2",
+        "power_kw": 11.5
+      },
+      {
+        "port_id": "port-3",
+        "level": "2",
+        "power_kw": 11.5
+      }
+    ]
+  },
+  {
+    "id": "station-369",
+    "source": "doe",
+    "source_id": 456083,
+    "latitude": 36.154283,
+    "longitude": -86.627148,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "dc_fast",
+        "power_kw": 500.0
+      },
+      {
+        "port_id": "port-1",
+        "level": "dc_fast",
+        "power_kw": 500.0
+      },
+      {
+        "port_id": "port-2",
+        "level": "dc_fast",
+        "power_kw": 500.0
+      },
+      {
+        "port_id": "port-3",
+        "level": "dc_fast",
+        "power_kw": 500.0
+      },
+      {
+        "port_id": "port-4",
+        "level": "dc_fast",
+        "power_kw": 500.0
+      },
+      {
+        "port_id": "port-5",
+        "level": "dc_fast",
+        "power_kw": 500.0
+      },
+      {
+        "port_id": "port-6",
+        "level": "dc_fast",
+        "power_kw": 500.0
+      },
+      {
+        "port_id": "port-7",
+        "level": "dc_fast",
+        "power_kw": 500.0
+      }
+    ]
+  },
+  {
+    "id": "station-370",
+    "source": "doe",
+    "source_id": 458283,
+    "latitude": 36.08557,
+    "longitude": -86.6958,
+    "ports": [
+      {
+        "port_id": "port-0",
+        "level": "2",
+        "power_kw": 12.0
+      }
+    ]
+  }
+]

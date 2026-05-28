@@ -1,9 +1,11 @@
+__pycache__
+.claude
 .DS_Store
 .vscode
-__pycache__
 adapters/__pycache__
 data/inputs
 models/__pycache__
+models/charging/davidson_ev_stations.json
 models/inputs/__pycache__
 models/outputs/__pycache__
 /outputs
@@ -11,4 +13,5 @@ state_memory/__pycache__
 supervisory/__pycache__
 supervisory/loaders/__pycache__
 supervisory/time/__pycache__
+download.py
 test.ipynb

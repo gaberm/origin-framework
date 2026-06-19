@@ -1,8 +1,0 @@
-defaults:
-- _self_
-- db: db
-- models:
-  - charging
-  - transportation
-- rabbitmq: rabbitmq
-- simulation: simulation

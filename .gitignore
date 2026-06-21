@@ -6,7 +6,6 @@ __pycache__
 .vscode
 adapters/__pycache__
 nashville/data
-outputs
 state_memory/__pycache__
 supervisory/__pycache__
 supervisory/time/__pycache__

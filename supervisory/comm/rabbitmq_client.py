@@ -63,6 +63,9 @@ class RabbitMQClient:
     def write_input(self, worker: str, input_data: Any, on_ack):
         self._send(worker, Message(Operation.WRITE_INPUTS, payload=input_data), on_ack)
 
+    def read_constants(self, worker: str, on_ack):
+        self._send(worker, Message(Operation.READ_CONSTANTS), on_ack)
+
     def read_outputs(self, worker: str, on_ack):
         self._send(worker, Message(Operation.READ_OUTPUTS), on_ack)
 

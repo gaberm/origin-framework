@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 class Operation(str, Enum):
     INITIALIZE = "initialize"
+    READ_CONSTANTS = "read_constants"
     WRITE_INPUTS = "write_inputs"
     READ_OUTPUTS = "read_outputs"
     ADVANCE = "advance"

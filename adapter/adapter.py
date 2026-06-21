@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Mapping
-from base.entity import Entity
-from base.input import Input
+from base import Record
+from base import Input
 
 
 class Adapter(ABC):
     InputType: type[Input] | list[type[Input]]
-    OutputType: type[Entity] | list[type[Entity]]
+    OutputType: type[Record] | list[type[Record]]
+    ConstantType: type[Record] | list[type[Record]] | None = None
 
     def __init__(self, name: str, timestep_length: float, **kwargs):
         self.name = name
@@ -28,14 +28,21 @@ class Adapter(ABC):
         """Initialize the model."""
         pass
 
+    def read_constants(self) -> list[Record]:
+        """Read the model's time-invariant records."""
+        return []
+
     @abstractmethod
-    def read_outputs(self) -> list[Entity]:
+    def read_outputs(self) -> list[type[Record]]:
         """Read the user-defined outputs of the model."""
         pass
 
     @abstractmethod
-    def write_inputs(self, inputs: Mapping[type[Input], list]):
-        """Write user-defined inputs to the model."""
+    def write_inputs(self, inputs: dict[str, list[dict]]):
+        """Write user-defined inputs to the model.
+
+        `inputs` is keyed by each inputs `key` (its class name by default)
+        """
         pass
 
     @abstractmethod

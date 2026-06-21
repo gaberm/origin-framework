@@ -87,6 +87,7 @@ class AdapterWorker:
 
         handlers = {
             "initialize": self.initialize,
+            "read_constants": self.read_constants,
             "write_inputs": self.write_inputs,
             "read_outputs": self.read_outputs,
             "advance": self.advance,
@@ -117,6 +118,11 @@ class AdapterWorker:
     def write_inputs(self, payload):
         self.adapter.write_inputs(payload)
         return Response(success=True)
+
+    def read_constants(self, payload):
+        records = self.adapter.read_constants()
+        serialized = [dataclasses.asdict(r) for r in records]
+        return Response(success=True, payload=serialized)
 
     def read_outputs(self, payload):
         outputs = self.adapter.read_outputs()

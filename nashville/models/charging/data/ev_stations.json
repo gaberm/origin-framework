@@ -7,17 +7,17 @@
     "longitude": -86.70486,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-0",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-1",
         "level": "dc_fast",
         "power_kw": 50.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-2",
         "level": "dc_fast",
         "power_kw": 50.0
       }
@@ -31,22 +31,22 @@
     "longitude": -86.74373,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-3",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-4",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-5",
         "level": "dc_fast",
         "power_kw": 50.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-6",
         "level": "dc_fast",
         "power_kw": 50.0
       }
@@ -60,42 +60,42 @@
     "longitude": -86.81379926522062,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-7",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-8",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-9",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-10",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-4",
+        "port": "port-11",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-5",
+        "port": "port-12",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-6",
+        "port": "port-13",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-7",
+        "port": "port-14",
         "level": "2",
         "power_kw": 7.2
       }
@@ -109,7 +109,7 @@
     "longitude": -86.70486,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-15",
         "level": "2",
         "power_kw": 7.2
       }
@@ -123,7 +123,7 @@
     "longitude": -86.74373,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-16",
         "level": "2",
         "power_kw": 7.2
       }
@@ -137,7 +137,7 @@
     "longitude": -86.793130254,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-17",
         "level": "2",
         "power_kw": 7.2
       }
@@ -151,52 +151,52 @@
     "longitude": -86.799577,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-18",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-19",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-20",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-21",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-4",
+        "port": "port-22",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-5",
+        "port": "port-23",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-6",
+        "port": "port-24",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-7",
+        "port": "port-25",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-8",
+        "port": "port-26",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-9",
+        "port": "port-27",
         "level": "2",
         "power_kw": 7.2
       }
@@ -210,12 +210,12 @@
     "longitude": -86.788609,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-28",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-29",
         "level": "2",
         "power_kw": 6.5
       }
@@ -229,12 +229,12 @@
     "longitude": -86.813431,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-30",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-31",
         "level": "2",
         "power_kw": 6.5
       }
@@ -248,12 +248,12 @@
     "longitude": -86.767472,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-32",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-33",
         "level": "2",
         "power_kw": 6.5
       }
@@ -267,12 +267,12 @@
     "longitude": -86.762976,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-34",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-35",
         "level": "2",
         "power_kw": 6.5
       }
@@ -286,12 +286,12 @@
     "longitude": -86.774698,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-36",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-37",
         "level": "2",
         "power_kw": 6.5
       }
@@ -305,12 +305,12 @@
     "longitude": -86.84697,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-38",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-39",
         "level": "2",
         "power_kw": 7.2
       }
@@ -324,7 +324,7 @@
     "longitude": -86.815539,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-40",
         "level": "2",
         "power_kw": 6.5
       }
@@ -338,7 +338,7 @@
     "longitude": -86.936094,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-41",
         "level": "2",
         "power_kw": 6.5
       }
@@ -352,7 +352,7 @@
     "longitude": -86.826441,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-42",
         "level": "2",
         "power_kw": 6.5
       }
@@ -366,12 +366,12 @@
     "longitude": -86.908649,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-43",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-44",
         "level": "2",
         "power_kw": 6.5
       }
@@ -385,7 +385,7 @@
     "longitude": -86.784768,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-45",
         "level": "2",
         "power_kw": 6.5
       }
@@ -399,12 +399,12 @@
     "longitude": -86.672007,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-46",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-47",
         "level": "2",
         "power_kw": 6.5
       }
@@ -418,22 +418,22 @@
     "longitude": -86.81668020370485,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-48",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-49",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-50",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-51",
         "level": "2",
         "power_kw": 7.2
       }
@@ -447,22 +447,22 @@
     "longitude": -86.81877232673646,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-52",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-53",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-54",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-55",
         "level": "2",
         "power_kw": 7.2
       }
@@ -476,27 +476,27 @@
     "longitude": -86.81565023544312,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-56",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-57",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-58",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-59",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-4",
+        "port": "port-60",
         "level": "2",
         "power_kw": 7.2
       }
@@ -510,12 +510,12 @@
     "longitude": -86.667492,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-61",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-62",
         "level": "2",
         "power_kw": 6.5
       }
@@ -529,42 +529,42 @@
     "longitude": -86.648099,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-63",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-64",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-65",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-66",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-4",
+        "port": "port-67",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-5",
+        "port": "port-68",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-6",
+        "port": "port-69",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-7",
+        "port": "port-70",
         "level": "2",
         "power_kw": 7.2
       }
@@ -578,27 +578,27 @@
     "longitude": -86.647955,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-71",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-72",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-73",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-74",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-4",
+        "port": "port-75",
         "level": "2",
         "power_kw": 7.2
       }
@@ -612,22 +612,22 @@
     "longitude": -86.777271,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-76",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-77",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-78",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-79",
         "level": "2",
         "power_kw": 7.2
       }
@@ -641,7 +641,7 @@
     "longitude": -86.79679,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-80",
         "level": "2",
         "power_kw": 7.2
       }
@@ -655,12 +655,12 @@
     "longitude": -86.782274,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-81",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-82",
         "level": "2",
         "power_kw": 7.2
       }
@@ -674,17 +674,17 @@
     "longitude": -86.696838,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-83",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-84",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-85",
         "level": "2",
         "power_kw": 7.2
       }
@@ -698,22 +698,22 @@
     "longitude": -86.784039,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-86",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-87",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-88",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-89",
         "level": "2",
         "power_kw": 7.2
       }
@@ -727,82 +727,82 @@
     "longitude": -86.701271,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-90",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-91",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-92",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-93",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-4",
+        "port": "port-94",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-5",
+        "port": "port-95",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-6",
+        "port": "port-96",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-7",
+        "port": "port-97",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-8",
+        "port": "port-98",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-9",
+        "port": "port-99",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-10",
+        "port": "port-100",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-11",
+        "port": "port-101",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-12",
+        "port": "port-102",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-13",
+        "port": "port-103",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-14",
+        "port": "port-104",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-15",
+        "port": "port-105",
         "level": "2",
         "power_kw": 7.2
       }
@@ -816,32 +816,32 @@
     "longitude": -86.781542,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-106",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-107",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-108",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-109",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-4",
+        "port": "port-110",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-5",
+        "port": "port-111",
         "level": "2",
         "power_kw": 7.2
       }
@@ -855,12 +855,12 @@
     "longitude": -86.739249,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-112",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-113",
         "level": "2",
         "power_kw": 6.5
       }
@@ -874,7 +874,7 @@
     "longitude": -86.855062,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-114",
         "level": "2",
         "power_kw": 6.5
       }
@@ -888,7 +888,7 @@
     "longitude": -86.656983,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-115",
         "level": "2",
         "power_kw": 6.5
       }
@@ -902,12 +902,12 @@
     "longitude": -86.777527,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-116",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-117",
         "level": "2",
         "power_kw": 6.5
       }
@@ -921,7 +921,7 @@
     "longitude": -86.630697,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-118",
         "level": "2",
         "power_kw": 6.5
       }
@@ -935,17 +935,17 @@
     "longitude": -86.797155,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-119",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-120",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-121",
         "level": "2",
         "power_kw": 7.2
       }
@@ -959,12 +959,12 @@
     "longitude": -86.950784,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-122",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-123",
         "level": "2",
         "power_kw": 6.5
       }
@@ -978,12 +978,12 @@
     "longitude": -86.950813,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-124",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-125",
         "level": "2",
         "power_kw": 6.5
       }
@@ -997,22 +997,22 @@
     "longitude": -86.7212,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-126",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-127",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-2",
+        "port": "port-128",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-3",
+        "port": "port-129",
         "level": "2",
         "power_kw": 8.6
       }
@@ -1026,122 +1026,122 @@
     "longitude": -86.723904,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-130",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-131",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-132",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-133",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-134",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-135",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-6",
+        "port": "port-136",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-137",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-8",
+        "port": "port-138",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-9",
+        "port": "port-139",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-10",
+        "port": "port-140",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-11",
+        "port": "port-141",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-12",
+        "port": "port-142",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-13",
+        "port": "port-143",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-14",
+        "port": "port-144",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-15",
+        "port": "port-145",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-16",
+        "port": "port-146",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-17",
+        "port": "port-147",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-18",
+        "port": "port-148",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-19",
+        "port": "port-149",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-20",
+        "port": "port-150",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-21",
+        "port": "port-151",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-22",
+        "port": "port-152",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-23",
+        "port": "port-153",
         "level": "dc_fast",
         "power_kw": 250.0
       }
@@ -1155,12 +1155,12 @@
     "longitude": -86.665805,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-154",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-155",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1174,12 +1174,12 @@
     "longitude": -86.807851,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-156",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-157",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1193,12 +1193,12 @@
     "longitude": -86.781701,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-158",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-159",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1212,12 +1212,12 @@
     "longitude": -86.934091,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-160",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-161",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1231,7 +1231,7 @@
     "longitude": -86.752546,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-162",
         "level": "2",
         "power_kw": 8.6
       }
@@ -1245,12 +1245,12 @@
     "longitude": -86.77796,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-163",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-164",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1264,12 +1264,12 @@
     "longitude": -86.777957,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-165",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-166",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1283,12 +1283,12 @@
     "longitude": -86.667087,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-167",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-168",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1302,7 +1302,7 @@
     "longitude": -86.841022,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-169",
         "level": "2",
         "power_kw": 21.6
       }
@@ -1316,12 +1316,12 @@
     "longitude": -86.797059,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-170",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-171",
         "level": "2",
         "power_kw": 7.2
       }
@@ -1335,12 +1335,12 @@
     "longitude": -86.78763,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-172",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-173",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1354,12 +1354,12 @@
     "longitude": -86.787408,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-174",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-175",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1373,12 +1373,12 @@
     "longitude": -86.77889,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-176",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-177",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1392,12 +1392,12 @@
     "longitude": -86.77919,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-178",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-179",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1411,12 +1411,12 @@
     "longitude": -86.78049,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-180",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-181",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1430,12 +1430,12 @@
     "longitude": -86.78044,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-182",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-183",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1449,7 +1449,7 @@
     "longitude": -86.78056,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-184",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1463,12 +1463,12 @@
     "longitude": -86.789639,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-185",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-186",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1482,7 +1482,7 @@
     "longitude": -86.767851,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-187",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1496,12 +1496,12 @@
     "longitude": -86.767386,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-188",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-189",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1515,12 +1515,12 @@
     "longitude": -86.784728,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-190",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-191",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1534,7 +1534,7 @@
     "longitude": -86.813525,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-192",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1548,12 +1548,12 @@
     "longitude": -86.774678,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-193",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-194",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1567,12 +1567,12 @@
     "longitude": -86.667512,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-195",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-196",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1586,12 +1586,12 @@
     "longitude": -86.667501,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-197",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-198",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1605,12 +1605,12 @@
     "longitude": -86.667497,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-199",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-200",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1624,12 +1624,12 @@
     "longitude": -86.739507,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-201",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-202",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1643,12 +1643,12 @@
     "longitude": -86.739328,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-203",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-204",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1662,12 +1662,12 @@
     "longitude": -86.739534,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-205",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-206",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1681,7 +1681,7 @@
     "longitude": -86.65697,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-207",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1695,12 +1695,12 @@
     "longitude": -86.777483,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-208",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-209",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1714,12 +1714,12 @@
     "longitude": -86.95075,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-210",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-211",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1733,12 +1733,12 @@
     "longitude": -86.950746,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-212",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-213",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1752,12 +1752,12 @@
     "longitude": -86.807851,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-214",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-215",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1771,12 +1771,12 @@
     "longitude": -86.807787,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-216",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-217",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1790,12 +1790,12 @@
     "longitude": -86.807819,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-218",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-219",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1809,12 +1809,12 @@
     "longitude": -86.807723,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-220",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-221",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1828,12 +1828,12 @@
     "longitude": -86.807755,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-222",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-223",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1847,12 +1847,12 @@
     "longitude": -86.807905,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-224",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-225",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1866,12 +1866,12 @@
     "longitude": -86.804615,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-226",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-227",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1885,12 +1885,12 @@
     "longitude": -86.667069,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-228",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-229",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1904,12 +1904,12 @@
     "longitude": -86.667076,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-230",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-231",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1923,12 +1923,12 @@
     "longitude": -86.667048,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-232",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-233",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1942,12 +1942,12 @@
     "longitude": -86.667055,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-234",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-235",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1961,12 +1961,12 @@
     "longitude": -86.667066,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-236",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-237",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1980,12 +1980,12 @@
     "longitude": -86.66708,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-238",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-239",
         "level": "2",
         "power_kw": 6.5
       }
@@ -1999,12 +1999,12 @@
     "longitude": -86.667058,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-240",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-241",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2018,12 +2018,12 @@
     "longitude": -86.66707,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-242",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-243",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2037,12 +2037,12 @@
     "longitude": -86.787417,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-244",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-245",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2056,12 +2056,12 @@
     "longitude": -86.779015,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-246",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-247",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2075,12 +2075,12 @@
     "longitude": -86.778915,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-248",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-249",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2094,12 +2094,12 @@
     "longitude": -86.778854,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-250",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-251",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2113,12 +2113,12 @@
     "longitude": -86.77885,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-252",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-253",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2132,12 +2132,12 @@
     "longitude": -86.779076,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-254",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-255",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2151,12 +2151,12 @@
     "longitude": -86.77883,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-256",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-257",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2170,12 +2170,12 @@
     "longitude": -86.778854,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-258",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-259",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2189,12 +2189,12 @@
     "longitude": -86.77924,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-260",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-261",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2208,12 +2208,12 @@
     "longitude": -86.77928,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-262",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-263",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2227,12 +2227,12 @@
     "longitude": -86.77917,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-264",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-265",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2246,12 +2246,12 @@
     "longitude": -86.77928,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-266",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-267",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2265,12 +2265,12 @@
     "longitude": -86.77925,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-268",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-269",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2284,12 +2284,12 @@
     "longitude": -86.77925,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-270",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-271",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2303,12 +2303,12 @@
     "longitude": -86.78032,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-272",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-273",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2322,12 +2322,12 @@
     "longitude": -86.780426,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-274",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-275",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2341,12 +2341,12 @@
     "longitude": -86.7804,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-276",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-277",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2360,7 +2360,7 @@
     "longitude": -86.7801,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-278",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2374,12 +2374,12 @@
     "longitude": -86.78047,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-279",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-280",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2393,7 +2393,7 @@
     "longitude": -86.780251,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-281",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2407,7 +2407,7 @@
     "longitude": -86.634813,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-282",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2421,7 +2421,7 @@
     "longitude": -86.633993,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-283",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2435,7 +2435,7 @@
     "longitude": -86.634813,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-284",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2449,7 +2449,7 @@
     "longitude": -86.633955,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-285",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2463,12 +2463,12 @@
     "longitude": -86.790855,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-286",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-287",
         "level": "2",
         "power_kw": 7.2
       }
@@ -2482,12 +2482,12 @@
     "longitude": -86.77856,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-288",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-289",
         "level": "2",
         "power_kw": 7.2
       }
@@ -2501,7 +2501,7 @@
     "longitude": -86.803693,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-290",
         "level": "2",
         "power_kw": 7.2
       }
@@ -2515,22 +2515,22 @@
     "longitude": -86.685166,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-291",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-292",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-293",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-294",
         "level": "2",
         "power_kw": 7.2
       }
@@ -2544,12 +2544,12 @@
     "longitude": -86.667029,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-295",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-296",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2563,12 +2563,12 @@
     "longitude": -86.667039,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-297",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-298",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2582,12 +2582,12 @@
     "longitude": -86.667046,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-299",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-300",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2601,12 +2601,12 @@
     "longitude": -86.667037,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-301",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-302",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2620,12 +2620,12 @@
     "longitude": -86.608176,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-303",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-304",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2639,122 +2639,122 @@
     "longitude": -86.891923,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-305",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-306",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-307",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-308",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-309",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-310",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-6",
+        "port": "port-311",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-312",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-8",
+        "port": "port-313",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-9",
+        "port": "port-314",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-10",
+        "port": "port-315",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-11",
+        "port": "port-316",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-12",
+        "port": "port-317",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-13",
+        "port": "port-318",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-14",
+        "port": "port-319",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-15",
+        "port": "port-320",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-16",
+        "port": "port-321",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-17",
+        "port": "port-322",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-18",
+        "port": "port-323",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-19",
+        "port": "port-324",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-20",
+        "port": "port-325",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-21",
+        "port": "port-326",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-22",
+        "port": "port-327",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-23",
+        "port": "port-328",
         "level": "dc_fast",
         "power_kw": 250.0
       }
@@ -2768,12 +2768,12 @@
     "longitude": -86.801711,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-329",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-330",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2787,12 +2787,12 @@
     "longitude": -86.80171,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-331",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-332",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2806,42 +2806,42 @@
     "longitude": -86.72716,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-333",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-334",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-335",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-336",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-337",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-338",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-6",
+        "port": "port-339",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-340",
         "level": "dc_fast",
         "power_kw": 350.0
       }
@@ -2855,22 +2855,22 @@
     "longitude": -86.795607,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-341",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-342",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-343",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-344",
         "level": "2",
         "power_kw": 7.2
       }
@@ -2884,12 +2884,12 @@
     "longitude": -86.781297,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-345",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-346",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2903,12 +2903,12 @@
     "longitude": -86.787571,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-347",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-348",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2922,12 +2922,12 @@
     "longitude": -86.787729,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-349",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-350",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2941,12 +2941,12 @@
     "longitude": -86.787959,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-351",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-352",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2960,12 +2960,12 @@
     "longitude": -86.78763,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-353",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-354",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2979,12 +2979,12 @@
     "longitude": -86.787674,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-355",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-356",
         "level": "2",
         "power_kw": 6.5
       }
@@ -2998,12 +2998,12 @@
     "longitude": -86.787557,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-357",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-358",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3017,12 +3017,12 @@
     "longitude": -86.785594,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-359",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-360",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3036,12 +3036,12 @@
     "longitude": -86.78736,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-361",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-362",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3055,12 +3055,12 @@
     "longitude": -86.78559,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-363",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-364",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3074,12 +3074,12 @@
     "longitude": -86.78593,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-365",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-366",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3093,12 +3093,12 @@
     "longitude": -86.787757,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-367",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-368",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3112,12 +3112,12 @@
     "longitude": -86.787549,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-369",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-370",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3131,12 +3131,12 @@
     "longitude": -86.78775,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-371",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-372",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3150,12 +3150,12 @@
     "longitude": -86.78788,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-373",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-374",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3169,12 +3169,12 @@
     "longitude": -86.787386,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-375",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-376",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3188,12 +3188,12 @@
     "longitude": -86.785576,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-377",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-378",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3207,12 +3207,12 @@
     "longitude": -86.785355,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-379",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-380",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3226,12 +3226,12 @@
     "longitude": -86.78751,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-381",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-382",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3245,12 +3245,12 @@
     "longitude": -86.787604,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-383",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-384",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3264,12 +3264,12 @@
     "longitude": -86.787614,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-385",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-386",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3283,12 +3283,12 @@
     "longitude": -86.7893509,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-387",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-388",
         "level": "2",
         "power_kw": 6.2
       }
@@ -3302,12 +3302,12 @@
     "longitude": -86.71014,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-389",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-390",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3321,22 +3321,22 @@
     "longitude": -86.801205,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-391",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-392",
         "level": "2",
         "power_kw": 6.9
       },
       {
-        "port_id": "port-2",
+        "port": "port-393",
         "level": "2",
         "power_kw": 6.6
       },
       {
-        "port_id": "port-3",
+        "port": "port-394",
         "level": "2",
         "power_kw": 6.6
       }
@@ -3350,12 +3350,12 @@
     "longitude": -86.71021,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-395",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-396",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3369,12 +3369,12 @@
     "longitude": -86.696213,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-397",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-398",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3388,12 +3388,12 @@
     "longitude": -86.767916,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-399",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-400",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3407,12 +3407,12 @@
     "longitude": -86.767932,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-401",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-402",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3426,12 +3426,12 @@
     "longitude": -86.768181,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-403",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-404",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3445,12 +3445,12 @@
     "longitude": -86.768198,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-405",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-406",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3464,12 +3464,12 @@
     "longitude": -86.768191,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-407",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-408",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3483,12 +3483,12 @@
     "longitude": -86.768203,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-409",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-410",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3502,12 +3502,12 @@
     "longitude": -86.813396,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-411",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-412",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3521,12 +3521,12 @@
     "longitude": -86.78168,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-413",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-414",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3540,12 +3540,12 @@
     "longitude": -86.78171,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-415",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-416",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3559,12 +3559,12 @@
     "longitude": -86.781381,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-417",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-418",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3578,12 +3578,12 @@
     "longitude": -86.781393,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-419",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-420",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3597,12 +3597,12 @@
     "longitude": -86.781359,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-421",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-422",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3616,12 +3616,12 @@
     "longitude": -86.781441,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-423",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-424",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3635,12 +3635,12 @@
     "longitude": -86.771998,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-425",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-426",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3654,12 +3654,12 @@
     "longitude": -86.696002,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-427",
         "level": "dc_fast",
         "power_kw": 125.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-428",
         "level": "dc_fast",
         "power_kw": 125.0
       }
@@ -3673,62 +3673,62 @@
     "longitude": -86.75288,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-429",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-430",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-2",
+        "port": "port-431",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-3",
+        "port": "port-432",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-4",
+        "port": "port-433",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-5",
+        "port": "port-434",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-6",
+        "port": "port-435",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-7",
+        "port": "port-436",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-8",
+        "port": "port-437",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-9",
+        "port": "port-438",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-10",
+        "port": "port-439",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-11",
+        "port": "port-440",
         "level": "2",
         "power_kw": 9.6
       }
@@ -3742,7 +3742,7 @@
     "longitude": -86.76732,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-441",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3756,12 +3756,12 @@
     "longitude": -86.8090888,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-442",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-443",
         "level": "2",
         "power_kw": 6.2
       }
@@ -3775,22 +3775,22 @@
     "longitude": -86.8209358,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-444",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-445",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-446",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-447",
         "level": "2",
         "power_kw": 6.2
       }
@@ -3804,12 +3804,12 @@
     "longitude": -86.788251,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-448",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-449",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3823,7 +3823,7 @@
     "longitude": -86.6457552,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-450",
         "level": "2",
         "power_kw": 7.2
       }
@@ -3837,12 +3837,12 @@
     "longitude": -86.779297,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-451",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-452",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3856,12 +3856,12 @@
     "longitude": -86.788251,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-453",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-454",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3875,12 +3875,12 @@
     "longitude": -86.739494,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-455",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-456",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3894,12 +3894,12 @@
     "longitude": -86.69596,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-457",
         "level": "dc_fast",
         "power_kw": 125.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-458",
         "level": "dc_fast",
         "power_kw": 125.0
       }
@@ -3913,12 +3913,12 @@
     "longitude": -86.821552,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-459",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-460",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3932,12 +3932,12 @@
     "longitude": -86.821374,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-461",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-462",
         "level": "2",
         "power_kw": 6.5
       }
@@ -3951,42 +3951,42 @@
     "longitude": -86.97781,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-463",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-464",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-2",
+        "port": "port-465",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-3",
+        "port": "port-466",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-4",
+        "port": "port-467",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-5",
+        "port": "port-468",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-6",
+        "port": "port-469",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-7",
+        "port": "port-470",
         "level": "2",
         "power_kw": 9.6
       }
@@ -4000,12 +4000,12 @@
     "longitude": -86.773916,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-471",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-472",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4019,12 +4019,12 @@
     "longitude": -86.773893,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-473",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-474",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4038,12 +4038,12 @@
     "longitude": -86.773914,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-475",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-476",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4057,32 +4057,32 @@
     "longitude": -86.816809,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-477",
         "level": "dc_fast",
         "power_kw": 100.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-478",
         "level": "dc_fast",
         "power_kw": 100.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-479",
         "level": "dc_fast",
         "power_kw": 100.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-480",
         "level": "dc_fast",
         "power_kw": 100.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-481",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-482",
         "level": "dc_fast",
         "power_kw": 350.0
       }
@@ -4096,12 +4096,12 @@
     "longitude": -86.692287,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-483",
         "level": "2",
         "power_kw": 6.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-484",
         "level": "2",
         "power_kw": 6.6
       }
@@ -4115,12 +4115,12 @@
     "longitude": -86.773764,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-485",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-486",
         "level": "2",
         "power_kw": 7.2
       }
@@ -4134,12 +4134,12 @@
     "longitude": -86.792345,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-487",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-488",
         "level": "2",
         "power_kw": 7.2
       }
@@ -4153,12 +4153,12 @@
     "longitude": -86.800514,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-489",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-490",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4172,12 +4172,12 @@
     "longitude": -86.820851,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-491",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-492",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4191,12 +4191,12 @@
     "longitude": -86.781801,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-493",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-494",
         "level": "2",
         "power_kw": 8.6
       }
@@ -4210,12 +4210,12 @@
     "longitude": -86.781679,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-495",
         "level": "2",
         "power_kw": 7.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-496",
         "level": "2",
         "power_kw": 8.6
       }
@@ -4229,12 +4229,12 @@
     "longitude": -86.782825,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-497",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-498",
         "level": "2",
         "power_kw": 8.6
       }
@@ -4248,7 +4248,7 @@
     "longitude": -86.81348,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-499",
         "level": "2",
         "power_kw": 9.6
       }
@@ -4262,22 +4262,22 @@
     "longitude": -86.608305,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-500",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-501",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-2",
+        "port": "port-502",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-3",
+        "port": "port-503",
         "level": "2",
         "power_kw": 8.6
       }
@@ -4291,7 +4291,7 @@
     "longitude": -86.654418,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-504",
         "level": "dc_fast",
         "power_kw": 24.0
       }
@@ -4305,12 +4305,12 @@
     "longitude": -86.763202,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-505",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-506",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4324,12 +4324,12 @@
     "longitude": -86.773256,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-507",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-508",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4343,12 +4343,12 @@
     "longitude": -86.697138,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-509",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-510",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4362,22 +4362,22 @@
     "longitude": -86.7663715,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-511",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-512",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-513",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-514",
         "level": "2",
         "power_kw": 7.2
       }
@@ -4391,12 +4391,12 @@
     "longitude": -86.814574,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-515",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-516",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4410,12 +4410,12 @@
     "longitude": -86.814438,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-517",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-518",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4429,12 +4429,12 @@
     "longitude": -86.813717,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-519",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-520",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4448,12 +4448,12 @@
     "longitude": -86.813753,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-521",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-522",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4467,12 +4467,12 @@
     "longitude": -86.788015,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-523",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-524",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4486,12 +4486,12 @@
     "longitude": -86.787961,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-525",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-526",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4505,12 +4505,12 @@
     "longitude": -86.788037,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-527",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-528",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4524,12 +4524,12 @@
     "longitude": -86.787983,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-529",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-530",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4543,12 +4543,12 @@
     "longitude": -86.788015,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-531",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-532",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4562,62 +4562,62 @@
     "longitude": -86.790931,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-533",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-534",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-535",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-536",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-537",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-538",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-6",
+        "port": "port-539",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-540",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-8",
+        "port": "port-541",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-9",
+        "port": "port-542",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-10",
+        "port": "port-543",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-11",
+        "port": "port-544",
         "level": "dc_fast",
         "power_kw": 250.0
       }
@@ -4631,12 +4631,12 @@
     "longitude": -86.774742,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-545",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-546",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4650,12 +4650,12 @@
     "longitude": -86.777245,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-547",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-548",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4669,12 +4669,12 @@
     "longitude": -86.777261,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-549",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-550",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4688,12 +4688,12 @@
     "longitude": -86.777209,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-551",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-552",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4707,12 +4707,12 @@
     "longitude": -86.777273,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-553",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-554",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4726,12 +4726,12 @@
     "longitude": -86.7773,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-555",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-556",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4745,12 +4745,12 @@
     "longitude": -86.777257,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-557",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-558",
         "level": "2",
         "power_kw": 6.5
       }
@@ -4764,62 +4764,62 @@
     "longitude": -86.7773708,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-559",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-560",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-561",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-562",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-4",
+        "port": "port-563",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-5",
+        "port": "port-564",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-6",
+        "port": "port-565",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-7",
+        "port": "port-566",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-8",
+        "port": "port-567",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-9",
+        "port": "port-568",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-10",
+        "port": "port-569",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-11",
+        "port": "port-570",
         "level": "2",
         "power_kw": 6.2
       }
@@ -4833,7 +4833,7 @@
     "longitude": -86.91232,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-571",
         "level": "2",
         "power_kw": 10.8
       }
@@ -4847,22 +4847,22 @@
     "longitude": -86.814294,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-572",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-573",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-2",
+        "port": "port-574",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-3",
+        "port": "port-575",
         "level": "2",
         "power_kw": 6.6
       }
@@ -4876,42 +4876,42 @@
     "longitude": -86.7754139,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-576",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-577",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-578",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-579",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-4",
+        "port": "port-580",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-5",
+        "port": "port-581",
         "level": "2",
         "power_kw": 6.2
       },
       {
-        "port_id": "port-6",
+        "port": "port-582",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-583",
         "level": "2",
         "power_kw": 10.0
       }
@@ -4925,12 +4925,12 @@
     "longitude": -86.683103,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-584",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-585",
         "level": "dc_fast",
         "power_kw": 250.0
       }
@@ -4944,12 +4944,12 @@
     "longitude": -86.683092,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-586",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-587",
         "level": "dc_fast",
         "power_kw": 250.0
       }
@@ -4963,82 +4963,82 @@
     "longitude": -86.755338,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-588",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-589",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-590",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-591",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-592",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-593",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-6",
+        "port": "port-594",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-595",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-8",
+        "port": "port-596",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-9",
+        "port": "port-597",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-10",
+        "port": "port-598",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-11",
+        "port": "port-599",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-12",
+        "port": "port-600",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-13",
+        "port": "port-601",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-14",
+        "port": "port-602",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-15",
+        "port": "port-603",
         "level": "dc_fast",
         "power_kw": 250.0
       }
@@ -5052,12 +5052,12 @@
     "longitude": -86.78,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-604",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-605",
         "level": "2",
         "power_kw": 7.2
       }
@@ -5071,12 +5071,12 @@
     "longitude": -86.83,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-606",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-607",
         "level": "2",
         "power_kw": 7.2
       }
@@ -5090,22 +5090,22 @@
     "longitude": -86.8060674,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-608",
         "level": "2",
         "power_kw": 40.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-609",
         "level": "2",
         "power_kw": 40.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-610",
         "level": "2",
         "power_kw": 40.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-611",
         "level": "2",
         "power_kw": 40.0
       }
@@ -5119,12 +5119,12 @@
     "longitude": -86.680899,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-612",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-613",
         "level": "2",
         "power_kw": 6.5
       }
@@ -5138,12 +5138,12 @@
     "longitude": -86.680093,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-614",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-615",
         "level": "2",
         "power_kw": 6.5
       }
@@ -5157,32 +5157,32 @@
     "longitude": -86.81795,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-616",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-617",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-618",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-619",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-620",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-621",
         "level": "dc_fast",
         "power_kw": 350.0
       }
@@ -5196,12 +5196,12 @@
     "longitude": -86.767461,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-622",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-623",
         "level": "2",
         "power_kw": 6.5
       }
@@ -5215,12 +5215,12 @@
     "longitude": -86.767547,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-624",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-625",
         "level": "2",
         "power_kw": 6.5
       }
@@ -5234,62 +5234,62 @@
     "longitude": -86.802536,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-626",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-627",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-628",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-629",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-630",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-631",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-6",
+        "port": "port-632",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-633",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-8",
+        "port": "port-634",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-9",
+        "port": "port-635",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-10",
+        "port": "port-636",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-11",
+        "port": "port-637",
         "level": "2",
         "power_kw": 10.0
       }
@@ -5303,12 +5303,12 @@
     "longitude": -86.78285723267264,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-638",
         "level": "2",
         "power_kw": 16.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-639",
         "level": "2",
         "power_kw": 16.6
       }
@@ -5322,42 +5322,42 @@
     "longitude": -86.69244,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-640",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-641",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-642",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-643",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-644",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-645",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-6",
+        "port": "port-646",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-647",
         "level": "dc_fast",
         "power_kw": 350.0
       }
@@ -5371,22 +5371,22 @@
     "longitude": -86.698103,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-648",
         "level": "2",
         "power_kw": 16.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-649",
         "level": "2",
         "power_kw": 16.6
       },
       {
-        "port_id": "port-2",
+        "port": "port-650",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-3",
+        "port": "port-651",
         "level": "2",
         "power_kw": 8.3
       }
@@ -5400,22 +5400,22 @@
     "longitude": -86.77971494602274,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-652",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-1",
+        "port": "port-653",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-2",
+        "port": "port-654",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-3",
+        "port": "port-655",
         "level": "2",
         "power_kw": 8.3
       }
@@ -5429,32 +5429,32 @@
     "longitude": -86.77971494602274,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-656",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-657",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-658",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-659",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-660",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-661",
         "level": "2",
         "power_kw": 6.2
       }
@@ -5468,12 +5468,12 @@
     "longitude": -86.79025269,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-662",
         "level": "2",
         "power_kw": 6.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-663",
         "level": "2",
         "power_kw": 6.6
       }
@@ -5487,27 +5487,27 @@
     "longitude": -86.77220154,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-664",
         "level": "2",
         "power_kw": 6.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-665",
         "level": "2",
         "power_kw": 6.6
       },
       {
-        "port_id": "port-2",
+        "port": "port-666",
         "level": "2",
         "power_kw": 6.6
       },
       {
-        "port_id": "port-3",
+        "port": "port-667",
         "level": "2",
         "power_kw": 6.6
       },
       {
-        "port_id": "port-4",
+        "port": "port-668",
         "level": "2",
         "power_kw": 6.6
       }
@@ -5521,12 +5521,12 @@
     "longitude": -86.636044,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-669",
         "level": "2",
         "power_kw": 13.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-670",
         "level": "2",
         "power_kw": 13.5
       }
@@ -5540,12 +5540,12 @@
     "longitude": -86.683545,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-671",
         "level": "2",
         "power_kw": 11.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-672",
         "level": "2",
         "power_kw": 11.5
       }
@@ -5559,12 +5559,12 @@
     "longitude": -86.830657,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-673",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-674",
         "level": "2",
         "power_kw": 6.5
       }
@@ -5578,12 +5578,12 @@
     "longitude": -86.830678,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-675",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-676",
         "level": "2",
         "power_kw": 6.5
       }
@@ -5597,12 +5597,12 @@
     "longitude": -86.6973007,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-677",
         "level": "2",
         "power_kw": 16.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-678",
         "level": "2",
         "power_kw": 16.6
       }
@@ -5616,122 +5616,122 @@
     "longitude": -86.763241,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-679",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-680",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-681",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-682",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-683",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-684",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-6",
+        "port": "port-685",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-686",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-8",
+        "port": "port-687",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-9",
+        "port": "port-688",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-10",
+        "port": "port-689",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-11",
+        "port": "port-690",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-12",
+        "port": "port-691",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-13",
+        "port": "port-692",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-14",
+        "port": "port-693",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-15",
+        "port": "port-694",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-16",
+        "port": "port-695",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-17",
+        "port": "port-696",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-18",
+        "port": "port-697",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-19",
+        "port": "port-698",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-20",
+        "port": "port-699",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-21",
+        "port": "port-700",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-22",
+        "port": "port-701",
         "level": "dc_fast",
         "power_kw": 250.0
       },
       {
-        "port_id": "port-23",
+        "port": "port-702",
         "level": "dc_fast",
         "power_kw": 250.0
       }
@@ -5745,12 +5745,12 @@
     "longitude": -86.796714,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-703",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-704",
         "level": "2",
         "power_kw": 6.5
       }
@@ -5764,12 +5764,12 @@
     "longitude": -86.796659,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-705",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-706",
         "level": "2",
         "power_kw": 6.5
       }
@@ -5783,12 +5783,12 @@
     "longitude": -86.82124,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-707",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-708",
         "level": "2",
         "power_kw": 7.2
       }
@@ -5802,22 +5802,22 @@
     "longitude": -86.687114,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-709",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-710",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-711",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-712",
         "level": "2",
         "power_kw": 7.2
       }
@@ -5831,17 +5831,17 @@
     "longitude": -86.697003,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-713",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-714",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-715",
         "level": "2",
         "power_kw": 7.2
       }
@@ -5855,22 +5855,22 @@
     "longitude": -86.587614,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-716",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-717",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-2",
+        "port": "port-718",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-3",
+        "port": "port-719",
         "level": "2",
         "power_kw": 7.2
       }
@@ -5884,42 +5884,42 @@
     "longitude": -86.64586381823844,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-720",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-721",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-722",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-723",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-4",
+        "port": "port-724",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-5",
+        "port": "port-725",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-6",
+        "port": "port-726",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-7",
+        "port": "port-727",
         "level": "2",
         "power_kw": 6.7
       }
@@ -5933,12 +5933,12 @@
     "longitude": -86.809883,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-728",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-729",
         "level": "2",
         "power_kw": 6.5
       }
@@ -5952,12 +5952,12 @@
     "longitude": -86.90978798823839,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-730",
         "level": "2",
         "power_kw": 16.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-731",
         "level": "2",
         "power_kw": 8.6
       }
@@ -5971,32 +5971,32 @@
     "longitude": -86.79910606136164,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-732",
         "level": "2",
         "power_kw": 3.3
       },
       {
-        "port_id": "port-1",
+        "port": "port-733",
         "level": "2",
         "power_kw": 3.3
       },
       {
-        "port_id": "port-2",
+        "port": "port-734",
         "level": "2",
         "power_kw": 3.3
       },
       {
-        "port_id": "port-3",
+        "port": "port-735",
         "level": "2",
         "power_kw": 3.3
       },
       {
-        "port_id": "port-4",
+        "port": "port-736",
         "level": "2",
         "power_kw": 3.7
       },
       {
-        "port_id": "port-5",
+        "port": "port-737",
         "level": "2",
         "power_kw": 3.7
       }
@@ -6010,22 +6010,22 @@
     "longitude": -86.662689,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-738",
         "level": "dc_fast",
         "power_kw": 150.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-739",
         "level": "dc_fast",
         "power_kw": 150.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-740",
         "level": "dc_fast",
         "power_kw": 150.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-741",
         "level": "dc_fast",
         "power_kw": 150.0
       }
@@ -6039,22 +6039,22 @@
     "longitude": -86.617813,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-742",
         "level": "dc_fast",
         "power_kw": 150.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-743",
         "level": "dc_fast",
         "power_kw": 150.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-744",
         "level": "dc_fast",
         "power_kw": 150.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-745",
         "level": "dc_fast",
         "power_kw": 150.0
       }
@@ -6068,12 +6068,12 @@
     "longitude": -86.698045,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-746",
         "level": "dc_fast",
         "power_kw": 62.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-747",
         "level": "dc_fast",
         "power_kw": 62.0
       }
@@ -6087,12 +6087,12 @@
     "longitude": -86.69776,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-748",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-749",
         "level": "2",
         "power_kw": 6.5
       }
@@ -6106,12 +6106,12 @@
     "longitude": -86.696868,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-750",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-751",
         "level": "2",
         "power_kw": 6.5
       }
@@ -6125,12 +6125,12 @@
     "longitude": -86.697299,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-752",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-753",
         "level": "2",
         "power_kw": 6.5
       }
@@ -6144,12 +6144,12 @@
     "longitude": -86.649298,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-754",
         "level": "dc_fast",
         "power_kw": 62.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-755",
         "level": "dc_fast",
         "power_kw": 62.0
       }
@@ -6163,42 +6163,42 @@
     "longitude": -86.81459,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-756",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-757",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-758",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-759",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-760",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-761",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-6",
+        "port": "port-762",
         "level": "dc_fast",
         "power_kw": 350.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-763",
         "level": "dc_fast",
         "power_kw": 350.0
       }
@@ -6212,7 +6212,7 @@
     "longitude": -86.785481,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-764",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6226,7 +6226,7 @@
     "longitude": -86.785497,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-765",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6240,7 +6240,7 @@
     "longitude": -86.785529,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-766",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6254,7 +6254,7 @@
     "longitude": -86.785451,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-767",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6268,7 +6268,7 @@
     "longitude": -86.785511,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-768",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6282,22 +6282,22 @@
     "longitude": -86.69084173246402,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-769",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-770",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-771",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-772",
         "level": "2",
         "power_kw": 6.7
       }
@@ -6311,7 +6311,7 @@
     "longitude": -86.785494,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-773",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6325,12 +6325,12 @@
     "longitude": -86.796025,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-774",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-775",
         "level": "2",
         "power_kw": 9.6
       }
@@ -6344,7 +6344,7 @@
     "longitude": -86.785494,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-776",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6358,7 +6358,7 @@
     "longitude": -86.785488,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-777",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6372,7 +6372,7 @@
     "longitude": -86.785489,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-778",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6386,7 +6386,7 @@
     "longitude": -86.785493,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-779",
         "level": "2",
         "power_kw": 3.8
       }
@@ -6400,7 +6400,7 @@
     "longitude": -86.785499,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-780",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6414,7 +6414,7 @@
     "longitude": -86.785473,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-781",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6428,7 +6428,7 @@
     "longitude": -86.785497,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-782",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6442,7 +6442,7 @@
     "longitude": -86.785645,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-783",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6456,7 +6456,7 @@
     "longitude": -86.785535,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-784",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6470,7 +6470,7 @@
     "longitude": -86.785474,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-785",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6484,7 +6484,7 @@
     "longitude": -86.785546,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-786",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6498,7 +6498,7 @@
     "longitude": -86.785444,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-787",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6512,7 +6512,7 @@
     "longitude": -86.785472,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-788",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6526,7 +6526,7 @@
     "longitude": -86.785514,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-789",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6540,7 +6540,7 @@
     "longitude": -86.785464,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-790",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6554,7 +6554,7 @@
     "longitude": -86.785454,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-791",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6568,12 +6568,12 @@
     "longitude": -86.788909,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-792",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-793",
         "level": "2",
         "power_kw": 6.5
       }
@@ -6587,12 +6587,12 @@
     "longitude": -86.788906,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-794",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-795",
         "level": "2",
         "power_kw": 6.5
       }
@@ -6606,12 +6606,12 @@
     "longitude": -86.788901,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-796",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-797",
         "level": "2",
         "power_kw": 6.5
       }
@@ -6625,12 +6625,12 @@
     "longitude": -86.788903,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-798",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-799",
         "level": "2",
         "power_kw": 6.5
       }
@@ -6644,12 +6644,12 @@
     "longitude": -86.788924,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-800",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-801",
         "level": "2",
         "power_kw": 6.5
       }
@@ -6663,12 +6663,12 @@
     "longitude": -86.8338488,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-802",
         "level": "2",
         "power_kw": 7.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-803",
         "level": "2",
         "power_kw": 7.2
       }
@@ -6682,22 +6682,22 @@
     "longitude": -86.667093,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-804",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-805",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-2",
+        "port": "port-806",
         "level": "2",
         "power_kw": 6.8
       },
       {
-        "port_id": "port-3",
+        "port": "port-807",
         "level": "2",
         "power_kw": 6.9
       }
@@ -6711,12 +6711,12 @@
     "longitude": -86.769569,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-808",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-809",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6730,7 +6730,7 @@
     "longitude": -86.76983,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-810",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6744,7 +6744,7 @@
     "longitude": -86.76982,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-811",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6758,7 +6758,7 @@
     "longitude": -86.769881,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-812",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6772,7 +6772,7 @@
     "longitude": -86.769364,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-813",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6786,7 +6786,7 @@
     "longitude": -86.768843,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-814",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6800,7 +6800,7 @@
     "longitude": -86.768848,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-815",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6814,22 +6814,22 @@
     "longitude": -86.75629,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-816",
         "level": "dc_fast",
         "power_kw": 240.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-817",
         "level": "dc_fast",
         "power_kw": 240.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-818",
         "level": "dc_fast",
         "power_kw": 240.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-819",
         "level": "dc_fast",
         "power_kw": 240.0
       }
@@ -6843,12 +6843,12 @@
     "longitude": -86.809912,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-820",
         "level": "2",
         "power_kw": 11.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-821",
         "level": "2",
         "power_kw": 11.0
       }
@@ -6862,12 +6862,12 @@
     "longitude": -86.5558136,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-822",
         "level": "2",
         "power_kw": 11.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-823",
         "level": "2",
         "power_kw": 11.0
       }
@@ -6881,7 +6881,7 @@
     "longitude": -86.756559,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-824",
         "level": "2",
         "power_kw": 9.6
       }
@@ -6895,12 +6895,12 @@
     "longitude": -86.76213,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-825",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-826",
         "level": "2",
         "power_kw": 6.5
       }
@@ -6914,52 +6914,52 @@
     "longitude": -86.820563,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-827",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-1",
+        "port": "port-828",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-2",
+        "port": "port-829",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-3",
+        "port": "port-830",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-4",
+        "port": "port-831",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-5",
+        "port": "port-832",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-6",
+        "port": "port-833",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-7",
+        "port": "port-834",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-8",
+        "port": "port-835",
         "level": "2",
         "power_kw": 8.3
       },
       {
-        "port_id": "port-9",
+        "port": "port-836",
         "level": "2",
         "power_kw": 8.3
       }
@@ -6973,7 +6973,7 @@
     "longitude": -86.768936,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-837",
         "level": "2",
         "power_kw": 7.7
       }
@@ -6987,7 +6987,7 @@
     "longitude": -86.768892,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-838",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7001,7 +7001,7 @@
     "longitude": -86.768786,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-839",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7015,7 +7015,7 @@
     "longitude": -86.768813,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-840",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7029,7 +7029,7 @@
     "longitude": -86.768809,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-841",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7043,7 +7043,7 @@
     "longitude": -86.768832,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-842",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7057,7 +7057,7 @@
     "longitude": -86.76885,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-843",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7071,7 +7071,7 @@
     "longitude": -86.768853,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-844",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7085,7 +7085,7 @@
     "longitude": -86.768879,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-845",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7099,7 +7099,7 @@
     "longitude": -86.768897,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-846",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7113,7 +7113,7 @@
     "longitude": -86.768898,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-847",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7127,7 +7127,7 @@
     "longitude": -86.768867,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-848",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7141,7 +7141,7 @@
     "longitude": -86.768896,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-849",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7155,7 +7155,7 @@
     "longitude": -86.768941,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-850",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7169,7 +7169,7 @@
     "longitude": -86.768901,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-851",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7183,7 +7183,7 @@
     "longitude": -86.768911,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-852",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7197,7 +7197,7 @@
     "longitude": -86.768684,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-853",
         "level": "2",
         "power_kw": 3.8
       }
@@ -7211,7 +7211,7 @@
     "longitude": -86.768897,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-854",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7225,7 +7225,7 @@
     "longitude": -86.76886,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-855",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7239,7 +7239,7 @@
     "longitude": -86.768928,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-856",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7253,7 +7253,7 @@
     "longitude": -86.768807,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-857",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7267,7 +7267,7 @@
     "longitude": -86.768807,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-858",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7281,62 +7281,62 @@
     "longitude": -86.77890410369214,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-859",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-860",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-861",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-862",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-4",
+        "port": "port-863",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-5",
+        "port": "port-864",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-6",
+        "port": "port-865",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-7",
+        "port": "port-866",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-8",
+        "port": "port-867",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-9",
+        "port": "port-868",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-10",
+        "port": "port-869",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-11",
+        "port": "port-870",
         "level": "2",
         "power_kw": 6.7
       }
@@ -7350,42 +7350,42 @@
     "longitude": -86.77434003366217,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-871",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-872",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-873",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-874",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-4",
+        "port": "port-875",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-5",
+        "port": "port-876",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-6",
+        "port": "port-877",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-7",
+        "port": "port-878",
         "level": "2",
         "power_kw": 6.7
       }
@@ -7399,22 +7399,22 @@
     "longitude": -86.71423,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-879",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-880",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-881",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-882",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7428,182 +7428,182 @@
     "longitude": -86.73529,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-883",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-884",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-885",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-886",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-4",
+        "port": "port-887",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-5",
+        "port": "port-888",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-6",
+        "port": "port-889",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-7",
+        "port": "port-890",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-8",
+        "port": "port-891",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-9",
+        "port": "port-892",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-10",
+        "port": "port-893",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-11",
+        "port": "port-894",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-12",
+        "port": "port-895",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-13",
+        "port": "port-896",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-14",
+        "port": "port-897",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-15",
+        "port": "port-898",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-16",
+        "port": "port-899",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-17",
+        "port": "port-900",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-18",
+        "port": "port-901",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-19",
+        "port": "port-902",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-20",
+        "port": "port-903",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-21",
+        "port": "port-904",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-22",
+        "port": "port-905",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-23",
+        "port": "port-906",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-24",
+        "port": "port-907",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-25",
+        "port": "port-908",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-26",
+        "port": "port-909",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-27",
+        "port": "port-910",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-28",
+        "port": "port-911",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-29",
+        "port": "port-912",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-30",
+        "port": "port-913",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-31",
+        "port": "port-914",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-32",
+        "port": "port-915",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-33",
+        "port": "port-916",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-34",
+        "port": "port-917",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-35",
+        "port": "port-918",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7617,12 +7617,12 @@
     "longitude": -86.75625,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-919",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-920",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7636,7 +7636,7 @@
     "longitude": -86.786118,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-921",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7650,7 +7650,7 @@
     "longitude": -86.786008,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-922",
         "level": "2",
         "power_kw": 3.8
       }
@@ -7664,7 +7664,7 @@
     "longitude": -86.786004,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-923",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7678,32 +7678,32 @@
     "longitude": -86.78152046113895,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-924",
         "level": "2",
         "power_kw": 5.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-925",
         "level": "2",
         "power_kw": 5.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-926",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-927",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-4",
+        "port": "port-928",
         "level": "2",
         "power_kw": 10.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-929",
         "level": "2",
         "power_kw": 10.0
       }
@@ -7717,22 +7717,22 @@
     "longitude": -86.802403,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-930",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-931",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-2",
+        "port": "port-932",
         "level": "2",
         "power_kw": 8.6
       },
       {
-        "port_id": "port-3",
+        "port": "port-933",
         "level": "2",
         "power_kw": 8.6
       }
@@ -7746,12 +7746,12 @@
     "longitude": -86.7904811,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-934",
         "level": "2",
         "power_kw": 9.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-935",
         "level": "2",
         "power_kw": 9.6
       }
@@ -7765,7 +7765,7 @@
     "longitude": -86.799949,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-936",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7779,7 +7779,7 @@
     "longitude": -86.79994,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-937",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7793,7 +7793,7 @@
     "longitude": -86.800138,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-938",
         "level": "2",
         "power_kw": 11.5
       }
@@ -7807,7 +7807,7 @@
     "longitude": -86.800122,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-939",
         "level": "2",
         "power_kw": 11.5
       }
@@ -7821,7 +7821,7 @@
     "longitude": -86.800115,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-940",
         "level": "2",
         "power_kw": 11.5
       }
@@ -7835,7 +7835,7 @@
     "longitude": -86.799936,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-941",
         "level": "2",
         "power_kw": 11.5
       }
@@ -7849,12 +7849,12 @@
     "longitude": -86.89731346299419,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-942",
         "level": "2",
         "power_kw": 14.3
       },
       {
-        "port_id": "port-1",
+        "port": "port-943",
         "level": "2",
         "power_kw": 14.5
       }
@@ -7868,12 +7868,12 @@
     "longitude": -86.89731346299419,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-944",
         "level": "2",
         "power_kw": 7.6
       },
       {
-        "port_id": "port-1",
+        "port": "port-945",
         "level": "2",
         "power_kw": 16.2
       }
@@ -7887,7 +7887,7 @@
     "longitude": -86.786027,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-946",
         "level": "2",
         "power_kw": 3.8
       }
@@ -7901,7 +7901,7 @@
     "longitude": -86.78592,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-947",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7915,7 +7915,7 @@
     "longitude": -86.785941,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-948",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7929,7 +7929,7 @@
     "longitude": -86.785974,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-949",
         "level": "2",
         "power_kw": 7.7
       }
@@ -7943,12 +7943,12 @@
     "longitude": -86.820136,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-950",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-951",
         "level": "2",
         "power_kw": 6.5
       }
@@ -7962,12 +7962,12 @@
     "longitude": -86.820114,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-952",
         "level": "2",
         "power_kw": 6.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-953",
         "level": "2",
         "power_kw": 6.5
       }
@@ -7981,22 +7981,22 @@
     "longitude": -86.83790801881096,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-954",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-955",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-956",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-957",
         "level": "2",
         "power_kw": 6.7
       }
@@ -8010,17 +8010,17 @@
     "longitude": -86.79744,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-958",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-959",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-960",
         "level": "2",
         "power_kw": 6.7
       }
@@ -8034,22 +8034,22 @@
     "longitude": -86.79554,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-961",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-962",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-963",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-964",
         "level": "2",
         "power_kw": 6.7
       }
@@ -8063,12 +8063,12 @@
     "longitude": -86.80416,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-965",
         "level": "2",
         "power_kw": 11.1
       },
       {
-        "port_id": "port-1",
+        "port": "port-966",
         "level": "2",
         "power_kw": 11.1
       }
@@ -8082,12 +8082,12 @@
     "longitude": -86.7951,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-967",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-968",
         "level": "2",
         "power_kw": 6.7
       }
@@ -8101,12 +8101,12 @@
     "longitude": -86.79555,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-969",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-970",
         "level": "2",
         "power_kw": 6.7
       }
@@ -8120,32 +8120,32 @@
     "longitude": -86.6778,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-971",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-972",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-973",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-974",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-4",
+        "port": "port-975",
         "level": "2",
         "power_kw": 6.7
       },
       {
-        "port_id": "port-5",
+        "port": "port-976",
         "level": "2",
         "power_kw": 6.7
       }
@@ -8159,7 +8159,7 @@
     "longitude": -86.685166,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-977",
         "level": "1",
         "power_kw": 1.4
       }
@@ -8173,7 +8173,7 @@
     "longitude": -86.7245832,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-978",
         "level": "2",
         "power_kw": 11.5
       }
@@ -8187,22 +8187,22 @@
     "longitude": -86.7905721187113,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-979",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-1",
+        "port": "port-980",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-2",
+        "port": "port-981",
         "level": "2",
         "power_kw": 7.7
       },
       {
-        "port_id": "port-3",
+        "port": "port-982",
         "level": "2",
         "power_kw": 7.7
       }
@@ -8216,12 +8216,12 @@
     "longitude": -86.643156,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-983",
         "level": "2",
         "power_kw": 19.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-984",
         "level": "2",
         "power_kw": 19.2
       }
@@ -8235,12 +8235,12 @@
     "longitude": -86.643149,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-985",
         "level": "2",
         "power_kw": 19.2
       },
       {
-        "port_id": "port-1",
+        "port": "port-986",
         "level": "2",
         "power_kw": 19.2
       }
@@ -8254,22 +8254,22 @@
     "longitude": -86.772799,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-987",
         "level": "2",
         "power_kw": 11.5
       },
       {
-        "port_id": "port-1",
+        "port": "port-988",
         "level": "2",
         "power_kw": 11.5
       },
       {
-        "port_id": "port-2",
+        "port": "port-989",
         "level": "2",
         "power_kw": 11.5
       },
       {
-        "port_id": "port-3",
+        "port": "port-990",
         "level": "2",
         "power_kw": 11.5
       }
@@ -8283,42 +8283,42 @@
     "longitude": -86.627148,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-991",
         "level": "dc_fast",
         "power_kw": 500.0
       },
       {
-        "port_id": "port-1",
+        "port": "port-992",
         "level": "dc_fast",
         "power_kw": 500.0
       },
       {
-        "port_id": "port-2",
+        "port": "port-993",
         "level": "dc_fast",
         "power_kw": 500.0
       },
       {
-        "port_id": "port-3",
+        "port": "port-994",
         "level": "dc_fast",
         "power_kw": 500.0
       },
       {
-        "port_id": "port-4",
+        "port": "port-995",
         "level": "dc_fast",
         "power_kw": 500.0
       },
       {
-        "port_id": "port-5",
+        "port": "port-996",
         "level": "dc_fast",
         "power_kw": 500.0
       },
       {
-        "port_id": "port-6",
+        "port": "port-997",
         "level": "dc_fast",
         "power_kw": 500.0
       },
       {
-        "port_id": "port-7",
+        "port": "port-998",
         "level": "dc_fast",
         "power_kw": 500.0
       }
@@ -8332,7 +8332,7 @@
     "longitude": -86.6958,
     "ports": [
       {
-        "port_id": "port-0",
+        "port": "port-999",
         "level": "2",
         "power_kw": 12.0
       }

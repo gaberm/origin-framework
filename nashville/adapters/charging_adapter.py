@@ -1,86 +1,80 @@
+from typing import Mapping
 from adapter import Adapter
-from nashville.entities.port import Port
 from nashville.inputs.charging import ArrivedVehicles, DepartedVehicles
-from nashville.models.charging_model import ChargingModel
+from nashville.models.charging.charging_model import ChargingModel
+from nashville.outputs.charging import Station, PortStatus, ChargingEvent
 
 
 class ChargingAdapter(Adapter):
-    InputType = list[ArrivedVehicles, DepartedVehicles]
-    OutputType = list[Port]
+    InputType = [ArrivedVehicles, DepartedVehicles]
+    OutputType = [PortStatus, ChargingEvent]
+    ConstantType = Station
 
-    @classmethod
-    def from_config(cls, model_cfg) -> "ChargingAdapter":
-        return cls(
-            name=model_cfg.name,
-            timestep_length=model_cfg.timestep_length,
-            charging_rate=model_cfg.charging_rate,
-        )
-
-    def __init__(self, name, timestep_length, charging_rate):
-        super().__init__(
-            name=name,
-            timestep_length=timestep_length,
-        )
-        self._charging_rate = charging_rate
-        self._charging_model = None
-
-        self._charged_vehicles = None
+    def __init__(self, name, timestep_length):
+        self.name = name
+        self.timestep_length = timestep_length
+        self._charging_model = ChargingModel()
 
     def initialize(self):
-        self._charging_model = ChargingModel(charging_rate=self._charging_rate)
+        self._charging_model.load_data()
 
-    def read_outputs(self) -> list[Port]:
+    def read_constants(self) -> list[Station]:
         return [
-            Port(
-                port_id=vehicle_id,
-                station_id="default_station",  # Replace with actual station ID if available
-                power_usage=self._charging_rate,
-                status="charging",
-                time=self.model_time,
+            Station(
+                station_id=station_id,
+                coords=(station["longitude"], station["latitude"]),
             )
-            for vehicle_id in self._charging_model.get_charging_vehicles()
+            for station_id, station in self._charging_model.stations.items()
         ]
 
-    def _get_charging_vehicles(self) -> tuple[ChargingVehicleRecord, ...]:
-        outputs = self._charging_model.get_all_soc()
-        return tuple(
-            ChargingVehicleRecord(
-                vehicle_id=vehicle_id,
-                soc=soc,
-                timestamp=self.model_time,
-            )
-            for vehicle_id, soc in outputs.items()
-        )
+    def read_outputs(self) -> list[type[PortStatus] | type[ChargingEvent]]:
+        outputs = []
+        outputs += self._get_port_status()
+        outputs += self._get_charging_event()
+        return outputs
 
-    def write_inputs(self, inputs: ChargingInputs):
-        for vehicle in inputs.vehicles_to_add:
-            self._charging_model.add_vehicle(
-                vehicle.vehicle_id, initial_soc=vehicle.initial_soc
-            )
-        self._save_charged_vehicles(inputs)
-        for vehicle in inputs.vehicles_to_remove:
-            self._charging_model.remove_vehicle(vehicle.vehicle_id)
+    def write_inputs(self, inputs: Mapping[str, list[dict]]):
+        for row in inputs.get(ArrivedVehicles.key, []):
+            self._charging_model.add_vehicle(row["veh_id"], initial_soc=row["soc"])
+        for row in inputs.get(DepartedVehicles.key, []):
+            self._charging_model.remove_vehicle(row["veh_id"])
 
-    def _save_charged_vehicles(self, inputs: ChargingInputs):
-        self._charged_vehicles = tuple(
-            ChargedVehicleRecord(
-                vehicle_id=vehicle.vehicle_id,
-                soc=self._charging_model.get_soc(vehicle.vehicle_id),
-                ended_at=self.model_time,
-            )
-            for vehicle in inputs.vehicles_to_remove
-        )
+    def _get_port_status(self) -> list[PortStatus]:
+        outputs = []
+        for event in self._charging_model.events:
+            if event["time"] == self.model_time:
+                outputs.append(
+                    PortStatus(
+                        port_id=event["port_id"],
+                        station_id=self._charging_model.stations[event["port_id"]][
+                            "station_id"
+                        ],
+                        load_kw=event["load_kw"],
+                        timestamp=event["time"],
+                    )
+                )
+        return outputs
 
-    def advance(self, dt: float):
-        if dt % self.timestep_length != 0:
-            raise ValueError(
-                f"SUMO adapter cannot advance by dt={dt}. It must be a multiple of the timestep length {self.timestep_length}."
-            )
+    def _get_charging_event(self) -> list[ChargingEvent]:
+        outputs = []
+        for event in self._charging_model.completed_sessions:
+            if event["time"] == (self.model_time - self._TIMESTEP_MIN):
+                outputs.append(
+                    ChargingEvent(
+                        veh_id=event["veh_id"],
+                        station_id=self._charging_model.stations[event["port_id"]][
+                            "station_id"
+                        ],
+                        port_id=event["port_id"],
+                        final_soc=event["soc"],
+                        timestamp=event["time"],
+                    )
+                )
+        return outputs
 
-        steps = int(dt / self.timestep_length)
-        for _ in range(steps):
-            self._charging_model.charge()
-            self._model_time += self.timestep_length
+    def advance(self):
+        self._charging_model.advance_time()
+        self._model_time += self.timestep_length
 
     def terminate(self):
         self._charging_model = None

@@ -6,12 +6,12 @@ from dataclasses import dataclass
 class EV(Record, Geometry, Timestamp):
     table_name = "ev"
     primary_key = ("veh_id", "time")
-    indexed = ("h3_ids", "state", "time")
+    indexed = ("h3_ids", "state")
 
     veh_id: str
     soc: float
     state: str
-    geometry: SHAPE_TYPE = "POINT"
+    shape: SHAPE_TYPE = "POINT"
 
 
 @dataclass(kw_only=True)

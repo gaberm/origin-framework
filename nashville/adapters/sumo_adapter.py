@@ -7,7 +7,7 @@ import traci
 
 class SumoAdapter(Adapter):
     InputType = VehicleSocInput
-    OutputType = EV
+    OutputType = [EV, VehicleBattery]
 
     def __init__(self, name, timestep_length, sumo_config):
         super().__init__(
@@ -58,7 +58,7 @@ class SumoAdapter(Adapter):
                         soc=soc,
                         state="arrived",
                         time=self.model_time,
-                        coords=(lon, lat),
+                        coords=[lon, lat],
                     )
                 )
         return evs
@@ -75,7 +75,7 @@ class SumoAdapter(Adapter):
                         soc=soc,
                         state="departed",
                         time=self.model_time,
-                        coords=(lon, lat),
+                        coords=[lon, lat],
                     )
                 )
         return evs
@@ -83,12 +83,18 @@ class SumoAdapter(Adapter):
     def _get_battery(self) -> list[VehicleBattery]:
         capacities = []
         for veh_id in self._traci.simulation.getDepartedIDList():
-            capacity = self._traci.vehicle.getParameter(
-                veh_id, "device.battery.capacity"
-            )
-            max_charge_rate = self._traci.vehicle.getParameter(
-                veh_id, "device.battery.maximumChargeRate"
-            )
+            try:
+                capacity = self._traci.vehicle.getParameter(
+                    veh_id, "device.battery.capacity"
+                )
+            except traci.exceptions.TraCIException:
+                capacity = 75_000  # 75 kWh in Wh — typical mid-range EV
+            try:
+                max_charge_rate = self._traci.vehicle.getParameter(
+                    veh_id, "device.battery.maximumChargeRate"
+                )
+            except traci.exceptions.TraCIException:
+                max_charge_rate = 11  # kW — standard Level 2 onboard charger
             capacities.append(
                 VehicleBattery(
                     veh_id=veh_id,

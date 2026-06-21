@@ -6,10 +6,10 @@ from base import Geometry, Record, SHAPE_TYPE, Timestamp
 class Station(Record, Geometry):
     table_name = "stations"
     primary_key = ("station_id",)
-    indexed = ("h3", "status", "time")
+    indexed = ("h3_ids",)
 
     station_id: str
-    geometry: SHAPE_TYPE = "POINT"
+    shape: SHAPE_TYPE = "POINT"
 
 
 @dataclass(kw_only=True)

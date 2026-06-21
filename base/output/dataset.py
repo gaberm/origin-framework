@@ -1,7 +1,7 @@
 import pandas as pd
 from dataclasses import dataclass, fields as dataclass_fields
 from typing import Any, get_type_hints
-from base import Record
+from base.output.record import Record
 
 
 @dataclass

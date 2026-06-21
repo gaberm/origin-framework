@@ -1,21 +1,20 @@
+from dataclasses import dataclass
 from typing import Literal
 
 SHAPE_TYPE = Literal["POINT", "LINESTRING", "POLYGON"]
 
 
+@dataclass(kw_only=True)
 class Geometry:
-    coords: tuple[float, float] | list[tuple[float, float]]
-    epsg_code: int = 4326
+    coords: list
     shape: SHAPE_TYPE
+    epsg_code: int = 4326
     h3_ids: str | list[str] | None = None
-    coords_4326: tuple[float, float] | list[tuple[float, float]] | None = None
+    coords_4326: list | None = None
 
     def _validate_shape(self):
         if self.shape == "POINT":
-            assert isinstance(
-                self.coords, tuple
-            ), "POINT geometry must have a single coordinate tuple."
+            assert len(self.coords) == 2, "POINT shape must have a coordinate pair."
         else:
-            assert isinstance(
-                self.coords, list
-            ), f"{self.shape} geometry must have a list of coordinate tuples."
+            assert all(isinstance(c, (list, tuple)) for c in self.coords), \
+                f"{self.shape} shape must have a list of coordinate pairs."

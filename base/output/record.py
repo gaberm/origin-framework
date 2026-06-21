@@ -6,6 +6,8 @@ class Record:
     primary_key: ClassVar[tuple[str, ...]]
     indexed: ClassVar[tuple[str, ...]] = ()
     on_conflict: ClassVar[Literal["ignore", "update"]] = "ignore"
+    diagnostic: ClassVar[bool] = False
+    time_field: ClassVar[str] = "time"
 
     def __post_init__(self):
         for name in dir(self):

@@ -42,7 +42,7 @@ class InputLoader:
     ) -> tuple[str, list]:
         fields = list(input_spec.row_fields)
         if input_spec.is_join:
-            return self._get_join_query(input_spec, fields, time_range)
+            return self._get_join_query(input_spec, time_range)
         return self._get_simple_query(input_spec, fields, time_range)
 
     def _get_simple_query(
@@ -56,7 +56,7 @@ class InputLoader:
         return f"SELECT {', '.join(fields)} FROM {table} WHERE {where}", values
 
     def _get_join_query(
-        self, input_spec: type[Input], fields: list[str], time_range: TimeRange
+        self, input_spec: type[Input], time_range: TimeRange
     ) -> tuple[str, list]:
         join: Join = input_spec.on
         la, ra = join.left_entity.table_name, join.right_entity.table_name
@@ -66,8 +66,13 @@ class InputLoader:
             input_spec.where,
             aliased=True,
         )
+        qualified = [
+            f"{entity.table_name}.{field}"
+            for entity, names in input_spec.select.segments
+            for field in names
+        ]
         query = (
-            f"SELECT {', '.join(fields)} "
+            f"SELECT {', '.join(qualified)} "
             f"FROM {self.run_id}.{la} {la} "
             f"JOIN {self.run_id}.{ra} {ra} ON {la}.{join.left_field} = {ra}.{join.right_field} "
             f"WHERE {where}"

@@ -2,7 +2,7 @@ from base.output.dataset import Dataset
 from base.output.geometry import Geometry, SHAPE_TYPE
 from base.output.record import Record
 from base.output.timestamp import Timestamp
-from input.input import (
+from base.input.input import (
     Comparison,
     Input,
     Fields,
@@ -15,7 +15,7 @@ from input.input import (
     LessEqual,
     NotEqual,
 )
-from spec.model_spec import ModelSpec
+from base.spec.model_spec import ModelSpec
 
 __all__ = [
     "Dataset",

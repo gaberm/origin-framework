@@ -10,7 +10,7 @@ class ArrivedVehicles(Input):
     ]
     on = Join((EV, "veh_id"), (VehicleBattery, "veh_id"))
     select = Fields(
-        (EV, "veh_id", "soc"), (VehicleBattery, "capacity_kwh", "charging_power")
+        (EV, "veh_id", "soc"), (VehicleBattery, "capacity", "charging_power")
     )
 
 

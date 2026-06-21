@@ -1,6 +1,6 @@
 import dataclasses
 import time
-from base import Observation, Input, ModelSpec
+from base import Record, Input, ModelSpec
 from state_memory import StateMemory
 from supervisory.comm.rabbitmq_client import RabbitMQClient
 from supervisory.space.cell_assigner import assign_cells
@@ -25,7 +25,7 @@ class SupervisoryModel:
         self.routing_keys: dict[str, str] = {
             spec.name: spec.routing_key for spec in model_specs
         }
-        self.output_types: dict[str, type[Observation]] = {
+        self.output_types: dict[str, type[Record]] = {
             spec.name: spec.adapter.OutputType for spec in model_specs
         }
         self.constant_types: dict = {
@@ -131,6 +131,7 @@ class SupervisoryModel:
             if not payload:
                 continue
             records = [constant_cls(**r) for r in payload]
+            records = [convert_coords(r) for r in records]
             records = assign_cells(records, resolution=9)
             rows = [dataclasses.asdict(r) for r in records]
             self.state_memory.insert_outputs(constant_cls, rows)
@@ -162,11 +163,7 @@ class SupervisoryModel:
             def on_ack(response, n=name):
                 responses[n] = response
 
-            self.rabbitmq_client.advance(
-                self.routing_keys[name],
-                self.model_timestep_lengths[name],
-                on_ack=on_ack,
-            )
+            self.rabbitmq_client.advance(self.routing_keys[name], on_ack=on_ack)
         self._wait_for_all(responses, self.lagging_adapter_names, "advance_components")
         for name in self.lagging_adapter_names:
             self.adapter_model_times[name] += self.model_timestep_lengths[name]
@@ -183,14 +180,20 @@ class SupervisoryModel:
         for name in self.lagging_adapter_names:
             output_cls = self.output_types[name]
             payload = responses[name].payload
-            if isinstance(payload, list):
+            if isinstance(output_cls, list):
+                type_map = {cls.__name__: cls for cls in output_cls}
+                records = [type_map[r["_type"]](**{k: v for k, v in r.items() if k != "_type"}) for r in payload]
+            elif isinstance(payload, list):
                 records = [output_cls(**r) for r in payload]
             else:
                 records = [output_cls.from_dict(payload)]
+            records = [convert_coords(r) for r in records]
             records = assign_cells(records, resolution=9)
-            records = convert_coords(records)
-            rows = [dataclasses.asdict(r) for r in records]
-            self.state_memory.insert_outputs(output_cls, rows)
+            by_type: dict = {}
+            for r in records:
+                by_type.setdefault(type(r), []).append(dataclasses.asdict(r))
+            for cls, rows in by_type.items():
+                self.state_memory.insert_outputs(cls, rows)
 
     def find_lagging_adapters(self):
         next_step_time = min(

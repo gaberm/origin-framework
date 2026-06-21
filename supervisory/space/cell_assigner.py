@@ -24,14 +24,14 @@ def assign_external_dataset(dataset: Dataset, resolution: int) -> Dataset:
     return dataset
 
 
-def assign_model_output(outputs: list[Geometry], resolution: int) -> list[Geometry]:
+def assign_model_output(outputs: list, resolution: int) -> list:
     results = []
     for output in outputs:
-        shape = output.shape
-        coords = output.coords_4326
-        output = dataclasses.replace(
-            output, h3_ids=_cells_for_shape(shape, coords, resolution)
-        )
+        if isinstance(output, Geometry):
+            output = dataclasses.replace(
+                output,
+                h3_ids=_cells_for_shape(output.shape, output.coords_4326, resolution),
+            )
         results.append(output)
     return results
 
@@ -42,21 +42,17 @@ def _cells_for_shape(
     resolution: int,
 ) -> list[str]:
     if shape == "POINT":
-        return [h3.geo_to_h3(coords[1], coords[0], resolution)]
+        return [h3.latlng_to_cell(coords[1], coords[0], resolution)]
 
     if shape == "LINESTRING":
         ids = []
         for i in range(len(coords) - 1):
-            start = h3.geo_to_h3(coords[i][1], coords[i][0], resolution)
-            end = h3.geo_to_h3(coords[i + 1][1], coords[i + 1][0], resolution)
-            ids.extend(h3.h3_line(start, end))
+            start = h3.latlng_to_cell(coords[i][1], coords[i][0], resolution)
+            end = h3.latlng_to_cell(coords[i + 1][1], coords[i + 1][0], resolution)
+            ids.extend(h3.grid_path_cells(start, end))
         return list(dict.fromkeys(ids))
 
     if shape == "POLYGON":
-        geo = {
-            "type": "Polygon",
-            "coordinates": [coords],
-        }
-        return list(h3.polyfill_geojson(geo, resolution))
+        return list(h3.h3shape_to_cells(h3.LatLngPoly(coords), resolution))
 
     raise ValueError(f"Unsupported shape type: {shape}")

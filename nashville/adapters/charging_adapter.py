@@ -11,8 +11,7 @@ class ChargingAdapter(Adapter):
     ConstantType = Station
 
     def __init__(self, name, timestep_length):
-        self.name = name
-        self.timestep_length = timestep_length
+        super().__init__(name=name, timestep_length=timestep_length)
         self._charging_model = ChargingModel()
 
     def initialize(self):
@@ -22,7 +21,7 @@ class ChargingAdapter(Adapter):
         return [
             Station(
                 station_id=station_id,
-                coords=(station["longitude"], station["latitude"]),
+                coords=[station["longitude"], station["latitude"]],
             )
             for station_id, station in self._charging_model.stations.items()
         ]
@@ -49,8 +48,8 @@ class ChargingAdapter(Adapter):
                         station_id=self._charging_model.stations[event["port_id"]][
                             "station_id"
                         ],
-                        load_kw=event["load_kw"],
-                        timestamp=event["time"],
+                        load=event["load_kw"],
+                        time=event["time"],
                     )
                 )
         return outputs
@@ -67,13 +66,13 @@ class ChargingAdapter(Adapter):
                         ],
                         port_id=event["port_id"],
                         final_soc=event["soc"],
-                        timestamp=event["time"],
+                        time=event["time"],
                     )
                 )
         return outputs
 
     def advance(self):
-        self._charging_model.advance_time()
+        self._charging_model.advance_time(self._timestep_length)
         self._model_time += self.timestep_length
 
     def terminate(self):

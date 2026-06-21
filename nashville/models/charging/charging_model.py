@@ -1,5 +1,8 @@
 import json
 import numpy as np
+from pathlib import Path
+
+_DATA_DIR = Path(__file__).parent / "data"
 
 
 class ChargingModel:
@@ -16,7 +19,7 @@ class ChargingModel:
         self.events = []
 
     def load_data(self):
-        with open("data/ev_stations.json", "r") as f:
+        with open(_DATA_DIR / "ev_stations.json", "r") as f:
             data = json.load(f)
         for station in data:
             self.stations[station["id"]] = {

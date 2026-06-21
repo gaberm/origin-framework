@@ -46,7 +46,7 @@ class Adapter(ABC):
         pass
 
     @abstractmethod
-    def advance(self, dt: float):
+    def advance(self):
         """Advance the model by dt global time units."""
         pass
 

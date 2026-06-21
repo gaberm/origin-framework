@@ -69,8 +69,8 @@ class RabbitMQClient:
     def read_outputs(self, worker: str, on_ack):
         self._send(worker, Message(Operation.READ_OUTPUTS), on_ack)
 
-    def advance(self, worker: str, time_step: float, on_ack):
-        self._send(worker, Message(Operation.ADVANCE, payload=time_step), on_ack)
+    def advance(self, worker: str, on_ack):
+        self._send(worker, Message(Operation.ADVANCE), on_ack)
 
     def terminate(self, worker: str, on_ack):
         self._send(worker, Message(Operation.TERMINATE), on_ack)

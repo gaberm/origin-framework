@@ -1,5 +1,9 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
-from adapter.adapter import Adapter
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from adapter.adapter import Adapter
 
 
 @dataclass(frozen=True)

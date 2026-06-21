@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, fields as dataclass_fields
 from typing import Any, ClassVar, Sequence
-from base import Record
+from base.output.record import Record
 
 
 @dataclass(frozen=True)

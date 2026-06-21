@@ -1,6 +1,10 @@
+from dataclasses import dataclass
+
+
+@dataclass(kw_only=True)
 class Timestamp:
-    timestamp: float
+    time: float
 
     def _validate_timestamp(self):
-        if self.timestamp < 0:
+        if self.time < 0:
             raise ValueError("Timestamp must be non-negative.")

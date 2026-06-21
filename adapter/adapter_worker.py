@@ -51,6 +51,8 @@ class AdapterWorker:
         self.channel.basic_consume(
             queue=queue_name, on_message_callback=self._on_message
         )
+        self.routing_key = routing_key
+        self.name = adapter.name
         self.adapter = adapter
 
     def register(self, timeout: float = 30.0):
@@ -127,13 +129,18 @@ class AdapterWorker:
     def read_outputs(self, payload):
         outputs = self.adapter.read_outputs()
         if isinstance(outputs, list):
-            serialized = [dataclasses.asdict(o) for o in outputs]
+            multi_type = isinstance(self.adapter.OutputType, list)
+            serialized = [
+                {"_type": type(o).__name__, **dataclasses.asdict(o)} if multi_type
+                else dataclasses.asdict(o)
+                for o in outputs
+            ]
         else:
             serialized = outputs.to_dict()
         return Response(success=True, payload=serialized)
 
     def advance(self, payload):
-        self.adapter.advance(payload)
+        self.adapter.advance()
         return Response(success=True)
 
     def terminate(self, payload):

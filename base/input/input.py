@@ -2,105 +2,142 @@ from __future__ import annotations
 from dataclasses import dataclass, fields as dataclass_fields
 from typing import Any, ClassVar, Sequence
 from base.output.record import Record
+from base.input.reconstruction import Windowed, Hold
 
 
 @dataclass(frozen=True)
-class Comparison:
-    op: str
+class Condition:
+    operator: str
     value: Any
 
 
-def Equal(value: Any) -> Comparison:
-    return Comparison("=", value)
+def Equal(value: Any) -> Condition:
+    return Condition("=", value)
 
 
-def NotEqual(value: Any) -> Comparison:
-    return Comparison("!=", value)
+def NotEqual(value: Any) -> Condition:
+    return Condition("!=", value)
 
 
-def Less(value: Any) -> Comparison:
-    return Comparison("<", value)
+def Less(value: Any) -> Condition:
+    return Condition("<", value)
 
 
-def LessEqual(value: Any) -> Comparison:
-    return Comparison("<=", value)
+def LessEqual(value: Any) -> Condition:
+    return Condition("<=", value)
 
 
-def Greater(value: Any) -> Comparison:
-    return Comparison(">", value)
+def Greater(value: Any) -> Condition:
+    return Condition(">", value)
 
 
-def GreaterEqual(value: Any) -> Comparison:
-    return Comparison(">=", value)
+def GreaterEqual(value: Any) -> Condition:
+    return Condition(">=", value)
 
 
 class Filter:
-    __slots__ = ("from_", "field", "cmp")
+    __slots__ = ("from_", "field", "condition")
 
     def __init__(
         self,
-        from_or_field: type | str,
-        field_or_cmp: str | Comparison,
-        cmp: Comparison | None = None,
+        from_or_field: type[Record] | str,
+        field_or_condition: str | Condition,
+        condition: Condition | None = None,
     ):
         if isinstance(from_or_field, type):
-            self.from_, self.field, self.cmp = from_or_field, field_or_cmp, cmp
+            self.from_, self.field, self.condition = (
+                from_or_field,
+                field_or_condition,
+                condition,
+            )
         else:
-            self.from_, self.field, self.cmp = None, from_or_field, field_or_cmp
+            self.from_, self.field, self.condition = (
+                None,
+                from_or_field,
+                field_or_condition,
+            )
+        self._validate_condition()
+
+    def _validate_condition(self):
+        if not isinstance(self.condition, Condition):
+            raise TypeError(
+                f"{self.__class__.__name__}: condition must be a Condition; got {type(self.condition).__name__!r}"
+            )
 
 
 class Join:
-    __slots__ = ("left_entity", "left_field", "right_entity", "right_field")
+    __slots__ = ("left_record", "left_field", "right_record", "right_field")
 
-    def __init__(self, left: tuple[type, str], right: tuple[type, str]):
-        self.left_entity, self.left_field = left
-        self.right_entity, self.right_field = right
+    def __init__(self, left: tuple[type[Record], str], right: tuple[type[Record], str]):
+        self.left_record, self.left_field = left
+        self.right_record, self.right_field = right
+        self._validate()
+
+    def _validate(self):
+        context = f"Join({self.left_record.__name__} → {self.right_record.__name__})"
+        if self.left_record is self.right_record:
+            raise TypeError(f"{context}: left and right records must be different")
+        for record, field in (
+            (self.left_record, self.left_field),
+            (self.right_record, self.right_field),
+        ):
+            valid_fields = {f.name for f in dataclass_fields(record)}
+            if field not in valid_fields:
+                raise AttributeError(
+                    f"{context}: {record.__name__} has no field {field!r}. Valid: {sorted(valid_fields)}"
+                )
 
 
 class Fields:
-    """Declarative row projection: the columns to select from one or more entities.
-
-    Field names are derived from (and validated against) the source entity,
-    so the projection cannot drift from the entity's actual schema.
-
-        select = Fields("veh_id", "soc")                                        # entity inferred
-        select = Fields((EV, "veh_id", "soc"))                                  # explicit single entity
-        select = Fields((EV, "veh_id", "soc"), (VehicleBattery, "capacity_kwh"))  # join projection
-    """
-
     __slots__ = ("segments",)
 
     def __init__(self, *args):
         if not args:
             raise TypeError("Fields(...) requires at least one field name")
-        segments: list[tuple[type | None, tuple[str, ...]]] = []
-        if isinstance(args[0], tuple) and args[0] and isinstance(args[0][0], type):
-            for arg in args:
-                if (
-                    not isinstance(arg, tuple)
-                    or not arg
-                    or not isinstance(arg[0], type)
-                ):
-                    raise TypeError(
-                        f"Fields: expected (Entity, field, ...) tuple, got {arg!r}"
-                    )
-                entity, *names = arg
-                if not names:
-                    raise TypeError(
-                        f"Fields: no field names given for {entity.__name__}"
-                    )
-                segments.append((entity, tuple(names)))
+        if self._is_explicit(args):
+            self.segments = [self._parse_segment(arg) for arg in args]
         else:
-            raw = (
+            field_names = (
                 args[0]
                 if len(args) == 1 and isinstance(args[0], (list, tuple))
                 else args
             )
-            names = tuple(raw)
-            if not names:
+            if not field_names:
                 raise TypeError("Fields(...) requires at least one field name")
-            segments.append((None, names))
-        self.segments = segments
+            self._validate_fields(field_names)
+            self.segments = [(None, tuple(field_names))]
+
+    @staticmethod
+    def _is_explicit(args) -> bool:
+        return (
+            isinstance(args[0], tuple)
+            and bool(args[0])
+            and isinstance(args[0][0], type)
+        )
+
+    def _parse_segment(self, arg) -> tuple:
+        if not (isinstance(arg, tuple) and arg and isinstance(arg[0], type)):
+            raise TypeError(f"Fields: expected (Entity, field, ...) tuple, got {arg!r}")
+        entity, *field_names = arg
+        if not field_names:
+            raise TypeError(f"Fields: no field names given for {entity.__name__}")
+        valid_fields = {
+            dataclass_field.name for dataclass_field in dataclass_fields(entity)
+        }
+        self._validate_fields(field_names, valid_fields)
+        return (entity, tuple(field_names))
+
+    @staticmethod
+    def _validate_fields(field_names, valid_fields: set[str] = None) -> None:
+        for field_name in field_names:
+            if not isinstance(field_name, str):
+                raise TypeError(
+                    f"Fields: expected string field name, got {field_name!r}"
+                )
+            if valid_fields is not None and field_name not in valid_fields:
+                raise AttributeError(
+                    f"Fields: no field {field_name!r}. Valid: {sorted(valid_fields)}"
+                )
 
     def __repr__(self) -> str:
         parts = []
@@ -114,132 +151,59 @@ class Fields:
 class Input:
     from_: ClassVar[type[Record] | list[type[Record]]]
     where: ClassVar[list[Filter]] = []
-    on: ClassVar[Join] = None
+    on: ClassVar[Join | list[Join]] = []
     select: ClassVar[type | Fields]
-    key: ClassVar[str]
+    name: ClassVar[str] = None
+    read_policy: ClassVar = Windowed()
 
-    entities: ClassVar[list[type]]
-    is_join: ClassVar[bool]
-    row_fields: ClassVar[tuple[str, ...]]
+    def __init_subclass__(cls):
+        cls._resolve_name()
+        cls._validate_from()
+        cls._validate_where()
+        cls._validate_on()
+        cls._validate_policy()
 
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        if "from_" not in {k for c in cls.__mro__ for k in vars(c)}:
-            return
-        cls.key = cls.__dict__.get("key", cls.__name__)
-        _resolve_entities(cls)
-        valid = {e: _field_names(e) for e in cls.entities}
-        _resolve_filters(cls, valid)
-        _resolve_row(cls, valid)
+    def _resolve_name(cls):
+        if cls.name is None:
+            cls.name = cls.__name__
 
+    def _validate_from(cls):
+        if cls.from_ is None:
+            raise TypeError(f"{cls.__name__}: from_ is required")
+        records = _as_list(cls.from_)
+        for record in records:
+            if not (isinstance(record, type) and issubclass(record, Record)):
+                raise TypeError(
+                    f"{cls.__name__}: from_ must be a Record subclass; got {type(record).__name__!r}"
+                )
 
-def _resolve_entities(cls) -> None:
-    primary = list(cls.from_) if isinstance(cls.from_, (list, tuple)) else [cls.from_]
-    on = getattr(cls, "on", None)
-    if isinstance(on, Join):
-        seen = set(primary)
-        for e in (on.left_entity, on.right_entity):
-            if e not in seen:
-                primary.append(e)
-                seen.add(e)
-    cls.entities = primary
-    cls.is_join = len(cls.entities) > 1
+    def _validate_on(cls):
+        joins = _as_list(cls.on)
+        for join in joins:
+            if not isinstance(join, Join):
+                raise TypeError(
+                    f"{cls.__name__}.on: expected Join, got {type(join).__name__!r}"
+                )
 
+    def _validate_where(cls):
+        for filter_ in _as_list(cls.where):
+            if not isinstance(filter_, Filter):
+                raise TypeError(
+                    f"{cls.__name__}.where: expected Filter, got {type(filter_).__name__!r}"
+                )
+            record = filter_.from_ if filter_.from_ is not None else cls.from_
+            valid_fields = {field.name for field in dataclass_fields(record)}
+            if filter_.field not in valid_fields:
+                raise AttributeError(
+                    f"{cls.__name__}.where: {record.__name__} has no field {filter_.field!r}. Valid: {sorted(valid_fields)}"
+                )
 
-def _resolve_filters(cls, valid: dict) -> None:
-    cls.where = [_make_filter(cls, f, valid) for f in getattr(cls, "where", [])]
-    if cls.on is not None:
-        cls.on = _make_join(cls, cls.on, valid)
-    elif cls.is_join:
-        raise TypeError(
-            f"{cls.__name__}: {len(cls.entities)} entities require an `on` join condition"
-        )
-
-
-def _resolve_row(cls, valid: dict) -> None:
-    row = getattr(cls, "select", None)
-    if row is None:
-        raise TypeError(
-            f"{cls.__name__}: missing `select` (a Fields(...) selection or a TypedDict)"
-        )
-    if isinstance(row, Fields):
-        owner = f"{cls.__name__}.select"
-        all_names: list[str] = []
-        for entity, names in row.segments:
-            if entity is None:
-                if len(cls.entities) != 1:
-                    raise TypeError(
-                        f"{owner}: Fields without an entity requires exactly one entity on the Input; "
-                        f"got {[e.__name__ for e in cls.entities]}"
-                    )
-                entity = cls.entities[0]
-            for name in names:
-                _check_field(owner, entity, name, valid)
-            all_names.extend(names)
-        cls.row_fields = tuple(all_names)
-    else:
-        cls.row_fields = tuple(getattr(row, "__annotations__", {}).keys())
-        if not cls.row_fields:
-            raise TypeError(f"{cls.__name__}: `row` {row!r} declares no fields")
-
-
-def _field_names(entity: type) -> set[str]:
-    try:
-        return {f.name for f in dataclass_fields(entity)}
-    except TypeError:
-        raise TypeError(
-            f"{getattr(entity, '__name__', entity)!r} is not a dataclass entity"
-        )
-
-
-def _check_field(owner: str, entity: type, field: str, valid: dict) -> None:
-    if entity not in valid:
-        raise TypeError(
-            f"{owner}: references {entity.__name__}, "
-            f"not in entity={[e.__name__ for e in valid]}"
-        )
-    if field not in valid[entity]:
-        raise AttributeError(
-            f"{owner}: {entity.__name__} has no field {field!r}. "
-            f"Valid fields: {sorted(valid[entity])}"
-        )
-
-
-def _make_filter(cls, spec, valid) -> Filter:
-    if isinstance(spec, Filter):
-        from_, field, cmp = spec.from_, spec.field, spec.cmp
-    else:
-        from_, field, cmp = _unpack(
-            cls, spec, 3, "each filter must be (entity, field, Cmp)"
-        )
-    if from_ is None:
-        if len(cls.entities) != 1:
+    def _validate_policy(cls):
+        if not isinstance(cls.read_policy, (Windowed, Hold)):
             raise TypeError(
-                f"{cls.__name__}: Filter without from_ requires exactly one entity; "
-                f"got {[e.__name__ for e in cls.entities]}"
+                f"{cls.__name__}: read_policy must be Windowed or Hold; got {type(cls.read_policy).__name__!r}"
             )
-        from_ = cls.entities[0]
-    if not isinstance(cmp, Comparison):
-        raise TypeError(
-            f"{cls.__name__}: filter on {from_.__name__}.{field} needs a comparison "
-            f"like Equal(...)/Less(...); got {cmp!r}"
-        )
-    _check_field(cls.__name__, from_, field, valid)
-    return Filter(from_, field, cmp)
 
 
-def _make_join(cls, spec, valid) -> Join:
-    le, lf, re_, rf = (
-        (spec.left_entity, spec.left_field, spec.right_entity, spec.right_field)
-        if isinstance(spec, Join)
-        else _unpack(cls, spec, 4, "`on` must be (LeftEntity, 'lf', RightEntity, 'rf')")
-    )
-    _check_field(f"{cls.__name__}.on", le, lf, valid)
-    _check_field(f"{cls.__name__}.on", re_, rf, valid)
-    return Join((le, lf), (re_, rf))
-
-
-def _unpack(cls, spec, n, msg):
-    if not isinstance(spec, (list, tuple)) or len(spec) != n:
-        raise TypeError(f"{cls.__name__}: {msg}; got {spec!r}")
-    return tuple(spec)
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else [value]

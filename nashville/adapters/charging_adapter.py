@@ -33,9 +33,9 @@ class ChargingAdapter(Adapter):
         return outputs
 
     def write_inputs(self, inputs: Mapping[str, list[dict]]):
-        for row in inputs.get(ArrivedVehicles.key, []):
+        for row in inputs.get(ArrivedVehicles.name, []):
             self._charging_model.add_vehicle(row["veh_id"], initial_soc=row["soc"])
-        for row in inputs.get(DepartedVehicles.key, []):
+        for row in inputs.get(DepartedVehicles.name, []):
             self._charging_model.remove_vehicle(row["veh_id"])
 
     def _get_port_status(self) -> list[PortStatus]:

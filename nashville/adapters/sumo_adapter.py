@@ -105,7 +105,7 @@ class SumoAdapter(Adapter):
         return capacities
 
     def write_inputs(self, inputs: dict[str, list[dict]]):
-        for veh_id, soc in inputs.get(VehicleSocInput.key, []):
+        for veh_id, soc in inputs.get(VehicleSocInput.name, []):
             self._traci.vehicle.setParameter(
                 veh_id, "device.battery.actualBatteryCapacity", str(soc * 100)
             )

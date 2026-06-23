@@ -3,7 +3,7 @@ from base.output.geometry import Geometry, SHAPE_TYPE
 from base.output.record import Record
 from base.output.timestamp import Timestamp
 from base.input.input import (
-    Comparison,
+    Condition,
     Input,
     Fields,
     Join,
@@ -25,7 +25,7 @@ __all__ = [
     "Timestamp",
     "Input",
     "Fields",
-    "Comparison",
+    "Condition",
     "Join",
     "Filter",
     "Equal",

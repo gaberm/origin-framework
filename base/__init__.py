@@ -8,6 +8,8 @@ from base.input.input import (
     Fields,
     Join,
     Filter,
+    Latest,
+    Window,
     Equal,
     Greater,
     GreaterEqual,
@@ -34,5 +36,7 @@ __all__ = [
     "Less",
     "LessEqual",
     "NotEqual",
+    "Latest",
+    "Window",
     "ModelSpec",
 ]

@@ -72,7 +72,8 @@ class AdapterWorker:
             metadata={"timestep_length": self.adapter.timestep_length},
         )
         self.channel.basic_publish(
-            exchange="", routing_key="worker_registration",
+            exchange="",
+            routing_key="worker_registration",
             properties=pika.BasicProperties(reply_to=reply, correlation_id=corr),
             body=json.dumps(reg.to_dict()),
         )
@@ -131,8 +132,11 @@ class AdapterWorker:
         if isinstance(outputs, list):
             multi_type = isinstance(self.adapter.OutputType, list)
             serialized = [
-                {"_type": type(o).__name__, **dataclasses.asdict(o)} if multi_type
-                else dataclasses.asdict(o)
+                (
+                    {"_type": type(o).__name__, **dataclasses.asdict(o)}
+                    if multi_type
+                    else dataclasses.asdict(o)
+                )
                 for o in outputs
             ]
         else:
@@ -140,8 +144,8 @@ class AdapterWorker:
         return Response(success=True, payload=serialized)
 
     def advance(self, payload):
-        self.adapter.advance()
-        return Response(success=True)
+        model_time = self.adapter.advance()
+        return Response(success=True, payload=model_time)
 
     def terminate(self, payload):
         self.adapter.terminate()

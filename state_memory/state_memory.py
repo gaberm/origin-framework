@@ -6,7 +6,7 @@ import psycopg2.pool
 from psycopg2.extras import execute_values
 from base import Input, Record
 from state_memory.validation import validate_run_id
-from supervisory.time.time import TimeRange
+from supervisory.scheduling.time_window import TimeWindow
 from .input_loader import InputLoader
 from .schema_manager import SchemaManager
 
@@ -63,8 +63,8 @@ class StateMemory:
 
     def load_inputs(
         self,
-        input_specs: type[Input] | Sequence[type[Input]],
-        time_interval: TimeRange,
+        input_specs: Input | Sequence[Input],
+        time_interval: TimeWindow,
     ) -> dict[str, list[dict]]:
         return self._loader.load_inputs(input_specs, time_interval)
 
@@ -73,9 +73,6 @@ class StateMemory:
 
     def delete_run(self, run_id: str):
         self._schema.delete_run(run_id)
-
-    def list_runs(self) -> list[str]:
-        return self._schema.list_runs()
 
     def insert_external_dataset(self, dataset) -> None:
         self._schema.setup_external_table(dataset)

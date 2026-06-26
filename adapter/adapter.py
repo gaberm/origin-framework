@@ -10,18 +10,13 @@ class Adapter(ABC):
 
     def __init__(self, name: str, timestep_length: float, **kwargs):
         self.name = name
-        self._timestep_length = timestep_length
-        self._model_time = 0.0
-
-    @property
-    def model_time(self) -> float:
-        """Return the model's current simulation time in global time units."""
-        return self._model_time
+        self.timestep_length = timestep_length
+        self.model_time = 0.0
 
     @property
     def timestep_length(self) -> float:
         """Return the model's timestep length in global time units."""
-        return self._timestep_length
+        return self.timestep_length
 
     @abstractmethod
     def initialize(self):
@@ -46,8 +41,8 @@ class Adapter(ABC):
         pass
 
     @abstractmethod
-    def advance(self):
-        """Advance the model by dt global time units."""
+    def advance(self) -> float:
+        """Advance the model by dt global time units. Returns the new model time."""
         pass
 
     @abstractmethod

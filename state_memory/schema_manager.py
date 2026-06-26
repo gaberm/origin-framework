@@ -85,14 +85,6 @@ class SchemaManager:
             cur.execute(f"DROP SCHEMA IF EXISTS {run_id} CASCADE")
         self.conn.commit()
 
-    def list_runs(self) -> list[str]:
-        with self.conn.cursor() as cur:
-            cur.execute(
-                "SELECT schema_name FROM information_schema.schemata "
-                "WHERE schema_name LIKE 'run_%' ORDER BY schema_name"
-            )
-            return [row[0] for row in cur.fetchall()]
-
     def setup_external_table(self, dataset) -> None:
         columns = []
         for col, values in dataset.data.items():

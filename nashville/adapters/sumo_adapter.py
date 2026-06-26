@@ -1,12 +1,12 @@
 from typing import Mapping
 from adapter import Adapter
-from nashville.inputs.sumo import VehicleSocInput
+from nashville.inputs.sumo import vehicle_soc_input
 from nashville.outputs.sumo import EV, VehicleBattery
 import traci
 
 
 class SumoAdapter(Adapter):
-    InputType = VehicleSocInput
+    InputType = vehicle_soc_input
     OutputType = [EV, VehicleBattery]
 
     def __init__(self, name, timestep_length, sumo_config):
@@ -105,14 +105,15 @@ class SumoAdapter(Adapter):
         return capacities
 
     def write_inputs(self, inputs: dict[str, list[dict]]):
-        for veh_id, soc in inputs.get(VehicleSocInput.name, []):
+        for veh_id, soc in inputs.get(vehicle_soc_input.name, []):
             self._traci.vehicle.setParameter(
                 veh_id, "device.battery.actualBatteryCapacity", str(soc * 100)
             )
 
-    def advance(self):
+    def advance(self) -> float:
         self._traci.simulationStep()
         self._model_time += self.timestep_length
+        return self._model_time
 
     def terminate(self):
         if self._traci is not None:

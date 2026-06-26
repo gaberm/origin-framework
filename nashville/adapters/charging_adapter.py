@@ -1,12 +1,12 @@
 from typing import Mapping
 from adapter import Adapter
-from nashville.inputs.charging import ArrivedVehicles, DepartedVehicles
+from nashville.inputs.charging import arrived_vehicles, departed_vehicles
 from nashville.models.charging.charging_model import ChargingModel
 from nashville.outputs.charging import Station, PortStatus, ChargingEvent
 
 
 class ChargingAdapter(Adapter):
-    InputType = [ArrivedVehicles, DepartedVehicles]
+    InputType = [arrived_vehicles, departed_vehicles]
     OutputType = [PortStatus, ChargingEvent]
     ConstantType = Station
 
@@ -33,9 +33,9 @@ class ChargingAdapter(Adapter):
         return outputs
 
     def write_inputs(self, inputs: Mapping[str, list[dict]]):
-        for row in inputs.get(ArrivedVehicles.name, []):
+        for row in inputs.get(arrived_vehicles.name, []):
             self._charging_model.add_vehicle(row["veh_id"], initial_soc=row["soc"])
-        for row in inputs.get(DepartedVehicles.name, []):
+        for row in inputs.get(departed_vehicles.name, []):
             self._charging_model.remove_vehicle(row["veh_id"])
 
     def _get_port_status(self) -> list[PortStatus]:
@@ -71,9 +71,10 @@ class ChargingAdapter(Adapter):
                 )
         return outputs
 
-    def advance(self):
-        self._charging_model.advance_time(self._timestep_length)
+    def advance(self) -> float:
+        self._charging_model.advance_time(self.timestep_length)
         self._model_time += self.timestep_length
+        return self._model_time
 
     def terminate(self):
         self._charging_model = None

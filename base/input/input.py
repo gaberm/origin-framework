@@ -1,8 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass, fields as dataclass_fields
-from typing import Any, ClassVar, Sequence
+from typing import Any
 from base.output.record import Record
-from base.input.reconstruction import Windowed, Hold
+from base.utils import as_list
 
 
 @dataclass(frozen=True)
@@ -61,7 +61,7 @@ class Filter:
     def _validate_condition(self):
         if not isinstance(self.condition, Condition):
             raise TypeError(
-                f"{self.__class__.__name__}: condition must be a Condition; got {type(self.condition).__name__!r}"
+                f"{self.__class__.__name__}.condition must be a Condition; got {type(self.condition).__name__!r}"
             )
 
 
@@ -81,7 +81,7 @@ class Join:
             (self.left_record, self.left_field),
             (self.right_record, self.right_field),
         ):
-            valid_fields = {f.name for f in dataclass_fields(record)}
+            valid_fields = {field.name for field in dataclass_fields(record)}
             if field not in valid_fields:
                 raise AttributeError(
                     f"{context}: {record.__name__} has no field {field!r}. Valid: {sorted(valid_fields)}"
@@ -89,13 +89,15 @@ class Join:
 
 
 class Fields:
-    __slots__ = ("segments",)
+    __slots__ = ("selected_fields",)
 
     def __init__(self, *args):
         if not args:
             raise TypeError("Fields(...) requires at least one field name")
+        self.selected_fields = {}
         if self._is_explicit(args):
-            self.segments = [self._parse_segment(arg) for arg in args]
+            for arg in args:
+                self.selected_fields.update(self._parse_field(arg))
         else:
             field_names = (
                 args[0]
@@ -105,7 +107,7 @@ class Fields:
             if not field_names:
                 raise TypeError("Fields(...) requires at least one field name")
             self._validate_fields(field_names)
-            self.segments = [(None, tuple(field_names))]
+            self.selected_fields = {None: tuple(field_names)}
 
     @staticmethod
     def _is_explicit(args) -> bool:
@@ -115,7 +117,7 @@ class Fields:
             and isinstance(args[0][0], type)
         )
 
-    def _parse_segment(self, arg) -> tuple:
+    def _parse_field(self, arg) -> tuple:
         if not (isinstance(arg, tuple) and arg and isinstance(arg[0], type)):
             raise TypeError(f"Fields: expected (Entity, field, ...) tuple, got {arg!r}")
         entity, *field_names = arg
@@ -125,7 +127,7 @@ class Fields:
             dataclass_field.name for dataclass_field in dataclass_fields(entity)
         }
         self._validate_fields(field_names, valid_fields)
-        return (entity, tuple(field_names))
+        return {entity.table_name: tuple(field_names)}
 
     @staticmethod
     def _validate_fields(field_names, valid_fields: set[str] = None) -> None:
@@ -141,69 +143,101 @@ class Fields:
 
     def __repr__(self) -> str:
         parts = []
-        for entity, names in self.segments:
-            if entity is not None:
-                parts.append(getattr(entity, "__name__", repr(entity)))
+        for table_name, names in self.selected_fields.items():
+            if table_name is not None:
+                parts.append(table_name)
             parts.append(repr(names))
         return f"Fields({', '.join(parts)})"
 
 
+class ReadPolicy:
+    kind: str
+
+
+@dataclass(frozen=True)
+class Window(ReadPolicy):
+    """Return all rows whose timestamp lies in [start, end)."""
+
+    kind: str = "window"
+
+
+@dataclass(frozen=True)
+class Latest(ReadPolicy):
+    """Only return the latest value per `by` key with timestamp in [start, end)."""
+
+    by: str
+    kind: str = "latest"
+
+
 class Input:
-    from_: ClassVar[type[Record] | list[type[Record]]]
-    where: ClassVar[list[Filter]] = []
-    on: ClassVar[Join | list[Join]] = []
-    select: ClassVar[type | Fields]
-    name: ClassVar[str] = None
-    read_policy: ClassVar = Windowed()
+    def __init__(
+        self,
+        *,
+        name: str,
+        from_: type[Record] | list[type[Record]],
+        select: Fields,
+        where: Filter | list[Filter] = None,
+        on: Join | list[Join] = None,
+        read_policy: ReadPolicy = None,
+    ):
+        self.name = name
+        self.from_ = from_
+        self.where = as_list(where) if where is not None else []
+        self.on = as_list(on) if on is not None else []
+        self.select = select
+        self.read_policy = read_policy if read_policy is not None else Window()
+        self._validate_from()
+        self._validate_where()
+        self._validate_on()
+        self._resolve_select()
+        self._validate_policy()
 
-    def __init_subclass__(cls):
-        cls._resolve_name()
-        cls._validate_from()
-        cls._validate_where()
-        cls._validate_on()
-        cls._validate_policy()
-
-    def _resolve_name(cls):
-        if cls.name is None:
-            cls.name = cls.__name__
-
-    def _validate_from(cls):
-        if cls.from_ is None:
-            raise TypeError(f"{cls.__name__}: from_ is required")
-        records = _as_list(cls.from_)
+    def _validate_from(self):
+        records = as_list(self.from_)
         for record in records:
             if not (isinstance(record, type) and issubclass(record, Record)):
                 raise TypeError(
-                    f"{cls.__name__}: from_ must be a Record subclass; got {type(record).__name__!r}"
+                    f"{self.name}: from_ must be a Record subclass; got {type(record).__name__!r}"
                 )
 
-    def _validate_on(cls):
-        joins = _as_list(cls.on)
-        for join in joins:
+    def _validate_on(self):
+        for join in self.on:
             if not isinstance(join, Join):
                 raise TypeError(
-                    f"{cls.__name__}.on: expected Join, got {type(join).__name__!r}"
+                    f"{self.name}.on: must be (list of) Join; got {type(join).__name__!r}"
                 )
 
-    def _validate_where(cls):
-        for filter_ in _as_list(cls.where):
+    def _validate_where(self):
+        for filter_ in self.where:
             if not isinstance(filter_, Filter):
                 raise TypeError(
-                    f"{cls.__name__}.where: expected Filter, got {type(filter_).__name__!r}"
+                    f"{self.name}.where: must be (list of) Filter; got {type(filter_).__name__!r}"
                 )
-            record = filter_.from_ if filter_.from_ is not None else cls.from_
+            record = filter_.from_ if filter_.from_ is not None else self.from_
             valid_fields = {field.name for field in dataclass_fields(record)}
             if filter_.field not in valid_fields:
                 raise AttributeError(
-                    f"{cls.__name__}.where: {record.__name__} has no field {filter_.field!r}. Valid: {sorted(valid_fields)}"
+                    f"{self.name}.where: {record.__name__} has no field {filter_.field!r}. Valid: {sorted(valid_fields)}"
                 )
 
-    def _validate_policy(cls):
-        if not isinstance(cls.read_policy, (Windowed, Hold)):
+    def _resolve_select(self):
+        if not isinstance(self.select, Fields):
             raise TypeError(
-                f"{cls.__name__}: read_policy must be Windowed or Hold; got {type(cls.read_policy).__name__!r}"
+                f"{self.name}.select must be Fields; got {type(self.select).__name__!r}"
             )
+        if None in self.select.selected_fields:
+            field_names = self.select.selected_fields.pop(None)
+            from_record = self.from_ if not isinstance(self.from_, list) else self.from_[0]
+            valid_fields = {field.name for field in dataclass_fields(from_record)}
+            for field_name in field_names:
+                if field_name not in valid_fields:
+                    raise AttributeError(
+                        f"{self.name}.select: {from_record.__name__} has no field {field_name!r}. Valid: {sorted(valid_fields)}"
+                    )
+            self.select.selected_fields[from_record.table_name] = field_names
 
-
-def _as_list(value: Any) -> list[Any]:
-    return value if isinstance(value, list) else [value]
+    def _validate_policy(self):
+        if not isinstance(self.read_policy, (Window, Latest)):
+            raise TypeError(
+                f"{self.name}.read_policy must be Window() or Latest(...); got {type(self.read_policy).__name__!r}"
+            )

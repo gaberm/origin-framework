@@ -1,7 +1,8 @@
 from contextlib import contextmanager
 from typing import Sequence
-from base.input.input import Input, Join
-from supervisory.time.time import TimeRange
+from base.input.input import Input, Latest
+from base.utils import as_list
+from supervisory.scheduling.time_window import TimeWindow
 
 
 class InputLoader:
@@ -19,77 +20,75 @@ class InputLoader:
 
     def load_inputs(
         self,
-        input_specs: type[Input] | Sequence[type[Input]],
-        time_range: TimeRange,
+        input_specs: Input | Sequence[Input],
+        time_range: TimeWindow,
     ) -> dict[str, list[dict]]:
-        specs = (
-            list(input_specs)
-            if isinstance(input_specs, (list, tuple))
-            else [input_specs]
-        )
-        return {spec.key: self._load_one(spec, time_range) for spec in specs}
+        return {
+            spec.name: self._load_input(spec, time_range)
+            for spec in as_list(input_specs)
+        }
 
-    def _load_one(self, input_spec: type[Input], time_range: TimeRange) -> list[dict]:
-        query, values = self._get_fetch_query(input_spec, time_range)
+    def _load_input(self, input_spec: Input, time_range: TimeWindow) -> list[dict]:
+        query, values = self._build_query(input_spec, time_range)
         with self._connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(query, values)
                 col_names = [desc[0] for desc in cur.description]
                 return [dict(zip(col_names, row)) for row in cur.fetchall()]
 
-    def _get_fetch_query(
-        self, input_spec: type[Input], time_range: TimeRange
+    def _build_query(
+        self, input_spec: Input, time_range: TimeWindow
     ) -> tuple[str, list]:
-        fields = list(input_spec.row_fields)
-        if input_spec.is_join:
-            return self._get_join_query(input_spec, time_range)
-        return self._get_simple_query(input_spec, fields, time_range)
+        fields = self._select_fields(input_spec)
+        from_clause = self._from_clause(input_spec)
+        time_field = self._time_field(input_spec)
+        filter_clauses, filter_values = self._filter_clauses(input_spec.where)
 
-    def _get_simple_query(
-        self, input_spec: type[Input], fields: list[str], time_range: TimeRange
-    ) -> tuple[str, list]:
-        entity = input_spec.from_
-        table = f"{self.run_id}.{entity.table_name}"
-        where, values = self._build_where(
-            entity.time_field, time_range, input_spec.where
-        )
-        return f"SELECT {', '.join(fields)} FROM {table} WHERE {where}", values
+        if isinstance(input_spec.read_policy, Latest):
+            by = input_spec.read_policy.by
+            where = " AND ".join([f"{time_field} < %s"] + filter_clauses)
+            values = [time_range.end] + filter_values
+            select = fields if by in fields else [by, *fields]
+            query = (
+                f"SELECT DISTINCT ON ({by}) {', '.join(select)} "
+                f"FROM {from_clause} WHERE {where} "
+                f"ORDER BY {by}, {time_field} DESC"
+            )
+        else:
+            where = " AND ".join(
+                [f"{time_field} >= %s AND {time_field} < %s"] + filter_clauses
+            )
+            values = [time_range.start, time_range.end] + filter_values
+            query = f"SELECT {', '.join(fields)} FROM {from_clause} WHERE {where}"
 
-    def _get_join_query(
-        self, input_spec: type[Input], time_range: TimeRange
-    ) -> tuple[str, list]:
-        join: Join = input_spec.on
-        la, ra = join.left_entity.table_name, join.right_entity.table_name
-        where, values = self._build_where(
-            f"{la}.{join.left_entity.time_field}",
-            time_range,
-            input_spec.where,
-            aliased=True,
-        )
-        qualified = [
-            f"{entity.table_name}.{field}"
-            for entity, names in input_spec.select.segments
-            for field in names
-        ]
-        query = (
-            f"SELECT {', '.join(qualified)} "
-            f"FROM {self.run_id}.{la} {la} "
-            f"JOIN {self.run_id}.{ra} {ra} ON {la}.{join.left_field} = {ra}.{join.right_field} "
-            f"WHERE {where}"
-        )
         return query, values
 
-    def _build_where(
-        self,
-        time_field: str,
-        time_range: TimeRange,
-        filters: list,
-        aliased: bool = False,
-    ) -> tuple[str, list]:
-        clauses = [f"{time_field} >= %s AND {time_field} < %s"]
-        values = [time_range.start_time, time_range.end_time]
-        for f in filters:
-            field = f"{f.from_.table_name}.{f.field}" if aliased else f.field
-            clauses.append(f"{field} {f.cmp.op} %s")
-            values.append(f.cmp.value)
-        return " AND ".join(clauses), values
+    def _select_fields(self, input_spec: Input) -> list[str]:
+        return [
+            f"{table_name}.{field_name}"
+            for table_name, field_names in input_spec.select.selected_fields.items()
+            for field_name in field_names
+        ]
+
+    def _from_clause(self, input_spec: Input) -> str:
+        primary_name = input_spec.from_.table_name
+        if not input_spec.on:
+            return f"{self.run_id}.{primary_name}"
+        join_sql = " ".join(
+            f"JOIN {self.run_id}.{j.right_record.table_name} {j.right_record.table_name} "
+            f"ON {j.left_record.table_name}.{j.left_field} = {j.right_record.table_name}.{j.right_field}"
+            for j in input_spec.on
+        )
+        return f"{self.run_id}.{primary_name} {primary_name} {join_sql}"
+
+    def _time_field(self, input_spec: Input) -> str:
+        primary = input_spec.from_
+        return f"{primary.table_name}.{primary.time_field}"
+
+    def _filter_clauses(self, filters: list) -> tuple[list[str], list]:
+        clauses, values = [], []
+        for filter_ in filters:
+            field = f"{filter_.from_.table_name}.{filter_.field}"
+            clauses.append(f"{field} {filter_.condition.operator} %s")
+            values.append(filter_.condition.value)
+        return clauses, values

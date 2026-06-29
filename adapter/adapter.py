@@ -1,12 +1,12 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
-from base import Record
-from base import Input
+from base import Record, Input
 
 
 class Adapter(ABC):
-    InputType: type[Input] | list[type[Input]]
-    OutputType: type[Record] | list[type[Record]]
-    ConstantType: type[Record] | list[type[Record]] | None = None
+    input_types: type[Input] | list[type[Input]]
+    output_types: type[Record] | list[type[Record]]
+    constant_types: type[Record] | list[type[Record]] | None = None
 
     def __init__(self, name: str, timestep_length: float, **kwargs):
         self.name = name
@@ -28,7 +28,7 @@ class Adapter(ABC):
         return []
 
     @abstractmethod
-    def read_outputs(self) -> list[type[Record]]:
+    def read_outputs(self) -> list[Record]:
         """Read the user-defined outputs of the model."""
         pass
 

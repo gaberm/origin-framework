@@ -17,11 +17,7 @@ def assign_cells(output: Any, resolution: int) -> Any:
 
 
 def assign_external_dataset(dataset: Dataset, resolution: int) -> Dataset:
-    if dataset.h3_index:
-        dataset.data["cell_ids"] = dataset.data[dataset.geometry_column].apply(
-            lambda geom: _cells_for_shape(geom, resolution)
-        )
-    return dataset
+    pass
 
 
 def assign_model_output(outputs: list, resolution: int) -> list:
@@ -53,6 +49,12 @@ def _cells_for_shape(
         return list(dict.fromkeys(ids))
 
     if shape == "POLYGON":
-        return list(h3.h3shape_to_cells(h3.LatLngPoly(coords), resolution))
+        return list(
+            set(
+                h3.h3shape_to_cells(
+                    h3.LatLngPoly([(lat, lon) for lon, lat in coords]), resolution
+                )
+            )
+        )
 
     raise ValueError(f"Unsupported shape type: {shape}")

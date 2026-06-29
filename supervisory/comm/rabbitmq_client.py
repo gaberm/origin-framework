@@ -3,7 +3,7 @@ import uuid
 import pika
 import json
 from typing import Any
-from .commands import Operation, Message, Response, Registration
+from .messages import Operation, Message, Response, Registration
 
 
 class RabbitMQClient:
@@ -26,7 +26,7 @@ class RabbitMQClient:
         self.channel.basic_consume(
             queue=self.reply_queue, on_message_callback=self._on_reply, auto_ack=True
         )
-    
+
     def collect_registrations(self, validate, expected: int, timeout: float = 30.0):
         """Block until `expected` distinct workers register and pass `validate`.
         validate(reg) -> (accepted: bool, error: str | None).
@@ -40,7 +40,8 @@ class RabbitMQClient:
             if ok:
                 registered[reg.name] = reg
             ch.basic_publish(
-                exchange="", routing_key=props.reply_to,
+                exchange="",
+                routing_key=props.reply_to,
                 properties=pika.BasicProperties(correlation_id=props.correlation_id),
                 body=json.dumps(Response(success=ok, error=error).to_dict()),
             )

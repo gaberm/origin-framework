@@ -74,7 +74,7 @@ class Scheduler:
         return {
             record: spec.name
             for spec in model_specs
-            for record in as_list(spec.adapter.OutputType)
+            for record in as_list(spec.adapter.output_types)
         }
 
     def _infer_dependencies(
@@ -83,7 +83,7 @@ class Scheduler:
         """Infer gated dependency edges from Window input types."""
         dependencies: dict[str, set] = {spec.name: set() for spec in model_specs}
         for spec in model_specs:
-            for input_cls in as_list(spec.adapter.InputType):
+            for input_cls in as_list(spec.adapter.input_types):
                 if isinstance(getattr(input_cls, "read_policy", None), Latest):
                     continue
                 records = as_list(input_cls.from_) + [
@@ -120,7 +120,11 @@ class Scheduler:
             if name in ranks:
                 return ranks[name]
             if name in in_progress:
-                raise RuntimeError(...)
+                raise RuntimeError(
+                    f"coupling cycle involving '{name}': models are mutually gated. "
+                    "Mark one coupling input as Latest(...) to designate the lagged "
+                    "direction, or set ModelSpec.dependencies explicitly."
+                )
             in_progress.add(name)
             dep_names = self.dependencies.get(name, ())
             ranks[name] = (

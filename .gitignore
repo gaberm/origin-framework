@@ -1,8 +1,7 @@
 __pycache__
 .claude
-__pycache__
-.claude
 .DS_Store
+.pytest_cache
 .vscode
 adapters/__pycache__
 nashville/data

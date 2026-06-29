@@ -5,7 +5,8 @@ from tqdm import tqdm
 from base import ModelSpec
 from base.utils import as_list
 from state_memory import StateMemory
-from supervisory.comm.rabbitmq_client import RabbitMQClient
+from supervisory.comm.rabbitmq_client import RabbitMQClient, Response
+from supervisory.comm.messages import Registration
 from supervisory.scheduling.scheduler import Scheduler
 from supervisory.space.cell_assigner import assign_cells
 from supervisory.space.coords_converter import convert_coords
@@ -24,12 +25,14 @@ class SupervisoryModel:
     ):
         self.model_names = [spec.name for spec in model_specs]
         self.routing_keys = {spec.name: spec.routing_key for spec in model_specs}
-        self.output_types = {spec.name: spec.adapter.OutputType for spec in model_specs}
+        self.output_types = {
+            spec.name: spec.adapter.output_types for spec in model_specs
+        }
         self.constant_types = {
             spec.name: getattr(spec.adapter, "ConstantType", None)
             for spec in model_specs
         }
-        self.input_types = {spec.name: spec.adapter.InputType for spec in model_specs}
+        self.input_types = {spec.name: spec.adapter.input_types for spec in model_specs}
         self.scheduler = Scheduler(model_specs, max_global_time)
         self.state_memory = state_memory
         self.rabbitmq_client = rabbitmq_client
@@ -46,7 +49,7 @@ class SupervisoryModel:
             raise RuntimeError(f"workers never registered: {missing}")
         logger.info("All %d workers registered.", len(self.model_names))
 
-    def _validate_registration(self, registration):
+    def _validate_registration(self, registration: Registration):
         if registration.name not in self.scheduler.timestep_lengths:
             return False, f"unexpected worker '{registration.name}'"
         if (registration.metadata or {}).get(
@@ -187,7 +190,7 @@ class SupervisoryModel:
 
     def _wait_for_all(
         self,
-        responses: dict,
+        responses: dict[str, Response],
         expected: list[str],
         operation: str,
         timeout: float = 30.0,

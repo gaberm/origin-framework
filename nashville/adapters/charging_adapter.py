@@ -26,7 +26,7 @@ class ChargingAdapter(Adapter):
             for station_id, station in self._charging_model.stations.items()
         ]
 
-    def read_outputs(self) -> list[type[PortStatus] | type[ChargingEvent]]:
+    def read_outputs(self) -> list[PortStatus | ChargingEvent]:
         outputs = []
         outputs += self._get_port_status()
         outputs += self._get_charging_event()

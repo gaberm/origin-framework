@@ -24,8 +24,8 @@ class Message:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Message":
-        return cls(command=Operation(d["command"]), payload=d.get("payload"))
+    def from_dict(cls, data: dict) -> "Message":
+        return cls(command=Operation(data["command"]), payload=data.get("payload"))
 
 
 @dataclass
@@ -42,8 +42,12 @@ class Response:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Response":
-        return cls(success=d["success"], payload=d.get("payload"), error=d.get("error"))
+    def from_dict(cls, data: dict) -> "Response":
+        return cls(
+            success=data["success"],
+            payload=data.get("payload"),
+            error=data.get("error"),
+        )
 
 
 @dataclass
@@ -60,7 +64,9 @@ class Registration:
         }
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Registration":
+    def from_dict(cls, data: dict) -> "Registration":
         return cls(
-            name=d["name"], routing_key=d["routing_key"], metadata=d.get("metadata")
+            name=data["name"],
+            routing_key=data["routing_key"],
+            metadata=data.get("metadata"),
         )

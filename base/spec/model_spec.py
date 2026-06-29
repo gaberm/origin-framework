@@ -1,5 +1,9 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
-from adapter.adapter import Adapter
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from adapter.adapter import Adapter
 
 
 @dataclass(frozen=True)
@@ -31,6 +35,8 @@ class ModelSpec:
             )
 
     def _validate_adapter(self):
+        from adapter.adapter import Adapter
+
         if not (isinstance(self.adapter, type) and issubclass(self.adapter, Adapter)):
             raise TypeError(
                 f"ModelSpec.adapter must be an Adapter subclass; got {type(self.adapter).__name__!r}"

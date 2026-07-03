@@ -10,13 +10,13 @@ class Adapter(ABC):
 
     def __init__(self, name: str, timestep_length: float, **kwargs):
         self.name = name
-        self.timestep_length = timestep_length
+        self._timestep_length = timestep_length
         self.model_time = 0.0
 
     @property
     def timestep_length(self) -> float:
         """Return the model's timestep length in global time units."""
-        return self.timestep_length
+        return self._timestep_length
 
     @abstractmethod
     def initialize(self):

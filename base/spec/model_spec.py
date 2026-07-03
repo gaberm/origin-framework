@@ -58,5 +58,8 @@ class ModelSpec:
                 raise TypeError(
                     f"ModelSpec.dependencies must be a tuple or list; got {type(self.dependencies).__name__!r}"
                 )
-            if not all(isinstance(name, str) for name in self.dependencies):
-                raise TypeError(f"ModelSpec.dependencies must be a list of strings")
+            for dependency in self.dependencies:
+                if not isinstance(dependency, str):
+                    raise TypeError(
+                        f"ModelSpec.dependencies must be a list of strings; got {type(dependency).__name__!r}"
+                    )

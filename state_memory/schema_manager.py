@@ -1,4 +1,5 @@
 import dataclasses
+import types
 from typing import Union, get_args, get_origin, get_type_hints
 from base import Record
 
@@ -116,9 +117,7 @@ class SchemaManager:
         self.conn.commit()
 
     def _get_sql_type(self, hint) -> str:
-        if get_origin(hint) is Union:
+        if get_origin(hint) in (Union, types.UnionType):
             non_none = [a for a in get_args(hint) if a is not type(None)]
-            # TODO: multi-type unions (e.g. str | int | None) silently resolve to the
-            # first type — this may produce the wrong SQL type if order changes.
             hint = non_none[0] if non_none else str
         return SQL_TYPE_MAP.get(hint, "TEXT")

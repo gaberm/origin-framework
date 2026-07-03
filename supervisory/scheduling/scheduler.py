@@ -2,7 +2,7 @@ import math
 from base import ModelSpec
 from base.input.input import Latest
 from base.utils import as_list
-from supervisory.scheduling import TimeWindow
+from supervisory.scheduling.time_window import TimeWindow
 
 _EPS = 1e-9
 

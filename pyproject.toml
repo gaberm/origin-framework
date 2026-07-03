@@ -1,3 +1,15 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "supervisory-model"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+include = ["adapter*", "base*", "nashville*", "state_memory*", "supervisory*"]
+
 [tool.pytest.ini_options]
 postgresql_exec = "/opt/homebrew/opt/postgresql@16/bin/pg_ctl"
 pythonpath = ["tests/state_memory"]

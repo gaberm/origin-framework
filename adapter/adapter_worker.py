@@ -17,7 +17,9 @@ class AdapterWorker:
         routing_key: str,
         queue_name: str,
         adapter: Adapter,
+        registration_timeout: float = 30.0,
     ):
+        self.registration_timeout = registration_timeout
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(
                 host=host,
@@ -49,8 +51,10 @@ class AdapterWorker:
             "terminate": self.terminate,
         }
 
-    def register(self, timeout: float = 30.0):
-        self.channel.queue_declare(queue="worker_registration", durable=True)
+    def register(self):
+        self.channel.queue_declare(
+            queue="worker_registration", durable=True, auto_delete=True
+        )
         reply = self.channel.queue_declare(queue="", exclusive=True).method.queue
         corr = str(uuid.uuid4())
         result = {}
@@ -71,7 +75,7 @@ class AdapterWorker:
             properties=pika.BasicProperties(reply_to=reply, correlation_id=corr),
             body=json.dumps(reg.to_dict()),
         )
-        deadline = time.time() + timeout
+        deadline = time.time() + self.registration_timeout
         while "resp" not in result:
             if time.time() > deadline:
                 raise TimeoutError("supervisory did not accept registration")

@@ -31,7 +31,9 @@ class RabbitMQClient:
         """Block until `expected` distinct workers register and pass `validate`.
         validate(reg) -> (accepted: bool, error: str | None).
         Returns {name: Registration}; raises TimeoutError(partial) on timeout."""
-        self.channel.queue_declare(queue="worker_registration", durable=True)
+        self.channel.queue_declare(
+            queue="worker_registration", durable=True, auto_delete=True
+        )
         registered: dict[str, Registration] = {}
 
         def handler(ch, method, props, body):

@@ -42,7 +42,9 @@ class InputLoader:
         fields = self._select_fields(input_spec)
         from_clause = self._from_clause(input_spec)
         time_field = self._time_field(input_spec)
-        filter_clauses, filter_values = self._filter_clauses(input_spec.where)
+        filter_clauses, filter_values = self._filter_clauses(
+            input_spec.where, input_spec.from_
+        )
 
         if isinstance(input_spec.read_policy, Latest):
             by = input_spec.read_policy.by
@@ -85,10 +87,11 @@ class InputLoader:
         primary = input_spec.from_
         return f"{primary.table_name}.{primary.time_field}"
 
-    def _filter_clauses(self, filters: list) -> tuple[list[str], list]:
+    def _filter_clauses(self, filters: list, default_record: type) -> tuple[list[str], list]:
         clauses, values = [], []
         for filter_ in filters:
-            field = f"{filter_.from_.table_name}.{filter_.field}"
+            record = filter_.from_ if filter_.from_ is not None else default_record
+            field = f"{record.table_name}.{filter_.field}"
             clauses.append(f"{field} {filter_.condition.operator} %s")
             values.append(filter_.condition.value)
         return clauses, values

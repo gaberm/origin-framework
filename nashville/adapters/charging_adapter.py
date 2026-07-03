@@ -6,9 +6,9 @@ from nashville.outputs.charging import Station, PortStatus, ChargingEvent
 
 
 class ChargingAdapter(Adapter):
-    InputType = [arrived_vehicles, departed_vehicles]
-    OutputType = [PortStatus, ChargingEvent]
-    ConstantType = Station
+    input_types = [arrived_vehicles, departed_vehicles]
+    output_types = [PortStatus, ChargingEvent]
+    constant_types = Station
 
     def __init__(self, name, timestep_length):
         super().__init__(name=name, timestep_length=timestep_length)
@@ -73,8 +73,8 @@ class ChargingAdapter(Adapter):
 
     def advance(self) -> float:
         self._charging_model.advance_time(self.timestep_length)
-        self._model_time += self.timestep_length
-        return self._model_time
+        self.model_time += self.timestep_length
+        return self.model_time
 
     def terminate(self):
         self._charging_model = None

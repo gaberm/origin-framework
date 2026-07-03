@@ -9,6 +9,7 @@ class EV(Record, Geometry, Timestamp):
     indexed = ("h3_ids", "state")
 
     veh_id: str
+    tour_id: int
     soc: float
     state: str
     shape: SHAPE_TYPE = "POINT"
@@ -23,4 +24,3 @@ class VehicleBattery(Record):
     veh_id: str
     capacity: float
     charging_power: float
-    # hybrid

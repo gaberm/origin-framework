@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from adapter.adapter_worker import AdapterWorker
 from supervisory.comm.messages import Message, Response, Operation
-from ..state_memory._records import Vehicle, Battery
+from _records import Vehicle, Battery
 
 
 @pytest.fixture
@@ -102,5 +102,6 @@ class TestRegister:
 
     def test_timeout_raises(self, worker):
         worker.channel.basic_consume.return_value = "tag"
+        worker.registration_timeout = 0.0
         with pytest.raises(TimeoutError):
-            worker.register(timeout=0.0)
+            worker.register()

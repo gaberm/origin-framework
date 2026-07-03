@@ -2,14 +2,13 @@ import dataclasses
 import logging
 import time
 from tqdm import tqdm
-from base import ModelSpec
-from base.utils import as_list
+from base import ModelSpec, as_list
 from state_memory import StateMemory
 from supervisory.comm.rabbitmq_client import RabbitMQClient, Response
 from supervisory.comm.messages import Registration
 from supervisory.scheduling.scheduler import Scheduler
-from supervisory.space.cell_assigner import assign_cells
-from supervisory.space.coords_converter import convert_coords
+from supervisory.geo.cell_assigner import assign_cells
+from supervisory.geo.coords_converter import convert_coords
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +20,8 @@ class SupervisoryModel:
         state_memory: StateMemory,
         rabbitmq_client: RabbitMQClient,
         max_global_time: float,
+        registration_timeout: float | int = 120.0,
+        response_timeout: float | int = 60.0,
         data_adapters: list = None,
     ):
         self.model_names = [spec.name for spec in model_specs]
@@ -29,7 +30,7 @@ class SupervisoryModel:
             spec.name: spec.adapter.output_types for spec in model_specs
         }
         self.constant_types = {
-            spec.name: getattr(spec.adapter, "ConstantType", None)
+            spec.name: getattr(spec.adapter, "constant_types", None)
             for spec in model_specs
         }
         self.input_types = {spec.name: spec.adapter.input_types for spec in model_specs}
@@ -37,12 +38,16 @@ class SupervisoryModel:
         self.state_memory = state_memory
         self.rabbitmq_client = rabbitmq_client
         self.data_adapters = data_adapters or []
+        self.registration_timeout = registration_timeout
+        self.response_timeout = response_timeout
         logger.info("Derived dependencies: %s", self.scheduler.dependencies)
 
-    def await_workers(self, timeout: float = 30.0):
+    def await_workers(self):
         try:
             self.rabbitmq_client.collect_registrations(
-                self._validate_registration, len(self.model_names), timeout
+                self._validate_registration,
+                len(self.model_names),
+                self.registration_timeout,
             )
         except TimeoutError as error:
             missing = sorted(set(self.model_names) - set(error.args[0]))
@@ -67,7 +72,8 @@ class SupervisoryModel:
         for value in list(self.output_types.values()) + list(
             self.constant_types.values()
         ):
-            types += as_list(value)
+            if value is not None:
+                types += as_list(value)
         return list(dict.fromkeys(types))
 
     def reset_state_memory(self, drop_tables: bool = False):
@@ -113,11 +119,11 @@ class SupervisoryModel:
             payload = responses[name].payload
             if not payload:
                 continue
-            records = [constant_cls(**r) for r in payload]
-            records = [convert_coords(r) for r in records]
+            records = [constant_cls(**rec) for rec in payload]
+            records = [convert_coords(rec) for rec in records]
             records = assign_cells(records, resolution=9)
             self.state_memory.insert_outputs(
-                constant_cls, [dataclasses.asdict(r) for r in records]
+                constant_cls, [dataclasses.asdict(rec) for rec in records]
             )
 
     def write_inputs(self, name: str):
@@ -193,9 +199,8 @@ class SupervisoryModel:
         responses: dict[str, Response],
         expected: list[str],
         operation: str,
-        timeout: float = 30.0,
     ):
-        deadline = time.time() + timeout
+        deadline = time.time() + self.response_timeout
         while len(responses) < len(expected):
             if time.time() > deadline:
                 missing = sorted(set(expected) - set(responses))

@@ -1,8 +1,8 @@
-from base.output.dataset import Dataset
-from base.output.geometry import Geometry, SHAPE_TYPE
-from base.output.record import Record
-from base.output.timestamp import Timestamp
-from base.input.input import (
+from .output.dataset import Dataset
+from .output.geometry import Geometry, SHAPE_TYPE
+from .output.record import Record
+from .output.timestamp import Timestamp
+from .input.input import (
     Condition,
     Input,
     Fields,
@@ -17,7 +17,8 @@ from base.input.input import (
     LessEqual,
     NotEqual,
 )
-from base.spec.model_spec import ModelSpec
+from .spec.model_spec import ModelSpec
+from .utils import as_list
 
 __all__ = [
     "Dataset",
@@ -39,4 +40,5 @@ __all__ = [
     "Latest",
     "Window",
     "ModelSpec",
+    "as_list",
 ]

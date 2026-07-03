@@ -1,6 +1,6 @@
 import pytest
 import h3
-from supervisory.space.cell_assigner import _cells_for_shape
+from supervisory.geo.cell_assigner import _cells_for_shape
 
 RESOLUTION = 5
 

@@ -7,7 +7,7 @@ sumo_spec = ModelSpec(
     adapter=SumoAdapter,
     timestep_length=1.0,
     params={
-        "sumo_config": "/Users/maltegaber/Downloads/Transportation Model/main.sumocfg",
+        "sumo_config": "/Users/maltegaber/Downloads/Transportation Model May 7/main.sumocfg",
     },
 )
 

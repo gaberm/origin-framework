@@ -13,7 +13,7 @@ def _transformer_to_4326(epsg_code: int) -> Transformer:
         raise ValueError(f"Invalid EPSG code: {epsg_code}") from error
 
 
-def to_4326(
+def to_4326_coords(
     coords: tuple[float, float] | list[tuple[float, float]],
     shape: SHAPE_TYPE,
     epsg_code: int,
@@ -31,7 +31,7 @@ def convert_coords(output: Record) -> Record:
     if isinstance(output, Geometry):
         return dataclasses.replace(
             output,
-            coords_4326=to_4326(output.coords, output.shape, output.epsg_code),
+            coords_4326=to_4326_coords(output.coords, output.shape, output.epsg_code),
         )
     else:
         return output

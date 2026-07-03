@@ -70,6 +70,20 @@ def test_filter(loader):
     assert all(row["veh_id"] == "veh_1" for row in result["vehicle"])
 
 
+def test_filter_without_explicit_record(loader):
+    """Filter(field, condition) omits the record and must fall back to
+    Input.from_, matching Input._validate_where's fallback behavior."""
+    spec = Input(
+        name="vehicle",
+        from_=Vehicle,
+        where=Filter("veh_id", Equal("veh_1")),
+        select=Fields("veh_id", "soc"),
+    )
+    result = loader.load_inputs(spec, TimeWindow(0.0, 10.0))
+    assert len(result["vehicle"]) == 2  # veh_1 at t=1.0 and t=2.5
+    assert all(row["veh_id"] == "veh_1" for row in result["vehicle"])
+
+
 def test_join(loader):
     spec = Input(
         name="vehicle",

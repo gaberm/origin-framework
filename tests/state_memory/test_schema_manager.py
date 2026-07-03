@@ -32,10 +32,24 @@ def test_setup_creates_tables(schema_manager):
     assert ("battery", "capacity") in rows
 
 
+def test_insert_time_field(schema_manager):
+    """The time filed can be of type float or int."""
+    schema_manager.setup([Vehicle])
+    cur = schema_manager.conn.cursor()
+    cur.execute(
+        "SELECT data_type FROM information_schema.columns "
+        "WHERE table_schema = %s AND table_name = 'vehicle' AND column_name = 'time'",
+        (RUN_ID,),
+    )
+    assert cur.fetchone()[0] == "double precision"
+
+
 def test_reset_tables(schema_manager):
     schema_manager.setup([Vehicle, Battery])
     cur = schema_manager.conn.cursor()
-    cur.execute(f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time) VALUES ('v1', 0.5, 1.0)")
+    cur.execute(
+        f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time) VALUES ('v1', 0.5, 1.0)"
+    )
     schema_manager.conn.commit()
     schema_manager.reset_tables()
     cur.execute(f"SELECT COUNT(*) FROM {RUN_ID}.vehicle")

@@ -12,6 +12,8 @@ class EV(Record, Geometry, Timestamp):
     tour_id: int
     soc: float
     state: str
+    fuel_type: str
+    veh_class: str
     shape: SHAPE_TYPE = "POINT"
 
 

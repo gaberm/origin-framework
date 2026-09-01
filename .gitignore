@@ -4,6 +4,7 @@ __pycache__
 .pytest_cache
 .vscode
 adapters/__pycache__
+logs/
 nashville/data
 state_memory/__pycache__
 supervisory/__pycache__

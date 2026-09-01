@@ -2,6 +2,7 @@ import dataclasses
 import types
 from typing import Union, get_args, get_origin, get_type_hints
 from base import Record
+from base.output.geometry import Geometry
 
 SQL_TYPE_MAP = {
     int: "INTEGER",
@@ -9,6 +10,8 @@ SQL_TYPE_MAP = {
     str: "TEXT",
     bool: "BOOLEAN",
 }
+
+COORDS_FIELDS = ("coords", "coords_4326")
 
 
 class SchemaManager:
@@ -42,6 +45,7 @@ class SchemaManager:
 
     def _create_schema(self):
         with self.conn.cursor() as cur:
+            cur.execute("CREATE EXTENSION IF NOT EXISTS postgis")
             cur.execute(f"CREATE SCHEMA {self.run_id}")
         self.conn.commit()
 
@@ -53,17 +57,29 @@ class SchemaManager:
                     f"CREATE INDEX IF NOT EXISTS idx_{cls.table_name}_{col} "
                     f"ON {self.run_id}.{cls.table_name} ({col});"
                 )
+            for col in self._coords_fields(cls):
+                cur.execute(
+                    f"CREATE INDEX IF NOT EXISTS idx_{cls.table_name}_{col}_gist "
+                    f"ON {self.run_id}.{cls.table_name} USING GIST ({col});"
+                )
         self.conn.commit()
 
     def _get_table_query(self, cls: type[Record]) -> str:
         hints = get_type_hints(cls)
         table = f"{self.run_id}.{cls.table_name}"
+        coords_fields = self._coords_fields(cls)
         columns = ", ".join(
-            f"{f.name} {self._get_sql_type(hints[f.name])}"
+            f"{f.name} {'geometry' if f.name in coords_fields else self._get_sql_type(hints[f.name])}"
             for f in dataclasses.fields(cls)
         )
         pk = f", PRIMARY KEY ({', '.join(cls.primary_key)})" if cls.primary_key else ""
         return f"CREATE TABLE IF NOT EXISTS {table} ({columns}{pk});"
+
+    @staticmethod
+    def _coords_fields(cls: type[Record]) -> set[str]:
+        if not issubclass(cls, Geometry):
+            return set()
+        return {f.name for f in dataclasses.fields(cls) if f.name in COORDS_FIELDS}
 
     def reset_tables(self, drop_tables: bool = False):
         with self.conn.cursor() as cur:

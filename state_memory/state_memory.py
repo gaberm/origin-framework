@@ -5,10 +5,11 @@ from typing import Sequence
 import psycopg2.pool
 from psycopg2.extras import execute_values
 from base import Input, Record
+from base.output.geometry import Geometry, to_ewkt
 from state_memory.validation import validate_run_id
 from supervisory.scheduling.time_window import TimeWindow
 from .input_loader import InputLoader
-from .schema_manager import SchemaManager
+from .schema_manager import SchemaManager, COORDS_FIELDS
 
 
 def _generate_run_id() -> str:
@@ -44,21 +45,40 @@ class StateMemory:
             return
         # Fix the column order once so every row serializes consistently.
         columns = list(rows[0].keys())
-        argslist = [tuple(row[col] for col in columns) for row in rows]
+        geometry_columns = (
+            {col for col in columns if col in COORDS_FIELDS}
+            if issubclass(entity_cls, Geometry)
+            else set()
+        )
+        argslist = [
+            tuple(self._serialize_value(row, col, geometry_columns) for col in columns)
+            for row in rows
+        ]
+        template = "(" + ", ".join(
+            "ST_GeomFromEWKT(%s)" if col in geometry_columns else "%s"
+            for col in columns
+        ) + ")"
         query = (
             f"INSERT INTO {self.run_id}.{entity_cls.table_name} "
             f"({', '.join(columns)}) VALUES %s"
         )
         if entity_cls.diagnostic:
-            self._executor.submit(self._execute_insert, query, argslist)
+            self._executor.submit(self._execute_insert, query, argslist, template)
         else:
-            self._execute_insert(query, argslist)
+            self._execute_insert(query, argslist, template)
 
-    def _execute_insert(self, query: str, argslist: list[tuple]):
+    @staticmethod
+    def _serialize_value(row: dict, col: str, geometry_columns: set[str]):
+        if col not in geometry_columns or row[col] is None:
+            return row[col]
+        srid = row["srid"] if col == "coords" else 4326
+        return to_ewkt(row[col], row["shape"], srid)
+
+    def _execute_insert(self, query: str, argslist: list[tuple], template: str = None):
         # One connection checkout, one multi-row statement, one commit per batch.
         with self._connection() as conn:
             with conn.cursor() as cur:
-                execute_values(cur, query, argslist)
+                execute_values(cur, query, argslist, template=template)
             conn.commit()
 
     def load_inputs(

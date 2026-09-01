@@ -1,6 +1,6 @@
 import pytest
 from dataclasses import dataclass
-from base import Record, Filter, Equal, Join, Fields, Input, Latest
+from base import Record, Geometry, SHAPE_TYPE, Filter, Equal, Join, SpatialJoin, Fields, Input, Latest
 
 
 @dataclass(kw_only=True)
@@ -17,6 +17,22 @@ class Battery(Record):
     primary_key = ("veh_id",)
     veh_id: str
     capacity: float
+
+
+@dataclass(kw_only=True)
+class VehicleLocation(Record, Geometry):
+    table_name = "vehicle_location"
+    primary_key = ("veh_id",)
+    veh_id: str
+    shape: SHAPE_TYPE = "POINT"
+
+
+@dataclass(kw_only=True)
+class Zone(Record, Geometry):
+    table_name = "zone"
+    primary_key = ("zone_id",)
+    zone_id: str
+    shape: SHAPE_TYPE = "POLYGON"
 
 
 def test_wrong_filter_condition():
@@ -51,6 +67,36 @@ def test_valid_join():
     assert join.right_record is Battery
     assert join.left_field == "veh_id"
     assert join.right_field == "veh_id"
+
+
+def test_spatial_join_same_record():
+    with pytest.raises(TypeError, match="left and right records must be different"):
+        SpatialJoin((VehicleLocation, "coords"), (VehicleLocation, "coords"))
+
+
+def test_spatial_join_non_geometry_record():
+    with pytest.raises(TypeError, match="requires Geometry records"):
+        SpatialJoin((Vehicle, "veh_id"), (Zone, "coords"))
+
+
+def test_spatial_join_invalid_mode():
+    with pytest.raises(ValueError, match="mode must be one of"):
+        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), mode="bad_mode")
+
+
+def test_spatial_join_invalid_duplicates():
+    with pytest.raises(ValueError, match="duplicates must be 'keep' or 'drop'"):
+        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), duplicates="bad")
+
+
+def test_valid_spatial_join():
+    join = SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), mode="left", duplicates="drop")
+    assert join.left_record is VehicleLocation
+    assert join.right_record is Zone
+    assert join.left_field == "coords"
+    assert join.right_field == "coords"
+    assert join.mode == "left"
+    assert join.duplicates == "drop"
 
 
 def test_empty_fields():

@@ -85,12 +85,14 @@ class AdapterWorker:
 
     def _on_message(self, ch, method, properties, body):
         message = Message.from_dict(json.loads(body))
-        try:
-            reply = self._handlers[message.command](message.payload)
-        except KeyError:
+        handler = self._handlers.get(message.command)
+        if handler is None:
             reply = Response(success=False, error=f"Unknown command: {message.command}")
-        except Exception as e:
-            reply = Response(success=False, error=str(e))
+        else:
+            try:
+                reply = handler(message.payload)
+            except Exception as e:
+                reply = Response(success=False, error=str(e))
         ch.basic_publish(
             exchange="",
             routing_key=properties.reply_to,

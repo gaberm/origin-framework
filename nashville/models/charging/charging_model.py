@@ -88,7 +88,7 @@ class ChargingModel:
             np.array([session["soc"] for session in self.active_sessions]),
             np.array(
                 [
-                    self.ports[session["port"]]["power_kw"]
+                    self.ports[session["port_id"]]["power_kw"]
                     for session in self.active_sessions
                 ]
             ),

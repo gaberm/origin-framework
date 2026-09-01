@@ -69,19 +69,33 @@ class Filter:
 _VALID_JOIN_MODES = ("inner", "left", "right", "full")
 
 
-class Join:
-    __slots__ = ("left_record", "left_field", "right_record", "right_field", "mode")
+class KeyJoin:
+    __slots__ = (
+        "left_record",
+        "left_field",
+        "right_record",
+        "right_field",
+        "join_type",
+        "duplicates",
+    )
 
     VALID_MODES = _VALID_JOIN_MODES
 
-    def __init__(self, left: tuple[type[Record], str], right: tuple[type[Record], str], mode: str = "inner"):
+    def __init__(
+        self,
+        left: tuple[type[Record], str],
+        right: tuple[type[Record], str],
+        join_type: str = "inner",
+        duplicates: str = "keep",
+    ):
         self.left_record, self.left_field = left
         self.right_record, self.right_field = right
-        self.mode = mode
+        self.join_type = join_type
+        self.duplicates = duplicates
         self._validate()
 
     def _validate(self):
-        context = f"Join({self.left_record.__name__} → {self.right_record.__name__})"
+        context = f"KeyJoin({self.left_record.__name__} → {self.right_record.__name__})"
         if self.left_record is self.right_record:
             raise TypeError(f"{context}: left and right records must be different")
         for record, field in (
@@ -93,24 +107,53 @@ class Join:
                 raise AttributeError(
                     f"{context}: {record.__name__} has no field {field!r}. Valid: {sorted(valid_fields)}"
                 )
-        if self.mode not in self.VALID_MODES:
-            raise ValueError(f"{context}: mode must be one of {self.VALID_MODES}, got {self.mode!r}")
+        if self.join_type not in self.VALID_MODES:
+            raise ValueError(
+                f"{context}: join_type must be one of {self.VALID_MODES}, got {self.join_type!r}"
+            )
+        if self.duplicates not in ("keep", "drop"):
+            raise ValueError(
+                f"{context}: duplicates must be 'keep' or 'drop', got {self.duplicates!r}"
+            )
+
+
+_VALID_PREDICATES = ("exact", "nearest")
 
 
 class SpatialJoin:
-    __slots__ = ("left_record", "left_field", "right_record", "right_field", "mode", "duplicates")
+    __slots__ = (
+        "left_record",
+        "left_field",
+        "right_record",
+        "right_field",
+        "join_type",
+        "duplicates",
+        "predicate",
+    )
 
     VALID_MODES = _VALID_JOIN_MODES
+    VALID_PREDICATES = _VALID_PREDICATES
 
-    def __init__(self, left: tuple[type[Record], str], right: tuple[type[Record], str], mode: str = "inner", duplicates: str = "keep"):
+    def __init__(
+        self,
+        left: tuple[type[Record], str],
+        right: tuple[type[Record], str],
+        join_type: str = "inner",
+        duplicates: str = "keep",
+        predicate: str = "exact",
+    ):
         self.left_record, self.left_field = left
         self.right_record, self.right_field = right
-        self.mode = mode
+        self.join_type = join_type
         self.duplicates = duplicates
-        self._validate()
+        self.predicate = predicate
+        context = (
+            f"SpatialJoin({self.left_record.__name__} → {self.right_record.__name__})"
+        )
+        self._validate_records(context)
+        self._validate_parameters(context)
 
-    def _validate(self):
-        context = f"SpatialJoin({self.left_record.__name__} → {self.right_record.__name__})"
+    def _validate_records(self, context: str):
         if self.left_record is self.right_record:
             raise TypeError(f"{context}: left and right records must be different")
         for record, field in (
@@ -118,16 +161,33 @@ class SpatialJoin:
             (self.right_record, self.right_field),
         ):
             if not issubclass(record, Geometry):
-                raise TypeError(f"{context}: SpatialJoin requires Geometry records, got {record.__name__} which is not a Geometry record")
+                raise TypeError(
+                    f"{context}: SpatialJoin requires Geometry records, got {record.__name__} which is not a Geometry record"
+                )
             valid_fields = {field.name for field in dataclass_fields(record)}
             if field not in valid_fields:
                 raise AttributeError(
                     f"{context}: {record.__name__} has no field {field!r}. Valid: {sorted(valid_fields)}"
                 )
-        if self.mode not in self.VALID_MODES:
-            raise ValueError(f"{context}: mode must be one of {self.VALID_MODES}, got {self.mode!r}")
+
+    def _validate_parameters(self, context: str):
+        if self.join_type not in self.VALID_MODES:
+            raise ValueError(
+                f"{context}: join_type must be one of {self.VALID_MODES}, got {self.join_type!r}"
+            )
         if self.duplicates not in ("keep", "drop"):
-            raise ValueError(f"{context}: duplicates must be 'keep' or 'drop', got {self.duplicates!r}")
+            raise ValueError(
+                f"{context}: duplicates must be 'keep' or 'drop', got {self.duplicates!r}"
+            )
+        if self.predicate not in self.VALID_PREDICATES:
+            raise ValueError(
+                f"{context}: predicate must be one of {self.VALID_PREDICATES}, got {self.predicate!r}"
+            )
+        if self.predicate == "nearest" and self.join_type in ("right", "full"):
+            raise ValueError(
+                f"{context}: predicate='nearest' does not support join_type={self.join_type!r} "
+                "(Postgres has no RIGHT/FULL JOIN LATERAL); use 'inner' or 'left'"
+            )
 
 
 class Fields:
@@ -219,7 +279,7 @@ class Input:
         from_: type[Record] | list[type[Record]],
         select: Fields,
         where: Filter | list[Filter] = None,
-        on: Join | SpatialJoin | list[Join | SpatialJoin] = None,
+        on: KeyJoin | SpatialJoin | list[KeyJoin | SpatialJoin] = None,
         read_policy: ReadPolicy = None,
     ):
         self.name = name
@@ -244,9 +304,9 @@ class Input:
 
     def _validate_on(self):
         for join in self.on:
-            if not isinstance(join, (Join, SpatialJoin)):
+            if not isinstance(join, (KeyJoin, SpatialJoin)):
                 raise TypeError(
-                    f"{self.name}.on: must be (list of) Join/SpatialJoin; got {type(join).__name__!r}"
+                    f"{self.name}.on: must be (list of) KeyJoin/SpatialJoin; got {type(join).__name__!r}"
                 )
 
     def _validate_where(self):
@@ -269,7 +329,9 @@ class Input:
             )
         if None in self.select.selected_fields:
             field_names = self.select.selected_fields.pop(None)
-            from_record = self.from_ if not isinstance(self.from_, list) else self.from_[0]
+            from_record = (
+                self.from_ if not isinstance(self.from_, list) else self.from_[0]
+            )
             valid_fields = {field.name for field in dataclass_fields(from_record)}
             for field_name in field_names:
                 if field_name not in valid_fields:

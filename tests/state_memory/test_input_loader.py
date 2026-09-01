@@ -1,5 +1,5 @@
 import pytest
-from base import Input, Fields, Filter, Equal, Join, SpatialJoin, Latest
+from base import Input, Fields, Filter, Equal, KeyJoin, SpatialJoin, Latest
 from state_memory.input_loader import InputLoader
 from supervisory.scheduling.time_window import TimeWindow
 from _records import Vehicle, Battery, VehicleLocation, Zone, RUN_ID
@@ -138,11 +138,28 @@ def test_spatial_join_drop_duplicates(spatial_loader):
     assert {row["veh_id"] for row in rows} == {"veh_1", "veh_2"}
 
 
+def test_spatial_join_nearest(spatial_loader):
+    spec = Input(
+        name="vehicle_location",
+        from_=VehicleLocation,
+        on=SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), predicate="nearest"),
+        select=Fields((VehicleLocation, "veh_id"), (Zone, "zone_id")),
+    )
+    result = spatial_loader.load_inputs(spec, TimeWindow(0.0, 2.0))
+    rows = result["vehicle_location"]
+    # Unlike "exact", every vehicle gets exactly one match, including veh_3
+    # (20,20), which intersects neither zone but is closer to z2 than z1.
+    assert len(rows) == 3
+    matches = {row["veh_id"]: row["zone_id"] for row in rows}
+    assert matches["veh_3"] == "z2"
+    assert matches["veh_1"] == "z1"
+
+
 def test_join(loader):
     spec = Input(
         name="vehicle",
         from_=Vehicle,
-        on=Join((Vehicle, "veh_id"), (Battery, "veh_id")),
+        on=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
         select=Fields((Vehicle, "veh_id", "soc"), (Battery, "capacity")),
     )
     result = loader.load_inputs(spec, TimeWindow(1.0, 2.0))
@@ -150,3 +167,35 @@ def test_join(loader):
     assert result["vehicle"][0]["veh_id"] == "veh_1"
     assert result["vehicle"][0]["soc"] == 0.5
     assert result["vehicle"][0]["capacity"] == 100.0
+
+
+def test_join_keep_duplicates(loader, postgresql):
+    cur = postgresql.cursor()
+    cur.execute(f"INSERT INTO {RUN_ID}.battery (veh_id, capacity) VALUES ('veh_1', 150.0)")
+    postgresql.commit()
+    spec = Input(
+        name="vehicle",
+        from_=Vehicle,
+        on=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
+        select=Fields((Vehicle, "veh_id", "soc"), (Battery, "capacity")),
+    )
+    result = loader.load_inputs(spec, TimeWindow(1.0, 2.0))
+    # veh_1 now has two battery rows; a plain equality join fans out by default.
+    assert len(result["vehicle"]) == 2
+    assert {row["capacity"] for row in result["vehicle"]} == {100.0, 150.0}
+
+
+def test_join_drop_duplicates(loader, postgresql):
+    cur = postgresql.cursor()
+    cur.execute(f"INSERT INTO {RUN_ID}.battery (veh_id, capacity) VALUES ('veh_1', 150.0)")
+    postgresql.commit()
+    spec = Input(
+        name="vehicle",
+        from_=Vehicle,
+        on=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id"), duplicates="drop"),
+        select=Fields((Vehicle, "veh_id", "soc"), (Battery, "capacity")),
+    )
+    result = loader.load_inputs(spec, TimeWindow(1.0, 2.0))
+    # duplicates="drop" collapses the fan-out back to one row per vehicle.
+    assert len(result["vehicle"]) == 1
+    assert result["vehicle"][0]["veh_id"] == "veh_1"

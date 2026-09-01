@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from typing import Sequence
-from base.input.input import Input, Join, Latest, SpatialJoin
+from base.input.input import Input, KeyJoin, Latest, SpatialJoin
 from base.utils import as_list
 from supervisory.scheduling.time_window import TimeWindow
 
@@ -71,7 +71,7 @@ class InputLoader:
     ) -> tuple[str, list]:
         if self._deduplication_key(input_spec) is not None:
             raise ValueError(
-                f"{input_spec.name}: SpatialJoin(duplicates='drop') cannot be "
+                f"{input_spec.name}: a join with duplicates='drop' cannot be "
                 f"combined with read_policy=Latest"
             )
         by = input_spec.read_policy.by
@@ -127,26 +127,32 @@ class InputLoader:
         )
         return f"{self.run_id}.{primary_name} {primary_name} {' '.join(join_clauses)}"
 
-    def _join_clause(self, join: Join) -> str:
-        keyword = _SQL_JOIN_KEYWORDS[join.mode]
+    def _join_clause(self, join: KeyJoin) -> str:
+        keyword = _SQL_JOIN_KEYWORDS[join.join_type]
         return (
             f"{keyword} {self.run_id}.{join.right_record.table_name} {join.right_record.table_name} "
             f"ON {join.left_record.table_name}.{join.left_field} = {join.right_record.table_name}.{join.right_field}"
         )
 
     def _spatial_join_clause(self, join: SpatialJoin) -> str:
-        keyword = _SQL_JOIN_KEYWORDS[join.mode]
+        keyword = _SQL_JOIN_KEYWORDS[join.join_type]
+        right_table = join.right_record.table_name
+        if join.predicate == "nearest":
+            return (
+                f"{keyword} LATERAL ("
+                f"SELECT * FROM {self.run_id}.{right_table} {right_table} "
+                f"ORDER BY {join.left_record.table_name}.{join.left_field} <-> "
+                f"{right_table}.{join.right_field} LIMIT 1"
+                f") {right_table} ON true"
+            )
         return (
-            f"{keyword} {self.run_id}.{join.right_record.table_name} {join.right_record.table_name} "
+            f"{keyword} {self.run_id}.{right_table} {right_table} "
             f"ON ST_Intersects({join.left_record.table_name}.{join.left_field}, "
-            f"{join.right_record.table_name}.{join.right_field})"
+            f"{right_table}.{join.right_field})"
         )
 
     def _deduplication_key(self, input_spec: Input) -> str | None:
-        has_drop_join = any(
-            isinstance(join, SpatialJoin) and join.duplicates == "drop"
-            for join in input_spec.on
-        )
+        has_drop_join = any(join.duplicates == "drop" for join in input_spec.on)
         if not has_drop_join:
             return None
         base_table = input_spec.from_

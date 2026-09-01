@@ -1,6 +1,6 @@
 import pytest
 from dataclasses import dataclass
-from base import Record, Input, Fields, ModelSpec, Join
+from base import Record, Input, Fields, ModelSpec, KeyJoin
 from base.input.input import Latest
 from adapter.adapter import Adapter
 from supervisory.scheduling.scheduler import Scheduler
@@ -201,7 +201,7 @@ class TestQuadrupleModel:
         input_types = Input(
             name="record_b_c",
             from_=RecordB,
-            on=Join((RecordB, "id"), (RecordC, "id")),
+            on=KeyJoin((RecordB, "id"), (RecordC, "id")),
             select=Fields((RecordB, "id"), (RecordC, "id")),
         )
         output_types = RecordD

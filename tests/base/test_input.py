@@ -1,6 +1,6 @@
 import pytest
 from dataclasses import dataclass
-from base import Record, Geometry, SHAPE_TYPE, Filter, Equal, Join, SpatialJoin, Fields, Input, Latest
+from base import Record, Geometry, SHAPE_TYPE, Filter, Equal, KeyJoin, SpatialJoin, Fields, Input, Latest
 
 
 @dataclass(kw_only=True)
@@ -48,25 +48,36 @@ def test_valid_filter():
 
 def test_join_same_record():
     with pytest.raises(TypeError, match="left and right records must be different"):
-        Join((Vehicle, "veh_id"), (Vehicle, "veh_id"))
+        KeyJoin((Vehicle, "veh_id"), (Vehicle, "veh_id"))
 
 
 def test_join_nonexistent_left_field():
     with pytest.raises(AttributeError, match="no field 'typo'"):
-        Join((Vehicle, "typo"), (Battery, "veh_id"))
+        KeyJoin((Vehicle, "typo"), (Battery, "veh_id"))
 
 
 def test_join_nonexistent_right_field():
     with pytest.raises(AttributeError, match="no field 'typo'"):
-        Join((Vehicle, "veh_id"), (Battery, "typo"))
+        KeyJoin((Vehicle, "veh_id"), (Battery, "typo"))
 
 
 def test_valid_join():
-    join = Join((Vehicle, "veh_id"), (Battery, "veh_id"))
+    join = KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id"))
     assert join.left_record is Vehicle
     assert join.right_record is Battery
     assert join.left_field == "veh_id"
     assert join.right_field == "veh_id"
+    assert join.duplicates == "keep"
+
+
+def test_join_drop_duplicates():
+    join = KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id"), duplicates="drop")
+    assert join.duplicates == "drop"
+
+
+def test_join_invalid_duplicates():
+    with pytest.raises(ValueError, match="duplicates must be 'keep' or 'drop'"):
+        KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id"), duplicates="bad")
 
 
 def test_spatial_join_same_record():
@@ -80,8 +91,8 @@ def test_spatial_join_non_geometry_record():
 
 
 def test_spatial_join_invalid_mode():
-    with pytest.raises(ValueError, match="mode must be one of"):
-        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), mode="bad_mode")
+    with pytest.raises(ValueError, match="join_type must be one of"):
+        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), join_type="bad_mode")
 
 
 def test_spatial_join_invalid_duplicates():
@@ -90,13 +101,39 @@ def test_spatial_join_invalid_duplicates():
 
 
 def test_valid_spatial_join():
-    join = SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), mode="left", duplicates="drop")
+    join = SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), join_type="left", duplicates="drop")
     assert join.left_record is VehicleLocation
     assert join.right_record is Zone
     assert join.left_field == "coords"
     assert join.right_field == "coords"
-    assert join.mode == "left"
+    assert join.join_type == "left"
     assert join.duplicates == "drop"
+
+
+def test_spatial_join_default_predicate():
+    join = SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"))
+    assert join.predicate == "exact"
+
+
+def test_spatial_join_nearest_predicate():
+    join = SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), predicate="nearest")
+    assert join.predicate == "nearest"
+
+
+def test_spatial_join_invalid_predicate():
+    with pytest.raises(ValueError, match="predicate must be one of"):
+        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), predicate="bad")
+
+
+@pytest.mark.parametrize("join_type", ["right", "full"])
+def test_spatial_join_nearest_rejects_right_and_full(join_type):
+    with pytest.raises(ValueError, match="does not support join_type"):
+        SpatialJoin(
+            (VehicleLocation, "coords"),
+            (Zone, "coords"),
+            join_type=join_type,
+            predicate="nearest",
+        )
 
 
 def test_empty_fields():
@@ -163,7 +200,7 @@ def test_where_nonexistent_field_raises():
 
 
 def test_on_non_join_raises():
-    with pytest.raises(TypeError, match="must be .list of. Join"):
+    with pytest.raises(TypeError, match="must be .list of. KeyJoin"):
         Input(name="BadInput", from_=Vehicle, on=["not_a_join"], select=Fields("veh_id"))
 
 
@@ -190,7 +227,7 @@ def test_valid_join_input():
     Input(
         name="VehicleInput",
         from_=Vehicle,
-        on=Join((Vehicle, "veh_id"), (Battery, "veh_id")),
+        on=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
         select=Fields((Vehicle, "veh_id"), (Battery, "capacity")),
     )
 

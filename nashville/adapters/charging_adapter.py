@@ -34,7 +34,12 @@ class ChargingAdapter(Adapter):
 
     def write_inputs(self, inputs: Mapping[str, list[dict]]):
         for row in inputs.get(arrived_vehicles.name, []):
-            self._charging_model.add_vehicle(row["veh_id"], initial_soc=row["soc"])
+            self._charging_model.add_vehicle(
+                row["veh_id"],
+                soc=row["soc"],
+                capacity_kwh=row["capacity"],
+                charging_power_kw=row["charging_power"],
+            )
         for row in inputs.get(departed_vehicles.name, []):
             self._charging_model.remove_vehicle(row["veh_id"])
 

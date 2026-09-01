@@ -19,12 +19,16 @@ class SumoAdapter(Adapter):
         )
         self._sumo_config = sumo_config
         self._traci = None
-        self._phev_vehicles = {}
+        self._static_veh_attrs = {}
+        self._dynamic_veh_attrs = {}
+        self._subscription_results = {}
 
     def initialize(self):
+        sif_path = os.environ.get("SUMO_SIF_PATH")
+        command = ["apptainer", "exec", sif_path, "sumo"] if sif_path else ["sumo"]
         traci.start(
-            [
-                "sumo",
+            command
+            + [
                 "-c",
                 self._sumo_config,
                 "--no-warnings",
@@ -37,37 +41,33 @@ class SumoAdapter(Adapter):
 
     def read_outputs(self) -> list[EV]:
         output = []
-        output += self._get_arrived_vehicles()
-        output += self._get_departed_vehicles()
+        output += self._get_arrived_evs()
+        output += self._get_departed_evs()
         output += self._get_battery()
         return output
 
     def _get_vehicle_coords(self, veh_id: str) -> tuple[float, float] | None:
-        try:
-            x, y = self._traci.vehicle.getPosition(veh_id)
-        except traci.exceptions.TraCIException:
+        dynamic_attrs = self._dynamic_veh_attrs.get(veh_id)
+        if dynamic_attrs is None:
             return None
+        x, y = dynamic_attrs["x"], dynamic_attrs["y"]
         if traci.constants.INVALID_DOUBLE_VALUE in (x, y):
             return None
         return self._traci.simulation.convertGeo(x, y)
 
     def _get_soc(self, veh_id: str) -> float:
+        dynamic_attrs = self._dynamic_veh_attrs.get(veh_id)
+        static_attrs = self._static_veh_attrs.get(veh_id)
+        if dynamic_attrs is None or static_attrs is None or not static_attrs["capacity"]:
+            return None
         try:
-            energy_consumed = self._traci.vehicle.getParameter(
-                veh_id, "device.battery.totalEnergyConsumed"
-            )
-            energy_capacity = self._traci.vehicle.getParameter(
-                veh_id, "device.battery.capacity"
-            )
-            return float(energy_consumed) / float(energy_capacity)
-        except traci.exceptions.TraCIException:
+            return float(dynamic_attrs["total_energy_consumed"]) / float(static_attrs["capacity"])
+        except (TypeError, ValueError, ZeroDivisionError):
             return None
 
     def _get_tour_id(self, veh_id: str) -> int:
-        try:
-            return int(self._traci.vehicle.getParameter(veh_id, "tour_id"))
-        except (traci.exceptions.TraCIException, ValueError):
-            return None
+        static_attrs = self._static_veh_attrs.get(veh_id)
+        return static_attrs["tour_id"] if static_attrs else None
 
     def _get_fuel_type(self, veh_id: str) -> str:
         if "PHEV" in veh_id:
@@ -77,13 +77,10 @@ class SumoAdapter(Adapter):
         return "ICE"
 
     def _get_veh_class(self, veh_id: str) -> str:
-        try:
-            type_id = traci.vehicle.getTypeID(veh_id)
-            return traci.vehicletype.getVehicleClass(type_id)
-        except traci.exceptions.TraCIException:
-            return None
+        static_attrs = self._static_veh_attrs.get(veh_id)
+        return static_attrs["veh_class"] if static_attrs else None
 
-    def _get_arrived_vehicles(self) -> list[EV]:
+    def _get_arrived_evs(self) -> list[EV]:
         evs = []
         for veh_id in self._traci.simulation.getArrivedIDList():
             soc = self._get_soc(veh_id)
@@ -105,14 +102,13 @@ class SumoAdapter(Adapter):
                         coords=[lon, lat],
                     )
                 )
+            self._forget_vehicle(veh_id)
         return evs
 
-    def _get_departed_vehicles(self) -> list[EV]:
+    def _get_departed_evs(self) -> list[EV]:
         evs = []
-        known_vehicles = set(self._traci.vehicle.getIDList())
         for veh_id in self._traci.simulation.getDepartedIDList():
-            if veh_id not in known_vehicles:
-                continue
+            self._save_static_attrs(veh_id)
             soc = self._get_soc(veh_id)
             if soc is not None:
                 tour_id = self._get_tour_id(veh_id)
@@ -136,27 +132,19 @@ class SumoAdapter(Adapter):
 
     def _get_battery(self) -> list[VehicleBattery]:
         capacities = []
-        known_vehicles = set(self._traci.vehicle.getIDList())
         for veh_id in self._traci.simulation.getDepartedIDList():
-            if veh_id not in known_vehicles:
-                continue
-            try:
-                capacity = self._traci.vehicle.getParameter(
-                    veh_id, "device.battery.capacity"
-                )
-            except traci.exceptions.TraCIException:
-                continue
-            try:
-                max_charge_rate = self._traci.vehicle.getParameter(
-                    veh_id, "device.battery.maximumChargeRate"
-                )
-            except traci.exceptions.TraCIException:
+            static_attrs = self._static_veh_attrs.get(veh_id)
+            if (
+                static_attrs is None
+                or static_attrs["capacity"] is None
+                or static_attrs["max_charge_rate"] is None
+            ):
                 continue
             capacities.append(
                 VehicleBattery(
                     veh_id=veh_id,
-                    capacity=capacity,
-                    charging_power=max_charge_rate,
+                    capacity=static_attrs["capacity"],
+                    charging_power=static_attrs["max_charge_rate"],
                 )
             )
         return capacities
@@ -169,62 +157,120 @@ class SumoAdapter(Adapter):
 
     def advance(self) -> float:
         self._traci.simulationStep()
-        self.update_phev()
+        self._subscribe_new_departures()
+        self._subscription_results = self._traci.vehicle.getAllSubscriptionResults()
+        self._update_dynamic_veh_attrs()
+        self._update_phev()
         self.model_time += self.timestep_length
         return self.model_time
 
-    def _subscribe_phev(self):
-        for veh_id in self._traci.simulation.getDepartedIDList():
-            if "phev" in veh_id:
-                self._traci.vehicle.subscribe(
-                    veh_id,
-                    [tc.VAR_SPEED, tc.VAR_PARAMETER],
-                    parameters={
-                        tc.VAR_PARAMETER: "device.battery.actualBatteryCapacity"
-                    },
-                )
+    def _save_static_attrs(self, veh_id: str):
+        if veh_id in self._static_veh_attrs:
+            return
+        self._static_veh_attrs[veh_id] = {
+            "capacity": self._read_capacity(veh_id),
+            "max_charge_rate": self._read_max_charge_rate(veh_id),
+            "tour_id": self._read_tour_id(veh_id),
+            "veh_class": self._read_veh_class(veh_id),
+        }
 
-    def update_phev(self):
-        self._subscribe_phev()
-        results = self._traci.vehicle.getAllSubscriptionResults()
-        for veh_id, result in results.items():
+    def _read_capacity(self, veh_id: str) -> float | None:
+        try:
+            capacity = self._traci.vehicle.getParameter(
+                veh_id, "device.battery.capacity"
+            )
+            return float(capacity) if capacity else None
+        except traci.exceptions.TraCIException:
+            return None
+
+    def _read_max_charge_rate(self, veh_id: str) -> float | None:
+        try:
+            max_charge_rate = self._traci.vehicle.getParameter(
+                veh_id, "device.battery.maximumChargeRate"
+            )
+            return float(max_charge_rate) if max_charge_rate else None
+        except traci.exceptions.TraCIException:
+            return None
+
+    def _read_tour_id(self, veh_id: str) -> int | None:
+        try:
+            return int(self._traci.vehicle.getParameter(veh_id, "tour_id"))
+        except (traci.exceptions.TraCIException, ValueError):
+            return None
+
+    def _read_veh_class(self, veh_id: str) -> str | None:
+        try:
+            return self._traci.vehicle.getVehicleClass(veh_id)
+        except traci.exceptions.TraCIException:
+            return None
+
+    def _forget_vehicle(self, veh_id: str):
+        self._static_veh_attrs.pop(veh_id, None)
+        self._dynamic_veh_attrs.pop(veh_id, None)
+
+    def _subscribe_new_departures(self):
+        for veh_id in self._traci.simulation.getDepartedIDList():
+            var_ids = [tc.VAR_POSITION, tc.VAR_PARAMETER_WITH_KEY]
+            parameters = {
+                tc.VAR_PARAMETER_WITH_KEY: ("s", "device.battery.totalEnergyConsumed"),
+            }
+            if "phev" in veh_id:
+                var_ids += [tc.VAR_SPEED, tc.VAR_PARAMETER]
+                parameters[tc.VAR_PARAMETER] = "device.battery.actualBatteryCapacity"
+            try:
+                self._traci.vehicle.subscribe(veh_id, var_ids, parameters=parameters)
+            except traci.exceptions.TraCIException:
+                pass
+
+    def _update_dynamic_veh_attrs(self):
+        for veh_id, result in self._subscription_results.items():
+            if tc.VAR_POSITION not in result or tc.VAR_PARAMETER_WITH_KEY not in result:
+                continue
+            x, y = result[tc.VAR_POSITION]
+            _, total_energy_consumed = result[tc.VAR_PARAMETER_WITH_KEY]
+            self._dynamic_veh_attrs.setdefault(veh_id, {}).update(
+                {
+                    "x": x,
+                    "y": y,
+                    "total_energy_consumed": total_energy_consumed,
+                }
+            )
+
+    def _update_phev(self):
+        for veh_id, result in self._subscription_results.items():
+            if tc.VAR_SPEED not in result or tc.VAR_PARAMETER not in result:
+                continue
             speed = float(result[tc.VAR_SPEED])
             soc = float(result[tc.VAR_PARAMETER])
-            if veh_id not in self._phev_vehicles:
+            dynamic_attrs = self._dynamic_veh_attrs.setdefault(veh_id, {})
+            if "phev_mode" not in dynamic_attrs:
                 mode = "EV" if speed <= self._EV_SPEED_THRESHOLD_MPS else "ICE"
-                self._phev_vehicles[veh_id] = {
-                    "speed": speed,
-                    "soc": soc,
-                    "mode": mode,
-                }
+                dynamic_attrs["phev_speed"] = speed
+                dynamic_attrs["phev_soc"] = soc
+                dynamic_attrs["phev_mode"] = mode
                 self._switch_emissions(veh_id, mode)
             else:
-                self._phev_vehicles[veh_id]["speed"] = speed
-                self._phev_vehicles[veh_id]["soc"] = self._update_soc(
-                    veh_id,
-                    self._phev_vehicles[veh_id],
-                    soc,
-                    speed,
-                )
+                dynamic_attrs["phev_speed"] = speed
+                dynamic_attrs["phev_soc"] = self._update_soc(veh_id, dynamic_attrs, soc, speed)
 
     def _update_soc(self, veh_id, state, raw_soc, speed):
-        current_soc = state["soc"]
+        current_soc = state["phev_soc"]
 
         if current_soc > 0:
-            if state["mode"] == "EV" and speed > self._ICE_SPEED_THRESHOLD_MPS:
-                state["mode"] = "ICE"
-            elif state["mode"] == "ICE" and speed < self._EV_SPEED_THRESHOLD_MPS:
-                state["mode"] = "EV"
+            if state["phev_mode"] == "EV" and speed > self._ICE_SPEED_THRESHOLD_MPS:
+                state["phev_mode"] = "ICE"
+            elif state["phev_mode"] == "ICE" and speed < self._EV_SPEED_THRESHOLD_MPS:
+                state["phev_mode"] = "EV"
 
         if current_soc <= 0:
-            state["mode"] = "ICE"
+            state["phev_mode"] = "ICE"
             self._switch_emissions(veh_id, "ICE")
             self._traci.vehicle.setParameter(
                 veh_id, "device.battery.actualBatteryCapacity", str(current_soc)
             )
             return current_soc
 
-        if state["mode"] == "ICE":
+        if state["phev_mode"] == "ICE":
             self._switch_emissions(veh_id, "ICE")
             delta = raw_soc - current_soc
             if self._EV_SPEED_THRESHOLD_MPS <= speed <= self._ICE_SPEED_THRESHOLD_MPS:

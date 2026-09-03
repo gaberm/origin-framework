@@ -1,14 +1,18 @@
+from __future__ import annotations
 import dataclasses
 import logging
 import time
+from typing import TYPE_CHECKING
 from tqdm import tqdm
 from base import ModelSpec, as_list
-from state_memory import StateMemory
 from supervisory.comm.rabbitmq_client import RabbitMQClient, Response
 from supervisory.comm.messages import Registration
 from supervisory.scheduling.scheduler import Scheduler
 from supervisory.geo.cell_assigner import assign_cells
 from supervisory.geo.coords_converter import convert_coords
+
+if TYPE_CHECKING:
+    from state_memory import StateMemory
 
 logger = logging.getLogger(__name__)
 

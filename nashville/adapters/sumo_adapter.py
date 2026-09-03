@@ -1,9 +1,19 @@
 import os
+import xml.etree.ElementTree as ET
+import sumolib
 from adapter import Adapter
 from nashville.inputs.sumo import vehicle_soc
 from nashville.outputs.sumo import EV, VehicleBattery
-import traci
-import traci.constants as tc
+
+_SIF_PATH = os.environ.get("SUMO_SIF_PATH")
+if _SIF_PATH:
+    import traci
+else:
+    try:
+        import libsumo as traci
+    except ImportError:
+        import traci
+tc = traci.constants
 
 
 class SumoAdapter(Adapter):
@@ -19,13 +29,13 @@ class SumoAdapter(Adapter):
         )
         self._sumo_config = sumo_config
         self._traci = None
+        self._net = None
         self._static_veh_attrs = {}
         self._dynamic_veh_attrs = {}
         self._subscription_results = {}
 
     def initialize(self):
-        sif_path = os.environ.get("SUMO_SIF_PATH")
-        command = ["apptainer", "exec", sif_path, "sumo"] if sif_path else ["sumo"]
+        command = ["apptainer", "exec", _SIF_PATH, "sumo"] if _SIF_PATH else ["sumo"]
         traci.start(
             command
             + [
@@ -38,6 +48,12 @@ class SumoAdapter(Adapter):
         )
         self._traci = traci
         self._timestep_length = self._traci.simulation.getDeltaT()
+        self._net = sumolib.net.readNet(self._resolve_net_file())
+
+    def _resolve_net_file(self) -> str:
+        config_dir = os.path.dirname(self._sumo_config)
+        net_file = ET.parse(self._sumo_config).find(".//net-file").get("value")
+        return os.path.join(config_dir, net_file)
 
     def read_outputs(self) -> list[EV]:
         output = []
@@ -53,15 +69,21 @@ class SumoAdapter(Adapter):
         x, y = dynamic_attrs["x"], dynamic_attrs["y"]
         if traci.constants.INVALID_DOUBLE_VALUE in (x, y):
             return None
-        return self._traci.simulation.convertGeo(x, y)
+        return self._net.convertXY2LonLat(x, y)
 
     def _get_soc(self, veh_id: str) -> float:
         dynamic_attrs = self._dynamic_veh_attrs.get(veh_id)
         static_attrs = self._static_veh_attrs.get(veh_id)
-        if dynamic_attrs is None or static_attrs is None or not static_attrs["capacity"]:
+        if (
+            dynamic_attrs is None
+            or static_attrs is None
+            or not static_attrs["capacity"]
+        ):
             return None
         try:
-            return float(dynamic_attrs["total_energy_consumed"]) / float(static_attrs["capacity"])
+            return float(dynamic_attrs["total_energy_consumed"]) / float(
+                static_attrs["capacity"]
+            )
         except (TypeError, ValueError, ZeroDivisionError):
             return None
 
@@ -70,9 +92,16 @@ class SumoAdapter(Adapter):
         return static_attrs["tour_id"] if static_attrs else None
 
     def _get_fuel_type(self, veh_id: str) -> str:
-        if "PHEV" in veh_id:
+        static_attrs = self._static_veh_attrs.get(veh_id)
+        veh_type = static_attrs["veh_type"] if static_attrs else None
+        return self._classify_veh_type(veh_type)
+
+    @staticmethod
+    def _classify_veh_type(veh_type: str | None) -> str:
+        veh_type = (veh_type or "").upper()
+        if veh_type.startswith("PHEV"):
             return "PHEV"
-        elif "EV" in veh_id:
+        if veh_type.startswith("EV"):
             return "EV"
         return "ICE"
 
@@ -172,6 +201,7 @@ class SumoAdapter(Adapter):
             "max_charge_rate": self._read_max_charge_rate(veh_id),
             "tour_id": self._read_tour_id(veh_id),
             "veh_class": self._read_veh_class(veh_id),
+            "veh_type": self._read_veh_type(veh_id),
         }
 
     def _read_capacity(self, veh_id: str) -> float | None:
@@ -204,17 +234,26 @@ class SumoAdapter(Adapter):
         except traci.exceptions.TraCIException:
             return None
 
+    def _read_veh_type(self, veh_id: str) -> str | None:
+        try:
+            return self._traci.vehicle.getTypeID(veh_id)
+        except traci.exceptions.TraCIException:
+            return None
+
     def _forget_vehicle(self, veh_id: str):
         self._static_veh_attrs.pop(veh_id, None)
         self._dynamic_veh_attrs.pop(veh_id, None)
 
     def _subscribe_new_departures(self):
         for veh_id in self._traci.simulation.getDepartedIDList():
+            fuel_type = self._classify_veh_type(self._read_veh_type(veh_id))
+            if fuel_type == "ICE":
+                continue
             var_ids = [tc.VAR_POSITION, tc.VAR_PARAMETER_WITH_KEY]
             parameters = {
                 tc.VAR_PARAMETER_WITH_KEY: ("s", "device.battery.totalEnergyConsumed"),
             }
-            if "phev" in veh_id:
+            if fuel_type == "PHEV":
                 var_ids += [tc.VAR_SPEED, tc.VAR_PARAMETER]
                 parameters[tc.VAR_PARAMETER] = "device.battery.actualBatteryCapacity"
             try:
@@ -251,7 +290,9 @@ class SumoAdapter(Adapter):
                 self._switch_emissions(veh_id, mode)
             else:
                 dynamic_attrs["phev_speed"] = speed
-                dynamic_attrs["phev_soc"] = self._update_soc(veh_id, dynamic_attrs, soc, speed)
+                dynamic_attrs["phev_soc"] = self._update_soc(
+                    veh_id, dynamic_attrs, soc, speed
+                )
 
     def _update_soc(self, veh_id, state, raw_soc, speed):
         current_soc = state["phev_soc"]

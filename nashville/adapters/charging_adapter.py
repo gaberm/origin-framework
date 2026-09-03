@@ -34,12 +34,16 @@ class ChargingAdapter(Adapter):
 
     def write_inputs(self, inputs: Mapping[str, list[dict]]):
         for row in inputs.get(arrived_vehicles.name, []):
-            self._charging_model.add_vehicle(
-                row["veh_id"],
-                soc=row["soc"],
-                capacity_kwh=row["capacity"],
-                charging_power_kw=row["charging_power"],
-            )
+            try:
+                self._charging_model.add_vehicle(
+                    row["veh_id"],
+                    soc=row["soc"],
+                    capacity_kwh=row["capacity"],
+                    charging_power_kw=row["charging_power"],
+                    station_id=row["station_id"],
+                )
+            except ValueError:
+                pass
         for row in inputs.get(departed_vehicles.name, []):
             self._charging_model.remove_vehicle(row["veh_id"])
 
@@ -50,9 +54,9 @@ class ChargingAdapter(Adapter):
                 outputs.append(
                     PortStatus(
                         port_id=event["port_id"],
-                        station_id=self._charging_model.stations[event["port_id"]][
-                            "station_id"
-                        ],
+                        station_id=self._charging_model.get_station_id(
+                            event["port_id"]
+                        ),
                         load=event["load_kw"],
                         time=event["time"],
                     )
@@ -62,16 +66,16 @@ class ChargingAdapter(Adapter):
     def _get_charging_event(self) -> list[ChargingEvent]:
         outputs = []
         for event in self._charging_model.completed_sessions:
-            if event["time"] == (self.model_time - self._TIMESTEP_MIN):
+            if event["finished_at"] == (self.model_time - self._TIMESTEP_MIN):
                 outputs.append(
                     ChargingEvent(
                         veh_id=event["veh_id"],
-                        station_id=self._charging_model.stations[event["port_id"]][
-                            "station_id"
-                        ],
+                        station_id=self._charging_model.get_station_id(
+                            event["port_id"]
+                        ),
                         port_id=event["port_id"],
-                        final_soc=event["soc"],
-                        time=event["time"],
+                        final_soc=event["final_soc"],
+                        time=event["finished_at"],
                     )
                 )
         return outputs

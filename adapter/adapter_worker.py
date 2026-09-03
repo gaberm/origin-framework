@@ -4,7 +4,7 @@ import time
 import uuid
 import pika
 from adapter.adapter import Adapter
-from supervisory.comm.messages import Message, Response, Registration
+from supervisory.comm.messages import Message, Operation, Response, Registration
 
 
 class AdapterWorker:
@@ -100,6 +100,8 @@ class AdapterWorker:
             body=json.dumps(reply.to_dict()),
         )
         ch.basic_ack(delivery_tag=method.delivery_tag)
+        if message.command == Operation.TERMINATE and reply.success:
+            ch.stop_consuming()
 
     def initialize(self, payload) -> Response:
         self.adapter.initialize()

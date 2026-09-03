@@ -88,14 +88,18 @@ def main():
         host=host, port=port, username=username, password=password
     )
 
-    SupervisoryModel(
-        model_specs=MODEL_SPECS,
-        state_memory=state_memory,
-        rabbitmq_client=rabbitmq,
-        max_global_time=float(os.environ.get("MAX_GLOBAL_TIME", 86_400)),
-        registration_timeout=DEFAULT_REGISTRATION_TIMEOUT,
-        response_timeout=300.0,
-    ).run()
+    try:
+        SupervisoryModel(
+            model_specs=MODEL_SPECS,
+            state_memory=state_memory,
+            rabbitmq_client=rabbitmq,
+            max_global_time=float(os.environ.get("MAX_GLOBAL_TIME", 86_400)),
+            registration_timeout=DEFAULT_REGISTRATION_TIMEOUT,
+            response_timeout=300.0,
+        ).run()
+    except Exception:
+        subprocess.run(["scancel", *job_ids], check=False)
+        raise
 
     wait_for_jobs(job_ids)
 

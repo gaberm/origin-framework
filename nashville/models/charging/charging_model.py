@@ -1,4 +1,5 @@
 import json
+import random
 import numpy as np
 from pathlib import Path
 
@@ -40,7 +41,12 @@ class ChargingModel:
         capacity_kwh: float,
         charging_power_kw: float,
         port_id: int = None,
+        station_id: str = None,
     ):
+        if port_id is None and station_id is None:
+            raise ValueError("must provide either port_id or station_id")
+        if port_id is None:
+            port_id = self._random_available_port(station_id)
         self.active_sessions.append(
             {
                 "port_id": port_id,
@@ -51,6 +57,17 @@ class ChargingModel:
                 "charging_power_kw": charging_power_kw,
             }
         )
+
+    def _random_available_port(self, station_id: str) -> int:
+        occupied_ports = {session["port_id"] for session in self.active_sessions}
+        available_ports = [
+            port_id
+            for port_id, port in self.ports.items()
+            if port["station_id"] == station_id and port_id not in occupied_ports
+        ]
+        if not available_ports:
+            raise ValueError(f"no available port at station '{station_id}'")
+        return random.choice(available_ports)
 
     def remove_vehicle(self, veh_id: str):
         for session in self.active_sessions:

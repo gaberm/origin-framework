@@ -17,6 +17,7 @@ class PortStatus(Record, Timestamp):
     table_name = "port_status"
     primary_key = ("port_id", "station_id", "time")
     indexed = ("port_id", "station_id", "time")
+    diagnostic = True
 
     port_id: str
     station_id: str

@@ -1,3 +1,5 @@
+import csv
+import io
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime
@@ -50,35 +52,47 @@ class StateMemory:
             if issubclass(entity_cls, Geometry)
             else set()
         )
-        argslist = [
-            tuple(self._serialize_value(row, col, geometry_columns) for col in columns)
-            for row in rows
-        ]
-        template = "(" + ", ".join(
-            "ST_GeomFromEWKT(%s)" if col in geometry_columns else "%s"
-            for col in columns
-        ) + ")"
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        for row in rows:
+            writer.writerow(
+                self._serialize_value(row, col, geometry_columns) for col in columns
+            )
+        buf.seek(0)
         query = (
-            f"INSERT INTO {self.run_id}.{entity_cls.table_name} "
-            f"({', '.join(columns)}) VALUES %s"
+            f"COPY {self.run_id}.{entity_cls.table_name} "
+            f"({', '.join(columns)}) FROM STDIN WITH (FORMAT csv)"
         )
         if entity_cls.diagnostic:
-            self._executor.submit(self._execute_insert, query, argslist, template)
+            self._executor.submit(self._execute_copy, query, buf)
         else:
-            self._execute_insert(query, argslist, template)
+            self._execute_copy(query, buf)
 
     @staticmethod
     def _serialize_value(row: dict, col: str, geometry_columns: set[str]):
-        if col not in geometry_columns or row[col] is None:
-            return row[col]
-        srid = row["srid"] if col == "coords" else 4326
-        return to_ewkt(row[col], row["shape"], srid)
+        value = row[col]
+        if col in geometry_columns and value is not None:
+            srid = row["srid"] if col == "coords" else 4326
+            return to_ewkt(value, row["shape"], srid)
+        if isinstance(value, list):
+            # Matches psycopg2's array-literal adaptation, which the previous
+            # execute_values-based insert relied on for list-valued columns
+            # (e.g. Geometry.h3_ids) stored in a plain TEXT column.
+            return "{" + ",".join(value) + "}"
+        return value
 
     def _execute_insert(self, query: str, argslist: list[tuple], template: str = None):
         # One connection checkout, one multi-row statement, one commit per batch.
         with self._connection() as conn:
             with conn.cursor() as cur:
                 execute_values(cur, query, argslist, template=template)
+            conn.commit()
+
+    def _execute_copy(self, query: str, buf: io.StringIO):
+        # COPY is substantially faster than a multi-row INSERT for large batches.
+        with self._connection() as conn:
+            with conn.cursor() as cur:
+                cur.copy_expert(query, buf)
             conn.commit()
 
     def load_inputs(

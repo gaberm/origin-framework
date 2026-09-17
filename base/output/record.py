@@ -1,4 +1,5 @@
 from typing import ClassVar, Literal
+from base.output.timestamp import Timestamp
 
 
 class Record:
@@ -8,8 +9,10 @@ class Record:
     on_conflict: ClassVar[Literal["IGNORE", "UPDATE"]] = "IGNORE"
     diagnostic: ClassVar[bool] = False
 
-    def __init_subclass__(cls):
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
         cls._validate_primary_key_indexed()
+        cls._index_time_field()
         cls._validate_on_conflict()
         cls._validate_diagnostic()
 
@@ -22,14 +25,18 @@ class Record:
         }
         for attr in ("primary_key", "indexed"):
             value = getattr(cls, attr, ())
-            if isinstance(value, str):
-                value = (value,)
-                setattr(cls, attr, value)
+            value = (value,) if isinstance(value, str) else tuple(value)
+            setattr(cls, attr, value)
             for key in value:
                 if key not in field_names:
                     raise ValueError(
                         f"{cls.__name__}: {attr} field '{key}' is not declared"
                     )
+
+    @classmethod
+    def _index_time_field(cls):
+        if issubclass(cls, Timestamp):
+            cls.indexed = tuple(dict.fromkeys((cls.time_field, *cls.indexed)))
 
     @classmethod
     def _validate_on_conflict(cls):

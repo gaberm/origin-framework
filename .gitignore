@@ -4,8 +4,12 @@ __pycache__
 .pytest_cache
 .vscode
 adapters/__pycache__
+exports
 logs/
 nashville/data
+nashville/models/charging/davidson_ev_stations.json
+nashville/add_tour_ids.py
+download.py
 state_memory/__pycache__
 supervisory/__pycache__
 supervisory/time/__pycache__

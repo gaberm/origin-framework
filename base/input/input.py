@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, fields as dataclass_fields
+from numbers import Real
 from typing import Any
 from base.output.record import Record
 from base.output.geometry import Geometry
@@ -129,6 +130,8 @@ class SpatialJoin:
         "join_type",
         "duplicates",
         "predicate",
+        "max_distance",
+        "where",
     )
 
     VALID_MODES = _VALID_JOIN_MODES
@@ -141,16 +144,21 @@ class SpatialJoin:
         join_type: str = "inner",
         duplicates: str = "keep",
         predicate: str = "exact",
+        max_distance: float | None = None,
+        where: Filter | list[Filter] = None,
     ):
         self.left_record, self.left_field = left
         self.right_record, self.right_field = right
         self.join_type = join_type
         self.duplicates = duplicates
         self.predicate = predicate
+        self.max_distance = max_distance
+        self.where = as_list(where) if where is not None else []
         context = (
             f"SpatialJoin({self.left_record.__name__} → {self.right_record.__name__})"
         )
         self._validate_records(context)
+        self._validate_where(context)
         self._validate_parameters(context)
 
     def _validate_records(self, context: str):
@@ -168,6 +176,22 @@ class SpatialJoin:
             if field not in valid_fields:
                 raise AttributeError(
                     f"{context}: {record.__name__} has no field {field!r}. Valid: {sorted(valid_fields)}"
+                )
+
+    def _validate_where(self, context: str):
+        valid_fields = {field.name for field in dataclass_fields(self.right_record)}
+        for filter_ in self.where:
+            if not isinstance(filter_, Filter):
+                raise TypeError(
+                    f"{context}.where: must be (list of) Filter; got {type(filter_).__name__!r}"
+                )
+            if filter_.from_ not in (None, self.right_record):
+                raise ValueError(
+                    f"{context}.where: filters apply to {self.right_record.__name__}, got {filter_.from_.__name__}"
+                )
+            if filter_.field not in valid_fields:
+                raise AttributeError(
+                    f"{context}.where: {self.right_record.__name__} has no field {filter_.field!r}. Valid: {sorted(valid_fields)}"
                 )
 
     def _validate_parameters(self, context: str):
@@ -188,6 +212,19 @@ class SpatialJoin:
                 f"{context}: predicate='nearest' does not support join_type={self.join_type!r} "
                 "(Postgres has no RIGHT/FULL JOIN LATERAL); use 'inner' or 'left'"
             )
+        if self.max_distance is not None:
+            if self.predicate != "nearest":
+                raise ValueError(
+                    f"{context}: max_distance requires predicate='nearest'"
+                )
+            if (
+                isinstance(self.max_distance, bool)
+                or not isinstance(self.max_distance, Real)
+                or not 0 < self.max_distance < float("inf")
+            ):
+                raise ValueError(
+                    f"{context}: max_distance must be a positive number of metres, got {self.max_distance!r}"
+                )
 
 
 class Fields:

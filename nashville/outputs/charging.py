@@ -17,7 +17,10 @@ class Station(Record, Geometry):
 @dataclass(kw_only=True)
 class PortStatus(Record, Timestamp):
     table_name = "port_status"
-    primary_key = ("port_id", "station_id", "time")
+    primary_key = (
+        "port_id",
+        "station_id",
+    )
     indexed = ("port_id", "station_id")
     diagnostic = True
 
@@ -30,7 +33,7 @@ class PortStatus(Record, Timestamp):
 @dataclass(kw_only=True)
 class ChargingEvent(Record, Timestamp):
     table_name = "charging_events"
-    primary_key = ("veh_id", "time")
+    primary_key = "veh_id"
     indexed = ("driver_id", "tour_id", "station_id")
 
     veh_id: str

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 @dataclass(kw_only=True)
 class EV(Record, Geometry, Timestamp):
     table_name = "ev"
-    primary_key = ("veh_id", "time", "state")
+    primary_key = ("veh_id", "state")
     indexed = ("h3_ids", "state")
 
     veh_id: str

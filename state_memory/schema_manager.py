@@ -50,12 +50,15 @@ class SchemaManager:
         self.conn.commit()
 
     def _create_table(self, cls: type[Record]) -> None:
+        hints = get_type_hints(cls)
         with self.conn.cursor() as cur:
             cur.execute(self._get_table_query(cls))
-            for col in cls.indexed:
+            for col in self._indexed_columns(cls):
+                is_array = self._get_sql_type(hints[col]).endswith("[]")
+                method = "GIN" if is_array else "BTREE"
                 cur.execute(
                     f"CREATE INDEX IF NOT EXISTS idx_{cls.table_name}_{col} "
-                    f"ON {self.run_id}.{cls.table_name} ({col});"
+                    f"ON {self.run_id}.{cls.table_name} USING {method} ({col});"
                 )
             for col in self._coords_fields(cls):
                 cur.execute(
@@ -63,6 +66,11 @@ class SchemaManager:
                     f"ON {self.run_id}.{cls.table_name} USING GIST ({col});"
                 )
         self.conn.commit()
+
+    @staticmethod
+    def _indexed_columns(cls: type[Record]) -> list[str]:
+        covered = cls.primary_key[:1]
+        return [col for col in cls.indexed if col not in covered]
 
     def _get_table_query(self, cls: type[Record]) -> str:
         hints = get_type_hints(cls)
@@ -136,4 +144,7 @@ class SchemaManager:
         if get_origin(hint) in (Union, types.UnionType):
             non_none = [a for a in get_args(hint) if a is not type(None)]
             hint = non_none[0] if non_none else str
+        if get_origin(hint) is list:
+            (item,) = get_args(hint)
+            return f"{self._get_sql_type(item)}[]"
         return SQL_TYPE_MAP.get(hint, "TEXT")

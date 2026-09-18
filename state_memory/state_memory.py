@@ -1,11 +1,9 @@
-import csv
 import io
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Sequence
 import psycopg2.pool
-from psycopg2.extras import execute_values
 from base import Input, Record
 from base.output.geometry import Geometry, to_ewkt
 from state_memory.validation import validate_run_id
@@ -18,6 +16,25 @@ def _generate_run_id() -> str:
     return datetime.now().strftime("run_%Y%m%d_%H%M%S")
 
 
+_COPY_NULL = "\\N"
+_COPY_TEXT_ESCAPES = str.maketrans(
+    {"\\": "\\\\", "\t": "\\t", "\n": "\\n", "\r": "\\r"}
+)
+
+
+def _array_literal(values: list) -> str:
+    """A Postgres array literal with every element quoted and escaped."""
+    items = (
+        (
+            "NULL"
+            if value is None
+            else '"' + str(value).replace("\\", "\\\\").replace('"', '\\"') + '"'
+        )
+        for value in values
+    )
+    return "{" + ",".join(items) + "}"
+
+
 class StateMemory:
     def __init__(self, db_url: str, run_id: str = None):
         self.run_id = run_id or _generate_run_id()
@@ -25,6 +42,7 @@ class StateMemory:
 
         self._pool = psycopg2.pool.ThreadedConnectionPool(1, 5, db_url)
         self._executor = ThreadPoolExecutor(max_workers=2)
+        self._background_writes: list[Future] = []
 
         self._schema_conn = self._pool.getconn()
 
@@ -43,53 +61,115 @@ class StateMemory:
         self._schema.setup(entity_classes)
 
     def insert_outputs(self, entity_cls: type[Record], rows: list[dict]):
+        self._raise_failed_background_writes()
         if not rows:
             return
-        # Fix the column order once so every row serializes consistently.
-        columns = list(rows[0].keys())
+        columns, geometry_columns = self._resolve_columns(entity_cls, rows[0])
+        buf = self._prepare_copy_payload(rows, columns, geometry_columns)
+        if entity_cls.diagnostic:
+            self._background_writes.append(
+                self._executor.submit(self._write_records, entity_cls, columns, buf)
+            )
+        else:
+            self._write_records(entity_cls, columns, buf)
+
+    def _raise_failed_background_writes(self):
+        finished, pending = [], []
+        for future in self._background_writes:
+            (finished if future.done() else pending).append(future)
+        self._background_writes = pending
+        for future in finished:
+            if future.exception() is not None:
+                raise RuntimeError(
+                    "a background write of diagnostic records failed"
+                ) from future.exception()
+
+    def _write_records(
+        self, entity_cls: type[Record], columns: list[str], buf: io.StringIO
+    ):
+        table = f"{self.run_id}.{entity_cls.table_name}"
+        staging = f"staging_{entity_cls.table_name}"
+        column_list = ", ".join(columns)
+        with self._connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"CREATE TEMP TABLE IF NOT EXISTS {staging} "
+                    f"(LIKE {table}, _row bigserial) ON COMMIT DELETE ROWS"
+                )
+                cur.copy_expert(f"COPY {staging} ({column_list}) FROM STDIN", buf)
+                cur.execute(
+                    self._move_staged_rows_query(entity_cls, columns, table, staging)
+                )
+            conn.commit()
+
+    @staticmethod
+    def _move_staged_rows_query(
+        entity_cls: type[Record], columns: list[str], table: str, staging: str
+    ) -> str:
+        column_list = ", ".join(columns)
+        primary_key = getattr(entity_cls, "primary_key", ())
+        if not primary_key:
+            return (
+                f"INSERT INTO {table} ({column_list}) "
+                f"SELECT {column_list} FROM {staging}"
+            )
+        key_list = ", ".join(primary_key)
+        updated = [col for col in columns if col not in primary_key]
+        if entity_cls.on_conflict == "UPDATE" and updated:
+            select = (
+                f"SELECT DISTINCT ON ({key_list}) {column_list} FROM {staging} "
+                f"ORDER BY {key_list}, _row DESC"
+            )
+            assignments = ", ".join(f"{col} = EXCLUDED.{col}" for col in updated)
+            action = f"DO UPDATE SET {assignments}"
+        else:
+            select = f"SELECT {column_list} FROM {staging} ORDER BY _row"
+            action = "DO NOTHING"
+        return (
+            f"INSERT INTO {table} ({column_list}) {select} "
+            f"ON CONFLICT ({key_list}) {action}"
+        )
+
+    @staticmethod
+    def _resolve_columns(
+        entity_cls: type[Record], first_row: dict
+    ) -> tuple[list[str], set[str]]:
+        columns = list(first_row.keys())
         geometry_columns = (
             {col for col in columns if col in COORDS_FIELDS}
             if issubclass(entity_cls, Geometry)
             else set()
         )
+        return columns, geometry_columns
+
+    @classmethod
+    def _prepare_copy_payload(
+        cls, rows: list[dict], columns: list[str], geometry_columns: set[str]
+    ) -> io.StringIO:
         buf = io.StringIO()
-        writer = csv.writer(buf)
         for row in rows:
-            writer.writerow(
-                self._serialize_value(row, col, geometry_columns) for col in columns
+            buf.write(
+                "\t".join(
+                    cls._serialize_value(row, col, geometry_columns) for col in columns
+                )
             )
+            buf.write("\n")
         buf.seek(0)
-        query = (
-            f"COPY {self.run_id}.{entity_cls.table_name} "
-            f"({', '.join(columns)}) FROM STDIN WITH (FORMAT csv)"
-        )
-        if entity_cls.diagnostic:
-            self._executor.submit(self._execute_copy, query, buf)
-        else:
-            self._execute_copy(query, buf)
+        return buf
 
     @staticmethod
-    def _serialize_value(row: dict, col: str, geometry_columns: set[str]):
+    def _serialize_value(row: dict, col: str, geometry_columns: set[str]) -> str:
         value = row[col]
-        if col in geometry_columns and value is not None:
+        if value is None:
+            return _COPY_NULL
+        if col in geometry_columns:
             srid = row["srid"] if col == "coords" else 4326
-            return to_ewkt(value, row["shape"], srid)
-        if isinstance(value, list):
-            # Matches psycopg2's array-literal adaptation, which the previous
-            # execute_values-based insert relied on for list-valued columns
-            # (e.g. Geometry.h3_ids) stored in a plain TEXT column.
-            return "{" + ",".join(value) + "}"
-        return value
-
-    def _execute_insert(self, query: str, argslist: list[tuple], template: str = None):
-        # One connection checkout, one multi-row statement, one commit per batch.
-        with self._connection() as conn:
-            with conn.cursor() as cur:
-                execute_values(cur, query, argslist, template=template)
-            conn.commit()
+            value = to_ewkt(value, row["shape"], srid)
+        elif isinstance(value, list):
+            value = _array_literal(value)
+        return str(value).translate(_COPY_TEXT_ESCAPES)
 
     def _execute_copy(self, query: str, buf: io.StringIO):
-        # COPY is substantially faster than a multi-row INSERT for large batches.
         with self._connection() as conn:
             with conn.cursor() as cur:
                 cur.copy_expert(query, buf)
@@ -110,19 +190,22 @@ class StateMemory:
 
     def insert_external_dataset(self, dataset) -> None:
         self._schema.setup_external_table(dataset)
+        if not dataset.data:
+            return
         columns = list(dataset.data.keys())
-        n_rows = len(next(iter(dataset.data.values()))) if dataset.data else 0
-        for i in range(n_rows):
-            row = {col: dataset.data[col][i] for col in columns}
-            fields = list(row.keys())
-            values = list(row.values())
-            query = (
-                f"INSERT INTO {self.run_id}.{dataset.table_name} "
-                f"({', '.join(fields)}) VALUES ({', '.join(['%s'] * len(fields))})"
-            )
-            self._execute_insert(query, values)
+        n_rows = len(next(iter(dataset.data.values())))
+        rows = [{col: dataset.data[col][i] for col in columns} for i in range(n_rows)]
+        buf = self._prepare_copy_payload(rows, columns, geometry_columns=set())
+        query = (
+            f"COPY {self.run_id}.{dataset.table_name} "
+            f"({', '.join(columns)}) FROM STDIN"
+        )
+        self._execute_copy(query, buf)
 
     def close_conn(self):
-        self._executor.shutdown(wait=True)
-        self._pool.putconn(self._schema_conn)
-        self._pool.closeall()
+        try:
+            self._executor.shutdown(wait=True)
+            self._raise_failed_background_writes()
+        finally:
+            self._pool.putconn(self._schema_conn)
+            self._pool.closeall()

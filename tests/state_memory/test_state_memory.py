@@ -42,7 +42,7 @@ def state_memory(postgresql):
 
 def _rows(postgresql, table):
     cur = postgresql.cursor()
-    cur.execute(f"SELECT veh_id, soc, time FROM {RUN_ID}.{table} ORDER BY veh_id")
+    cur.execute(f"SELECT veh_id, soc, time_s FROM {RUN_ID}.{table} ORDER BY veh_id")
     rows = cur.fetchall()
     postgresql.commit()
     return rows
@@ -57,7 +57,7 @@ def test_insert_outputs(state_memory, postgresql):
         ],
     )
     cur = postgresql.cursor()
-    cur.execute(f"SELECT veh_id, soc FROM {RUN_ID}.vehicle ORDER BY time")
+    cur.execute(f"SELECT veh_id, soc FROM {RUN_ID}.vehicle ORDER BY time_s")
     assert cur.fetchall() == [("veh_1", 0.5), ("veh_2", 0.8)]
 
 
@@ -105,7 +105,7 @@ def test_geometry_rows_go_through_staging(state_memory, postgresql):
     state_memory.insert_outputs(VehicleLocation, [row, {**row, "time_s": 2.0}])
     cur = postgresql.cursor()
     cur.execute(
-        f"SELECT veh_id, time, ST_AsText(coords), ST_SRID(coords), h3_ids "
+        f"SELECT veh_id, time_s, ST_AsText(coords), ST_SRID(coords), h3_ids "
         f"FROM {RUN_ID}.vehicle_location"
     )
     assert cur.fetchall() == [

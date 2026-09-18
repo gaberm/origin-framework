@@ -2,6 +2,20 @@ from enum import Enum
 from typing import Any
 from dataclasses import dataclass
 
+DEFAULT_HEARTBEAT_SECONDS = 600
+
+
+def task_exchange(run_id: str) -> str:
+    return f"{run_id}.tasks"
+
+
+def registration_queue(run_id: str) -> str:
+    return f"{run_id}.worker_registration"
+
+
+def task_queue(run_id: str, queue_name: str) -> str:
+    return f"{run_id}.{queue_name}"
+
 
 class Operation(str, Enum):
     INITIALIZE = "initialize"

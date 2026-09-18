@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from numbers import Real
 from typing import Literal, get_args
 
 SHAPE_TYPE = Literal["POINT", "LINESTRING", "POLYGON"]
@@ -9,10 +10,14 @@ class Geometry:
     shape: SHAPE_TYPE
     coords: tuple[float, float] | list[tuple[float, float]]
     srid: int = 4326
-    h3_ids: str | list[str] | None = None
+    h3_ids: list[str] | None = None  # stored as TEXT[]
     coords_4326: list | None = None
 
     def __post_init__(self):
+        # Chained so that every base class of a record validates.
+        parent_post_init = getattr(super(), "__post_init__", None)
+        if parent_post_init is not None:
+            parent_post_init()
         self._validate_shape()
         self._validate_coords()
 
@@ -25,7 +30,7 @@ class Geometry:
     def _validate_coords(self):
         if self.shape == "POINT":
             if len(self.coords) != 2 or not all(
-                isinstance(coord, (float, int)) for coord in self.coords
+                isinstance(coord, Real) for coord in self.coords
             ):
                 raise ValueError("POINT coords must be a (float, float) pair")
         else:
@@ -42,7 +47,7 @@ class Geometry:
         return (
             isinstance(coord, (list, tuple))
             and len(coord) == 2
-            and all(isinstance(val, (float, int)) for val in coord)
+            and all(isinstance(val, Real) for val in coord)
         )
 
 

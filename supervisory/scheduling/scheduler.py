@@ -1,18 +1,28 @@
 import math
+from datetime import timedelta
+from numbers import Real
 from base import ModelSpec
 from base.input.input import Latest
 from base.utils import as_list
 from supervisory.scheduling.time_window import TimeWindow
 
 _EPS = 1e-9
+# Seconds a reported model time may differ from the expected window end.
+_TIME_TOLERANCE = 1e-6
 
 
 class Scheduler:
-    def __init__(self, model_specs: list[ModelSpec], max_global_time: float):
-        self.max_global_time = max_global_time
+    def __init__(self, model_specs: list[ModelSpec], max_global_time: timedelta):
+        if not isinstance(max_global_time, timedelta):
+            raise TypeError(
+                f"max_global_time must be a datetime.timedelta, e.g. "
+                f"timedelta(hours=24); got {type(max_global_time).__name__!r}"
+            )
+        # All times below are in seconds.
+        self.max_global_time = max_global_time.total_seconds()
         self.model_names = [spec.name for spec in model_specs]
         self.timestep_lengths = {
-            spec.name: spec.timestep_length for spec in model_specs
+            spec.name: spec.timestep_seconds for spec in model_specs
         }
         self.model_times = {spec.name: 0.0 for spec in model_specs}
         self.dependencies = self._derive_dependencies(model_specs)
@@ -44,6 +54,17 @@ class Scheduler:
 
     def sync_model_time(self, name: str, time: float):
         self.model_times[name] = time
+
+    def complete_step(self, name: str, reported_time) -> None:
+        expected = self.time_window_end(name)
+        if not isinstance(reported_time, Real) or not math.isclose(
+            reported_time, expected, rel_tol=0, abs_tol=_TIME_TOLERANCE
+        ):
+            raise RuntimeError(
+                f"'{name}' reported time {reported_time!r} s after advancing; "
+                f"expected {expected} s"
+            )
+        self.model_times[name] = expected
 
     def time_window_end(self, name: str) -> float:
         return self.model_times[name] + self.timestep_lengths[name]

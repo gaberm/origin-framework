@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
+from datetime import timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -10,9 +11,13 @@ if TYPE_CHECKING:
 class ModelSpec:
     name: str
     adapter: type[Adapter]
-    timestep_length: float
+    timestep_length: timedelta
     params: dict = field(default_factory=dict)
     dependencies: tuple[str, ...] | None = None
+
+    @property
+    def timestep_seconds(self) -> float:
+        return self.timestep_length.total_seconds()
 
     @property
     def routing_key(self) -> str:
@@ -43,11 +48,12 @@ class ModelSpec:
             )
 
     def _validate_timestep_length(self):
-        if not isinstance(self.timestep_length, (float, int)):
+        if not isinstance(self.timestep_length, timedelta):
             raise TypeError(
-                f"ModelSpec.timestep_length must be a float or int; got {type(self.timestep_length).__name__!r}"
+                f"ModelSpec.timestep_length must be a datetime.timedelta, e.g. "
+                f"timedelta(seconds=1); got {type(self.timestep_length).__name__!r}"
             )
-        if self.timestep_length <= 0:
+        if self.timestep_length <= timedelta(0):
             raise ValueError(
                 f"ModelSpec.timestep_length must be positive; got {self.timestep_length}"
             )

@@ -16,21 +16,21 @@ model = SupervisoryModel(
     data_adapters=[],
 )
 
-vehicle_payload_1 = {"veh_id": "veh_1", "time": 1.0, "soc": 0.5}
-vehicle_payload_2 = {"veh_id": "veh_2", "time": 2.0, "soc": 0.7}
+vehicle_payload_1 = {"veh_id": "veh_1", "time_s": 1.0, "soc": 0.5}
+vehicle_payload_2 = {"veh_id": "veh_2", "time_s": 2.0, "soc": 0.7}
 battery_payload = {"veh_id": "veh_1", "capacity": 100}
 
 
 class TestDeserialize:
     def test_single_record(self):
         outputs = model._deserialize(Vehicle, [vehicle_payload_1])
-        assert outputs[0] == Vehicle(veh_id="veh_1", soc=0.5, time=1.0)
+        assert outputs[0] == Vehicle(veh_id="veh_1", soc=0.5, time_s=1.0)
 
     def test_multiple_payloads(self):
         outputs = model._deserialize(Vehicle, [vehicle_payload_1, vehicle_payload_2])
         assert outputs == [
-            Vehicle(veh_id="veh_1", soc=0.5, time=1.0),
-            Vehicle(veh_id="veh_2", soc=0.7, time=2.0),
+            Vehicle(veh_id="veh_1", soc=0.5, time_s=1.0),
+            Vehicle(veh_id="veh_2", soc=0.7, time_s=2.0),
         ]
 
     def test_multiple_record_types(self):
@@ -40,7 +40,7 @@ class TestDeserialize:
             [Vehicle, Battery], [tagged_vehicle, tagged_battery]
         )
         assert outputs == [
-            Vehicle(veh_id="veh_1", soc=0.5, time=1.0),
+            Vehicle(veh_id="veh_1", soc=0.5, time_s=1.0),
             Battery(veh_id="veh_1", capacity=100),
         ]
 

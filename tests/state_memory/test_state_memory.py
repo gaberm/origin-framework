@@ -52,8 +52,8 @@ def test_insert_outputs(state_memory, postgresql):
     state_memory.insert_outputs(
         Vehicle,
         [
-            {"veh_id": "veh_1", "soc": 0.5, "time": 1.0},
-            {"veh_id": "veh_2", "soc": 0.8, "time": 2.0},
+            {"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0},
+            {"veh_id": "veh_2", "soc": 0.8, "time_s": 2.0},
         ],
     )
     cur = postgresql.cursor()
@@ -62,13 +62,13 @@ def test_insert_outputs(state_memory, postgresql):
 
 
 def test_ignore_keeps_existing_and_first_duplicate(state_memory, postgresql):
-    state_memory.insert_outputs(Vehicle, [{"veh_id": "veh_1", "soc": 0.5, "time": 1.0}])
+    state_memory.insert_outputs(Vehicle, [{"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}])
     state_memory.insert_outputs(
         Vehicle,
         [
-            {"veh_id": "veh_1", "soc": 0.9, "time": 2.0},  # already stored
-            {"veh_id": "veh_2", "soc": 0.6, "time": 2.0},
-            {"veh_id": "veh_2", "soc": 0.7, "time": 3.0},  # duplicate in batch
+            {"veh_id": "veh_1", "soc": 0.9, "time_s": 2.0},  # already stored
+            {"veh_id": "veh_2", "soc": 0.6, "time_s": 2.0},
+            {"veh_id": "veh_2", "soc": 0.7, "time_s": 3.0},  # duplicate in batch
         ],
     )
     assert _rows(postgresql, "vehicle") == [("veh_1", 0.5, 1.0), ("veh_2", 0.6, 2.0)]
@@ -76,14 +76,14 @@ def test_ignore_keeps_existing_and_first_duplicate(state_memory, postgresql):
 
 def test_update_overwrites_with_last_duplicate(state_memory, postgresql):
     state_memory.insert_outputs(
-        UpdatedVehicle, [{"veh_id": "veh_1", "soc": 0.5, "time": 1.0}]
+        UpdatedVehicle, [{"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}]
     )
     state_memory.insert_outputs(
         UpdatedVehicle,
         [
-            {"veh_id": "veh_1", "soc": 0.9, "time": 2.0},  # already stored
-            {"veh_id": "veh_2", "soc": 0.6, "time": 2.0},
-            {"veh_id": "veh_2", "soc": 0.7, "time": 3.0},  # duplicate in batch
+            {"veh_id": "veh_1", "soc": 0.9, "time_s": 2.0},  # already stored
+            {"veh_id": "veh_2", "soc": 0.6, "time_s": 2.0},
+            {"veh_id": "veh_2", "soc": 0.7, "time_s": 3.0},  # duplicate in batch
         ],
     )
     assert _rows(postgresql, "updated_vehicle") == [
@@ -94,7 +94,7 @@ def test_update_overwrites_with_last_duplicate(state_memory, postgresql):
 
 def test_geometry_rows_go_through_staging(state_memory, postgresql):
     row = {
-        "time": 1.0,
+        "time_s": 1.0,
         "shape": "POINT",
         "coords": [-86.7, 36.1],
         "srid": 4326,
@@ -102,7 +102,7 @@ def test_geometry_rows_go_through_staging(state_memory, postgresql):
         "coords_4326": [-86.7, 36.1],
         "veh_id": "veh_1",
     }
-    state_memory.insert_outputs(VehicleLocation, [row, {**row, "time": 2.0}])
+    state_memory.insert_outputs(VehicleLocation, [row, {**row, "time_s": 2.0}])
     cur = postgresql.cursor()
     cur.execute(
         f"SELECT veh_id, time, ST_AsText(coords), ST_SRID(coords), h3_ids "
@@ -119,8 +119,8 @@ def test_diagnostic_records_use_same_conflict_handling(state_memory, postgresql)
         diagnostic = True
 
     rows = [
-        {"veh_id": "veh_1", "soc": 0.5, "time": 1.0},
-        {"veh_id": "veh_1", "soc": 0.9, "time": 2.0},
+        {"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0},
+        {"veh_id": "veh_1", "soc": 0.9, "time_s": 2.0},
     ]
     state_memory.insert_outputs(DiagnosticVehicle, rows)
     state_memory._executor.shutdown(wait=True)
@@ -144,13 +144,13 @@ def test_serialize_value_escapes():
 
 def test_text_and_arrays_round_trip(state_memory, postgresql):
     rows = [
-        {"note_id": "empty", "text": "", "tags": [], "time": 1.0},
-        {"note_id": "null", "text": None, "tags": None, "time": 1.0},
+        {"note_id": "empty", "text": "", "tags": [], "time_s": 1.0},
+        {"note_id": "null", "text": None, "tags": None, "time_s": 1.0},
         {
             "note_id": "tricky",
             "text": "tab\there\nnewline \\N back\\slash",
             "tags": ["a,b", 'say "hi"', "back\\slash", "{brace}", None],
-            "time": 1.0,
+            "time_s": 1.0,
         },
     ]
     state_memory.insert_outputs(Note, rows)
@@ -176,7 +176,7 @@ def test_failed_background_write_raises_on_next_insert(state_memory):
     class DiagnosticVehicle(Vehicle):
         diagnostic = True
 
-    row = {"veh_id": "veh_1", "soc": 0.5, "time": 1.0}
+    row = {"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}
     with patch.object(StateMemory, "_write_records", _failing_write):
         state_memory.insert_outputs(DiagnosticVehicle, [row])
         state_memory._background_writes[0].exception()  # wait for it
@@ -195,7 +195,7 @@ def test_failed_background_write_raises_on_close(state_memory, postgresql):
     sm = StateMemory(_dsn(postgresql), RUN_ID)
     with patch.object(StateMemory, "_write_records", _failing_write):
         sm.insert_outputs(
-            DiagnosticVehicle, [{"veh_id": "veh_1", "soc": 0.5, "time": 1.0}]
+            DiagnosticVehicle, [{"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}]
         )
         with pytest.raises(RuntimeError, match="background write"):
             sm.close_conn()

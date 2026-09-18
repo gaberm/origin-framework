@@ -41,7 +41,7 @@ def test_setup_creates_tables(schema_manager):
     rows = cur.fetchall()
     assert ("vehicle", "veh_id") in rows
     assert ("vehicle", "soc") in rows
-    assert ("vehicle", "time") in rows
+    assert ("vehicle", "time_s") in rows
     assert ("battery", "veh_id") in rows
     assert ("battery", "capacity") in rows
 
@@ -52,7 +52,7 @@ def test_insert_time_field(schema_manager):
     cur = schema_manager.conn.cursor()
     cur.execute(
         "SELECT data_type FROM information_schema.columns "
-        "WHERE table_schema = %s AND table_name = 'vehicle' AND column_name = 'time'",
+        "WHERE table_schema = %s AND table_name = 'vehicle' AND column_name = 'time_s'",
         (RUN_ID,),
     )
     assert cur.fetchone()[0] == "double precision"

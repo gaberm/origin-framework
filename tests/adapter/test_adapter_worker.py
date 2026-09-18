@@ -72,19 +72,19 @@ class TestReadOutputs:
     def test_single_type(self, worker):
         worker.adapter.output_types = Vehicle
         worker.adapter.read_outputs.return_value = [
-            Vehicle(veh_id="veh_1", soc=0.5, time=1.0)
+            Vehicle(veh_id="veh_1", soc=0.5, time_s=1.0)
         ]
 
         response = worker.read_outputs(None)
 
         assert response == Response(
-            success=True, payload=[{"veh_id": "veh_1", "soc": 0.5, "time": 1.0}]
+            success=True, payload=[{"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}]
         )
 
     def test_multi_type_adds_type_tag(self, worker):
         worker.adapter.output_types = [Vehicle, Battery]
         worker.adapter.read_outputs.return_value = [
-            Vehicle(veh_id="veh_1", soc=0.5, time=1.0),
+            Vehicle(veh_id="veh_1", soc=0.5, time_s=1.0),
             Battery(veh_id="veh_1", capacity=100),
         ]
 
@@ -93,7 +93,7 @@ class TestReadOutputs:
         assert response == Response(
             success=True,
             payload=[
-                {"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time": 1.0},
+                {"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time_s": 1.0},
                 {"_type": "Battery", "veh_id": "veh_1", "capacity": 100},
             ],
         )
@@ -108,13 +108,13 @@ class TestTerminate:
     def test_returns_final_outputs(self, worker):
         worker.adapter.output_types = Vehicle
         worker.adapter.terminate.return_value = [
-            Vehicle(veh_id="veh_1", soc=0.5, time=1.0)
+            Vehicle(veh_id="veh_1", soc=0.5, time_s=1.0)
         ]
 
         response = worker.terminate(None)
 
         assert response == Response(
-            success=True, payload=[{"veh_id": "veh_1", "soc": 0.5, "time": 1.0}]
+            success=True, payload=[{"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}]
         )
 
 
@@ -142,18 +142,18 @@ class TestOnMessage:
     def test_converts_numpy_values(self, worker):
         worker.adapter.output_types = Vehicle
         worker.adapter.read_outputs.return_value = [
-            Vehicle(veh_id="veh_1", soc=np.float32(0.5), time=1.0)
+            Vehicle(veh_id="veh_1", soc=np.float32(0.5), time_s=1.0)
         ]
         reply = self._call(worker, Operation.READ_OUTPUTS)
         assert reply == Response(
-            success=True, payload=[{"veh_id": "veh_1", "soc": 0.5, "time": 1.0}]
+            success=True, payload=[{"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}]
         )
         assert type(reply.payload[0]["soc"]) is float
 
     def test_converts_numpy_arrays(self, worker):
         worker.adapter.output_types = Vehicle
         worker.adapter.read_outputs.return_value = [
-            Vehicle(veh_id="veh_1", soc=np.array([1.5, 2.5], dtype=np.float32), time=1.0)
+            Vehicle(veh_id="veh_1", soc=np.array([1.5, 2.5], dtype=np.float32), time_s=1.0)
         ]
         reply = self._call(worker, Operation.READ_OUTPUTS)
         assert reply.payload[0]["soc"] == [1.5, 2.5]
@@ -161,7 +161,7 @@ class TestOnMessage:
     def test_unserializable_reply_becomes_error(self, worker):
         worker.adapter.output_types = Vehicle
         worker.adapter.read_outputs.return_value = [
-            Vehicle(veh_id="veh_1", soc=object(), time=1.0)
+            Vehicle(veh_id="veh_1", soc=object(), time_s=1.0)
         ]
         reply = self._call(worker, Operation.READ_OUTPUTS)
         assert not reply.success

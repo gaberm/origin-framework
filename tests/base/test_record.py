@@ -82,22 +82,22 @@ class TestTimeFieldIndexed:
         @dataclass(kw_only=True)
         class Reading(Record, Timestamp):
             table_name = "reading"
-            primary_key = ("sensor_id", "time")
+            primary_key = ("sensor_id", "time_s")
             indexed = ("value",)
             sensor_id: str
             value: float
 
-        assert Reading.indexed == ("time", "value")
+        assert Reading.indexed == ("time_s", "value")
 
     def test_string_indexed_and_no_duplicate(self):
         @dataclass(kw_only=True)
         class Reading(Timestamp, Record):
             table_name = "reading"
             primary_key = "sensor_id"
-            indexed = "time"
+            indexed = "time_s"
             sensor_id: str
 
-        assert Reading.indexed == ("time",)
+        assert Reading.indexed == ("time_s",)
 
     def test_subclass_keeps_time_index(self):
         @dataclass(kw_only=True)
@@ -111,8 +111,8 @@ class TestTimeFieldIndexed:
             indexed = ["label"]
             label: str
 
-        assert Reading.indexed == ("time",)
-        assert LabelledReading.indexed == ("time", "label")
+        assert Reading.indexed == ("time_s",)
+        assert LabelledReading.indexed == ("time_s", "label")
 
     def test_not_added_without_timestamp(self):
         @dataclass(kw_only=True)
@@ -126,8 +126,8 @@ class TestTimeFieldIndexed:
         assert Sensor.indexed == ("kind",)
 
     def test_nashville_records(self):
-        assert EV.indexed == ("time", "h3_ids", "state")
-        assert PortStatus.indexed == ("time", "port_id", "station_id")
-        assert ChargingEvent.indexed == ("time", "driver_id", "tour_id", "station_id")
+        assert EV.indexed == ("time_s", "h3_ids", "state")
+        assert PortStatus.indexed == ("time_s", "port_id", "station_id")
+        assert ChargingEvent.indexed == ("time_s", "driver_id", "tour_id", "station_id")
         assert Station.indexed == ("h3_ids",)
         assert VehicleBattery.indexed == ()

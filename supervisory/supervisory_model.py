@@ -1,20 +1,19 @@
 from __future__ import annotations
 import dataclasses
-import logging
 import time
+from datetime import timedelta
 from typing import TYPE_CHECKING
-from tqdm import tqdm
 from base import ModelSpec, as_list
 from supervisory.comm.rabbitmq_client import RabbitMQClient, Response
 from supervisory.comm.messages import Registration
+from supervisory.console_display import ConsoleDisplay
 from supervisory.scheduling.scheduler import Scheduler
 from supervisory.geo.cell_assigner import assign_cells
 from supervisory.geo.coords_converter import convert_coords
 
+# Use TYPE_CHECKING to avoid circular imports during runtime
 if TYPE_CHECKING:
     from state_memory import StateMemory
-
-logger = logging.getLogger(__name__)
 
 
 class SupervisoryModel:
@@ -23,10 +22,12 @@ class SupervisoryModel:
         model_specs: list[ModelSpec],
         state_memory: StateMemory,
         rabbitmq_client: RabbitMQClient,
-        max_global_time: float,
+        max_global_time: timedelta,
         registration_timeout: float | int = 120.0,
         response_timeout: float | int = 60.0,
         data_adapters: list = None,
+        shutdown_timeout: float | int = 10.0,
+        workers_started=None,
     ):
         self.model_names = [spec.name for spec in model_specs]
         self.routing_keys = {spec.name: spec.routing_key for spec in model_specs}
@@ -44,19 +45,30 @@ class SupervisoryModel:
         self.data_adapters = data_adapters or []
         self.registration_timeout = registration_timeout
         self.response_timeout = response_timeout
-        logger.info("Derived dependencies: %s", self.scheduler.dependencies)
+        # How long a failed run waits for workers to confirm termination.
+        self.shutdown_timeout = shutdown_timeout
+        # Optional check that the workers' processes are running; the
+        # registration timeout only starts then (see collect_registrations).
+        self.workers_started = workers_started
+        self.display = ConsoleDisplay()
 
     def await_workers(self):
-        try:
-            self.rabbitmq_client.collect_registrations(
-                self._validate_registration,
-                len(self.model_names),
-                self.registration_timeout,
-            )
-        except TimeoutError as error:
-            missing = sorted(set(self.model_names) - set(error.args[0]))
-            raise RuntimeError(f"workers never registered: {missing}")
-        logger.info("All %d workers registered.", len(self.model_names))
+        with self.display.wait_list(self.model_names, "Await Workers") as wait_list:
+
+            def on_registered(name):
+                wait_list.mark_done(name)
+
+            try:
+                self.rabbitmq_client.collect_registrations(
+                    self._validate_registration,
+                    len(self.model_names),
+                    self.registration_timeout,
+                    on_registered=on_registered,
+                    workers_started=self.workers_started,
+                )
+            except TimeoutError as error:
+                missing = sorted(set(self.model_names) - set(error.args[0]))
+                raise RuntimeError(f"workers never registered: {missing}")
 
     def _validate_registration(self, registration: Registration):
         if registration.name not in self.scheduler.timestep_lengths:
@@ -81,17 +93,23 @@ class SupervisoryModel:
         return list(dict.fromkeys(types))
 
     def reset_state_memory(self, drop_tables: bool = False):
-        logger.info("Resetting state memory tables.")
+        self.display.warning("Resetting state memory tables.")
         self.state_memory.reset_tables(drop_tables=drop_tables)
 
     def load_data(self):
-        for data_adapter in self.data_adapters:
-            for dataset in data_adapter.load_data():
-                if dataset.h3_index:
-                    dataset = assign_cells(dataset, resolution=9)
-                self.state_memory.insert_external_dataset(dataset)
+        if not self.data_adapters:
+            return
+        names = [type(data_adapter).__name__ for data_adapter in self.data_adapters]
+        with self.display.loading_data(names) as view:
+            for data_adapter, name in zip(self.data_adapters, names):
+                for dataset in data_adapter.load_data():
+                    if dataset.h3_index:
+                        dataset = assign_cells(dataset, resolution=9)
+                    self.state_memory.insert_external_dataset(dataset)
+                    view.record(name)
+                view.mark_done(name)
 
-    def _broadcast(self, send_fn, operation: str) -> dict:
+    def _broadcast(self, send_fn, operation: str, dashboard: bool = False) -> dict:
         """Send an RPC to every worker and wait for all responses."""
         responses = {}
         for name, routing_key in self.routing_keys.items():
@@ -100,11 +118,17 @@ class SupervisoryModel:
                 responses[n] = response
 
             send_fn(routing_key, on_ack=on_ack)
-        self._wait_for_all(responses, list(self.routing_keys), operation)
+        expected = list(self.routing_keys)
+        if dashboard:
+            self._wait_for_all_with_dashboard(responses, expected, operation)
+        else:
+            self._wait_for_all(responses, expected, operation)
         return responses
 
     def initialize_components(self):
-        self._broadcast(self.rabbitmq_client.initialize, "initialize_components")
+        self._broadcast(
+            self.rabbitmq_client.initialize, "initialize_components", dashboard=True
+        )
 
     def read_constants(self):
         """Collect each model's time-invariant records once, before stepping."""
@@ -150,7 +174,7 @@ class SupervisoryModel:
                 self.routing_keys[name], on_ack=ack
             ),
         )
-        self.scheduler.sync_model_time(name, response.payload)
+        self.scheduler.complete_step(name, response.payload)
 
     def read_outputs(self, name: str):
         response = self._send_and_wait(
@@ -160,7 +184,10 @@ class SupervisoryModel:
                 self.routing_keys[name], on_ack=ack
             ),
         )
-        records = self._deserialize(self.output_types[name], response.payload)
+        self._store_outputs(name, response.payload)
+
+    def _store_outputs(self, name: str, payload):
+        records = self._deserialize(self.output_types[name], payload)
         records = [convert_coords(record) for record in records]
         records = assign_cells(records, resolution=9)
         by_type = {}
@@ -183,9 +210,40 @@ class SupervisoryModel:
         return [output_cls.from_dict(payload)]
 
     def terminate(self):
-        self._broadcast(self.rabbitmq_client.terminate, "terminate")
+        try:
+            responses = self._broadcast(self.rabbitmq_client.terminate, "terminate")
+            # Models may hand back final outputs; store them before the
+            # connection closes.
+            for name, response in responses.items():
+                if response.payload:
+                    self._store_outputs(name, response.payload)
+        except BaseException:
+            self._shut_down_after_error()
+            raise
         self.state_memory.close_conn()
-        logger.info("Simulation run completed.")
+        self.display.end_run()
+
+    def _shut_down_after_error(self):
+        responses = {}
+        try:
+            for name, routing_key in self.routing_keys.items():
+
+                def on_ack(response, n=name):
+                    responses[n] = response
+
+                self.rabbitmq_client.terminate(routing_key, on_ack=on_ack)
+            deadline = time.time() + self.shutdown_timeout
+            while len(responses) < len(self.routing_keys) and time.time() < deadline:
+                self.rabbitmq_client.connection.process_data_events(time_limit=1)
+            missing = sorted(set(self.routing_keys) - set(responses))
+            if missing:
+                self.display.warning(f"Workers did not confirm termination: {missing}")
+        except Exception as error:
+            self.display.warning(f"Could not terminate workers: {error!r}")
+        try:
+            self.state_memory.close_conn()
+        except Exception as error:
+            self.display.warning(f"Could not close state memory cleanly: {error!r}")
 
     def _send_and_wait(self, name: str, operation: str, send):
         """Issue one RPC to a single worker and block until its response."""
@@ -203,8 +261,9 @@ class SupervisoryModel:
         responses: dict[str, Response],
         expected: list[str],
         operation: str,
+        timeout: float | None = None,
     ):
-        deadline = time.time() + self.response_timeout
+        deadline = time.time() + (self.response_timeout if timeout is None else timeout)
         while len(responses) < len(expected):
             if time.time() > deadline:
                 missing = sorted(set(expected) - set(responses))
@@ -212,6 +271,36 @@ class SupervisoryModel:
                     f"{operation} timed out; no response from: {missing}"
                 )
             self.rabbitmq_client.connection.process_data_events(time_limit=1)
+        self._check_responses(responses, expected, operation)
+
+    def _wait_for_all_with_dashboard(
+        self,
+        responses: dict[str, Response],
+        expected: list[str],
+        operation: str,
+    ):
+        """Like _wait_for_all, but shows a live spinner per model, updated in
+        place as each model's response comes in."""
+        title = operation.replace("_", " ").title()
+        deadline = time.time() + self.response_timeout
+        with self.display.wait_list(expected, title) as wait_list:
+            while len(responses) < len(expected):
+                if time.time() > deadline:
+                    missing = sorted(set(expected) - set(responses))
+                    raise TimeoutError(
+                        f"{operation} timed out; no response from: {missing}"
+                    )
+                self.rabbitmq_client.connection.process_data_events(time_limit=1)
+                for name in responses:
+                    wait_list.mark_done(name)
+        self._check_responses(responses, expected, operation)
+
+    def _check_responses(
+        self,
+        responses: dict[str, Response],
+        expected: list[str],
+        operation: str,
+    ):
         for name in expected:
             if not responses[name].success:
                 raise RuntimeError(
@@ -219,23 +308,29 @@ class SupervisoryModel:
                 )
 
     def run(self):
-        logger.info("Starting simulation run.")
+        self.display.start_run()
+        try:
+            self._run_steps()
+        except BaseException:
+            # BaseException, so Ctrl+C also stops the workers.
+            self._shut_down_after_error()
+            raise
+        self.terminate()
+
+    def _run_steps(self):
+        self.display.print_dependencies(self.scheduler.dependencies)
         self.await_workers()
         self.setup_state_memory()
         self.load_data()
         self.initialize_components()
         self.read_constants()
-        with tqdm(
-            total=self.scheduler.max_global_time, desc="Simulation Progress"
-        ) as progress:
+        with self.display.run_dashboard(self.scheduler.max_global_time) as dashboard:
             while (name := self.scheduler.select_next()) is not None:
                 self.write_inputs(name)
                 self.advance(name)
                 self.read_outputs(name)
-                progress.update(min(self.scheduler.model_times.values()) - progress.n)
-        self._log_final_state()
-        self.terminate()
-
-    def _log_final_state(self):
-        for name, model_time in self.scheduler.model_times.items():
-            logger.info("Final model time for '%s': %s", name, model_time)
+                dashboard.update(
+                    max(self.scheduler.model_times.values()), self.scheduler.model_times
+                )
+            dashboard.update(self.scheduler.max_global_time, self.scheduler.model_times)
+        self.display.print_final_model_times(self.scheduler.model_times)

@@ -20,10 +20,10 @@ class FakePool:
 def loader(postgresql):
     cur = postgresql.cursor()
     cur.execute(f"CREATE SCHEMA {RUN_ID}")
-    cur.execute(f"CREATE TABLE {RUN_ID}.vehicle (veh_id TEXT, soc FLOAT, time FLOAT)")
+    cur.execute(f"CREATE TABLE {RUN_ID}.vehicle (veh_id TEXT, soc FLOAT, time_s FLOAT)")
     cur.execute(f"CREATE TABLE {RUN_ID}.battery (veh_id TEXT, capacity FLOAT)")
     cur.executemany(
-        f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time) VALUES (%s, %s, %s)",
+        f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time_s) VALUES (%s, %s, %s)",
         [
             ("veh_1", 0.5, 1.0),
             ("veh_2", 0.7, 2.0),
@@ -90,11 +90,11 @@ def spatial_loader(postgresql):
     cur.execute("CREATE EXTENSION IF NOT EXISTS postgis")
     cur.execute(f"CREATE SCHEMA {RUN_ID}")
     cur.execute(
-        f"CREATE TABLE {RUN_ID}.vehicle_location (veh_id TEXT, time FLOAT, coords geometry)"
+        f"CREATE TABLE {RUN_ID}.vehicle_location (veh_id TEXT, time_s FLOAT, coords geometry)"
     )
     cur.execute(f"CREATE TABLE {RUN_ID}.zone (zone_id TEXT, coords geometry)")
     cur.execute(
-        f"INSERT INTO {RUN_ID}.vehicle_location (veh_id, time, coords) VALUES "
+        f"INSERT INTO {RUN_ID}.vehicle_location (veh_id, time_s, coords) VALUES "
         "('veh_1', 1.0, ST_GeomFromText('POINT(2 2)', 4326)), "
         "('veh_2', 1.0, ST_GeomFromText('POINT(7 7)', 4326)), "
         "('veh_3', 1.0, ST_GeomFromText('POINT(20 20)', 4326))"
@@ -290,7 +290,7 @@ def test_join_drop_duplicates(loader, postgresql):
 def test_window_rows_are_ordered_by_time_then_key(loader, postgresql):
     cur = postgresql.cursor()
     cur.executemany(
-        f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time) VALUES (%s, %s, %s)",
+        f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time_s) VALUES (%s, %s, %s)",
         [("veh_9", 0.1, 5.0), ("veh_5", 0.2, 5.0), ("veh_7", 0.3, 4.0)],
     )
     postgresql.commit()

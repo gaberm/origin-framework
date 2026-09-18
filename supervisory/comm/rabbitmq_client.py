@@ -3,21 +3,41 @@ import uuid
 import pika
 import json
 from typing import Any
-from .messages import Operation, Message, Response, Registration
+from .messages import (
+    DEFAULT_HEARTBEAT_SECONDS,
+    Operation,
+    Message,
+    Response,
+    Registration,
+    registration_queue,
+    task_exchange,
+)
 
 
 class RabbitMQClient:
-    def __init__(self, host="localhost", port=5672, username="guest", password="guest"):
+    def __init__(
+        self,
+        run_id: str,
+        host="localhost",
+        port=5672,
+        username="guest",
+        password="guest",
+        heartbeat: int = DEFAULT_HEARTBEAT_SECONDS,
+    ):
+        self.run_id = run_id
+        self.exchange = task_exchange(run_id)
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(
                 host=host,
                 port=port,
                 credentials=pika.PlainCredentials(username, password),
+                heartbeat=heartbeat,
             )
         )
         self.channel = self.connection.channel()
+        # Must match the worker's declaration (see AdapterWorker).
         self.channel.exchange_declare(
-            exchange="tasks", exchange_type="direct", durable=True
+            exchange=self.exchange, exchange_type="direct", auto_delete=True
         )
         result = self.channel.queue_declare(queue="", exclusive=True)
         self.reply_queue = result.method.queue
@@ -27,12 +47,25 @@ class RabbitMQClient:
             queue=self.reply_queue, on_message_callback=self._on_reply, auto_ack=True
         )
 
-    def collect_registrations(self, validate, expected: int, timeout: float = 30.0):
+    def collect_registrations(
+        self,
+        validate,
+        expected: int,
+        timeout: float = 30.0,
+        on_registered=None,
+        workers_started=None,
+    ):
         """Block until `expected` distinct workers register and pass `validate`.
         validate(reg) -> (accepted: bool, error: str | None).
+        on_registered(name), if given, is called each time a worker registers
+        successfully, so callers can show live per-worker progress.
+        workers_started(), if given, is polled while waiting; `timeout` only
+        starts once it returns True, e.g. when queued batch jobs are running.
+        It may raise to give up, e.g. when a job ended without registering.
         Returns {name: Registration}; raises TimeoutError(partial) on timeout."""
+        # Must match the worker's declaration (see AdapterWorker.register).
         self.channel.queue_declare(
-            queue="worker_registration", durable=True, auto_delete=True
+            queue=registration_queue(self.run_id), durable=True, auto_delete=True
         )
         registered: dict[str, Registration] = {}
 
@@ -41,6 +74,8 @@ class RabbitMQClient:
             ok, error = validate(reg)
             if ok:
                 registered[reg.name] = reg
+                if on_registered is not None:
+                    on_registered(reg.name)
             ch.basic_publish(
                 exchange="",
                 routing_key=props.reply_to,
@@ -49,11 +84,13 @@ class RabbitMQClient:
             )
             ch.basic_ack(method.delivery_tag)
 
-        tag = self.channel.basic_consume("worker_registration", handler)
-        deadline = time.time() + timeout
+        tag = self.channel.basic_consume(registration_queue(self.run_id), handler)
+        deadline = None
         try:
             while len(registered) < expected:
-                if time.time() > deadline:
+                if deadline is None and (workers_started is None or workers_started()):
+                    deadline = time.time() + timeout
+                if deadline is not None and time.time() > deadline:
                     raise TimeoutError(registered)
                 self.connection.process_data_events(time_limit=1)
         finally:
@@ -82,7 +119,7 @@ class RabbitMQClient:
         correlation_id = str(uuid.uuid4())
         self.pending[correlation_id] = on_ack
         self.channel.basic_publish(
-            exchange="tasks",
+            exchange=self.exchange,
             routing_key=worker,
             properties=pika.BasicProperties(
                 reply_to=self.reply_queue, correlation_id=correlation_id

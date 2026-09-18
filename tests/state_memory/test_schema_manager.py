@@ -62,7 +62,7 @@ def test_reset_tables(schema_manager):
     schema_manager.setup([Vehicle, Battery])
     cur = schema_manager.conn.cursor()
     cur.execute(
-        f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time) VALUES ('v1', 0.5, 1.0)"
+        f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time_s) VALUES ('v1', 0.5, 1.0)"
     )
     schema_manager.conn.commit()
     schema_manager.reset_tables()
@@ -106,11 +106,11 @@ def test_insert_rows(schema_manager):
     schema_manager.setup([Vehicle])
     cur = schema_manager.conn.cursor()
     cur.executemany(
-        f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time) VALUES (%s, %s, %s)",
+        f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time_s) VALUES (%s, %s, %s)",
         [("v1", 0.5, 1.0), ("v2", 0.8, 2.0)],
     )
     schema_manager.conn.commit()
-    cur.execute(f"SELECT veh_id, soc FROM {RUN_ID}.vehicle ORDER BY time")
+    cur.execute(f"SELECT veh_id, soc FROM {RUN_ID}.vehicle ORDER BY time_s")
     assert cur.fetchall() == [("v1", 0.5), ("v2", 0.8)]
 
 
@@ -146,24 +146,24 @@ def _indexes(conn, table):
 def test_time_field_is_indexed_automatically(schema_manager):
     schema_manager.setup([Vehicle])
     indexes = _indexes(schema_manager.conn, "vehicle")
-    assert "USING btree (\"time\")" in indexes["idx_vehicle_time"]
+    assert "USING btree (time_s)" in indexes["idx_vehicle_time_s"]
     # veh_id is served by the primary key, so it gets no index of its own.
-    assert set(indexes) == {"vehicle_pkey", "idx_vehicle_time"}
+    assert set(indexes) == {"vehicle_pkey", "idx_vehicle_time_s"}
 
 
 def test_nashville_indexes(schema_manager):
     schema_manager.setup([EV, VehicleBattery, Station, PortStatus, ChargingEvent])
     conn = schema_manager.conn
     assert set(_indexes(conn, "ev")) == {
-        "ev_pkey", "idx_ev_time", "idx_ev_h3_ids", "idx_ev_state",
+        "ev_pkey", "idx_ev_time_s", "idx_ev_h3_ids", "idx_ev_state",
         "idx_ev_coords_gist", "idx_ev_coords_4326_gist",
     }
     assert set(_indexes(conn, "vehicle_battery")) == {"vehicle_battery_pkey"}
     assert set(_indexes(conn, "port_status")) == {
-        "port_status_pkey", "idx_port_status_time", "idx_port_status_station_id",
+        "port_status_pkey", "idx_port_status_time_s", "idx_port_status_station_id",
     }
     assert set(_indexes(conn, "charging_events")) == {
-        "charging_events_pkey", "idx_charging_events_time",
+        "charging_events_pkey", "idx_charging_events_time_s",
         "idx_charging_events_driver_id", "idx_charging_events_tour_id",
         "idx_charging_events_station_id",
     }

@@ -10,6 +10,7 @@ class EV(Record, Geometry, Timestamp):
 
     veh_id: str
     tour_id: int
+    driver_id: str
     soc: float
     state: str
     fuel_type: str
@@ -21,8 +22,7 @@ class EV(Record, Geometry, Timestamp):
 class VehicleBattery(Record):
     table_name = "vehicle_battery"
     primary_key = ("veh_id",)
-    indexed = ("veh_id",)
 
     veh_id: str
-    capacity: float
-    charging_power: float
+    capacity_wh: float
+    charging_power_w: float

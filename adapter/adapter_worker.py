@@ -1,10 +1,40 @@
 import dataclasses
 import json
 import time
+import traceback
 import uuid
+from datetime import timedelta
+import numpy as np
 import pika
 from adapter.adapter import Adapter
-from supervisory.comm.messages import Message, Operation, Response, Registration
+from supervisory.comm.messages import (
+    DEFAULT_HEARTBEAT_SECONDS,
+    Message,
+    Operation,
+    Response,
+    Registration,
+    registration_queue,
+    task_exchange,
+    task_queue,
+)
+
+
+def _to_builtin(value):
+    """json.dumps fallback: adapters may return numpy values."""
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
+
+
+def _to_seconds(value, what: str) -> float:
+    """Adapters use timedeltas; messages carry seconds."""
+    if not isinstance(value, timedelta):
+        raise TypeError(
+            f"{what} must be a datetime.timedelta; got {type(value).__name__!r}"
+        )
+    return value.total_seconds()
 
 
 class AdapterWorker:
@@ -17,28 +47,34 @@ class AdapterWorker:
         routing_key: str,
         queue_name: str,
         adapter: Adapter,
+        run_id: str,
         registration_timeout: float = 30.0,
+        heartbeat: int = DEFAULT_HEARTBEAT_SECONDS,
     ):
         self.registration_timeout = registration_timeout
+        self.run_id = run_id
+        self.queue_name = task_queue(run_id, queue_name)
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(
                 host=host,
                 port=port,
                 credentials=pika.PlainCredentials(username, password),
+                heartbeat=heartbeat,
             )
         )
         self.channel = self.connection.channel()
         self.channel.exchange_declare(
-            exchange="tasks", exchange_type="direct", durable=True
+            exchange=task_exchange(run_id), exchange_type="direct", auto_delete=True
         )
-        self.channel.queue_declare(queue=queue_name, durable=True)
+        self.channel.queue_declare(
+            queue=self.queue_name, durable=True, auto_delete=True
+        )
         self.channel.queue_bind(
-            queue=queue_name, exchange="tasks", routing_key=routing_key
+            queue=self.queue_name,
+            exchange=task_exchange(run_id),
+            routing_key=routing_key,
         )
         self.channel.basic_qos(prefetch_count=1)
-        self.channel.basic_consume(
-            queue=queue_name, on_message_callback=self._on_message
-        )
         self.routing_key = routing_key
         self.name = adapter.name
         self.adapter = adapter
@@ -53,7 +89,7 @@ class AdapterWorker:
 
     def register(self):
         self.channel.queue_declare(
-            queue="worker_registration", durable=True, auto_delete=True
+            queue=registration_queue(self.run_id), durable=True, auto_delete=True
         )
         reply = self.channel.queue_declare(queue="", exclusive=True).method.queue
         corr = str(uuid.uuid4())
@@ -67,13 +103,17 @@ class AdapterWorker:
         reg = Registration(
             name=self.name,
             routing_key=self.routing_key,
-            metadata={"timestep_length": self.adapter.timestep_length},
+            metadata={
+                "timestep_length": _to_seconds(
+                    self.adapter.timestep_length, "Adapter.timestep_length"
+                )
+            },
         )
         self.channel.basic_publish(
             exchange="",
-            routing_key="worker_registration",
+            routing_key=registration_queue(self.run_id),
             properties=pika.BasicProperties(reply_to=reply, correlation_id=corr),
-            body=json.dumps(reg.to_dict()),
+            body=json.dumps(reg.to_dict(), default=_to_builtin),
         )
         deadline = time.time() + self.registration_timeout
         while "resp" not in result:
@@ -84,23 +124,24 @@ class AdapterWorker:
             raise RuntimeError(f"registration rejected: {result['resp'].error}")
 
     def _on_message(self, ch, method, properties, body):
-        message = Message.from_dict(json.loads(body))
-        handler = self._handlers.get(message.command)
-        if handler is None:
-            reply = Response(success=False, error=f"Unknown command: {message.command}")
-        else:
-            try:
-                reply = handler(message.payload)
-            except Exception as e:
-                reply = Response(success=False, error=str(e))
+        command = None
+        try:
+            message = Message.from_dict(json.loads(body))
+            command = message.command
+            reply = self._handlers[command](message.payload)
+            reply_body = json.dumps(reply.to_dict(), default=_to_builtin)
+        except Exception as error:
+            traceback.print_exc()
+            reply = Response(success=False, error=f"{type(error).__name__}: {error}")
+            reply_body = json.dumps(reply.to_dict())
         ch.basic_publish(
             exchange="",
             routing_key=properties.reply_to,
             properties=pika.BasicProperties(correlation_id=properties.correlation_id),
-            body=json.dumps(reply.to_dict()),
+            body=reply_body,
         )
         ch.basic_ack(delivery_tag=method.delivery_tag)
-        if message.command == Operation.TERMINATE and reply.success:
+        if command == Operation.TERMINATE and reply.success:
             ch.stop_consuming()
 
     def initialize(self, payload) -> Response:
@@ -119,10 +160,13 @@ class AdapterWorker:
 
     def read_outputs(self, payload) -> Response:
         outputs = self.adapter.read_outputs()
+        return Response(success=True, payload=self._serialize_outputs(outputs))
+
+    def _serialize_outputs(self, outputs):
         if not isinstance(outputs, list):
-            return Response(success=True, payload=outputs.to_dict())
+            return outputs.to_dict()
         is_multi_type = isinstance(self.adapter.output_types, list)
-        serialized = [
+        return [
             (
                 {"_type": type(output).__name__, **dataclasses.asdict(output)}
                 if is_multi_type
@@ -130,16 +174,25 @@ class AdapterWorker:
             )
             for output in outputs
         ]
-        return Response(success=True, payload=serialized)
 
     def advance(self, payload) -> Response:
-        return Response(success=True, payload=self.adapter.advance())
+        self.adapter.advance()
+        current_time = _to_seconds(
+            self.adapter.current_time(),
+            f"{type(self.adapter).__name__}.current_time()",
+        )
+        return Response(success=True, payload=current_time)
 
     def terminate(self, payload) -> Response:
-        self.adapter.terminate()
-        return Response(success=True)
+        outputs = self.adapter.terminate()
+        if not outputs:
+            return Response(success=True)
+        return Response(success=True, payload=self._serialize_outputs(outputs))
 
     def run(self):
         print(f"[{self.__class__.__name__}] Waiting for commands...")
         self.register()
+        self.channel.basic_consume(
+            queue=self.queue_name, on_message_callback=self._on_message
+        )
         self.channel.start_consuming()

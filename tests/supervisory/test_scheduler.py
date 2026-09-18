@@ -1,4 +1,5 @@
 import pytest
+from datetime import timedelta
 from dataclasses import dataclass
 from base import Record, Input, Fields, ModelSpec, KeyJoin
 from base.input.input import Latest
@@ -74,7 +75,7 @@ class AdapterBLatest(_Base):
 
 def spec(name, adapter, dt=1.0, dependencies=None):
     return ModelSpec(
-        name=name, adapter=adapter, timestep_length=dt, dependencies=dependencies
+        name=name, adapter=adapter, timestep_length=timedelta(seconds=dt), dependencies=dependencies
     )
 
 
@@ -84,20 +85,20 @@ class TestSingleModel:
         output_types = RecordA
 
     def test_select_returns_model(self):
-        scheduler = Scheduler([spec("model_a", self.AdapterA)], max_global_time=2.0)
+        scheduler = Scheduler([spec("model_a", self.AdapterA)], max_global_time=timedelta(seconds=2.0))
         assert scheduler.select_next() == "model_a"
 
     def test_select_returns_none_when_done(self):
-        scheduler = Scheduler([spec("model_a", self.AdapterA)], max_global_time=1.0)
+        scheduler = Scheduler([spec("model_a", self.AdapterA)], max_global_time=timedelta(seconds=1.0))
         scheduler.sync_model_time("model_a", 1.0)
         assert scheduler.select_next() is None
 
     def test_time_window_is_correct(self):
-        scheduler = Scheduler([spec("model_a", self.AdapterA)], max_global_time=1.0)
+        scheduler = Scheduler([spec("model_a", self.AdapterA)], max_global_time=timedelta(seconds=1.0))
         assert scheduler.time_window("model_a") == TimeWindow(0.0, 1.0)
 
     def test_sync_time_updates_model_time(self):
-        scheduler = Scheduler([spec("model_a", self.AdapterA)], max_global_time=2.0)
+        scheduler = Scheduler([spec("model_a", self.AdapterA)], max_global_time=timedelta(seconds=2.0))
         scheduler.sync_model_time("model_a", 1.0)
         assert scheduler.model_times["model_a"] == 1.0
 
@@ -123,7 +124,7 @@ class TestTwoModelChain:
     def test_select_returns_model(self):
         scheduler = Scheduler(
             [spec("model_a", self.AdapterA), spec("model_b", self.AdapterB)],
-            max_global_time=2.0,
+            max_global_time=timedelta(seconds=2.0),
         )
         assert scheduler.select_next() == "model_a"
         scheduler.sync_model_time("model_a", 1.0)
@@ -132,7 +133,7 @@ class TestTwoModelChain:
     def test_latest_does_not_block(self):
         scheduler = Scheduler(
             [spec("model_a", self.AdapterA), spec("model_b", self.AdapterBLatest)],
-            max_global_time=2.0,
+            max_global_time=timedelta(seconds=2.0),
         )
         assert scheduler.dependencies["model_b"] == ()
 
@@ -150,7 +151,7 @@ class TestCircularDependency:
         with pytest.raises(RuntimeError, match="coupling cycle"):
             scheduler = Scheduler(
                 [spec("a", self.AdapterA), spec("b", self.AdapterB)],
-                max_global_time=2.0,
+                max_global_time=timedelta(seconds=2.0),
             )
             scheduler.select_next()
 
@@ -175,7 +176,7 @@ class TestTripleModel:
                 spec("model_b", self.AdapterB),
                 spec("model_c", self.AdapterC),
             ],
-            max_global_time=2.0,
+            max_global_time=timedelta(seconds=2.0),
         )
         assert scheduler.select_next() == "model_a"
         scheduler.sync_model_time("model_a", 1.0)
@@ -214,7 +215,7 @@ class TestQuadrupleModel:
                 spec("model_c", self.AdapterC),
                 spec("model_d", self.AdapterD),
             ],
-            max_global_time=2.0,
+            max_global_time=timedelta(seconds=2.0),
         )
         assert scheduler.select_next() == "model_a"
         scheduler.sync_model_time("model_a", 1.0)
@@ -247,7 +248,7 @@ class TestDifferentTimesteps:
         # B listed first, but Window forces A to run first every time (rank 0 vs 1)
         scheduler = Scheduler(
             [spec("b", self.AdapterB, dt=3.0), spec("a", self.AdapterA, dt=2.0)],
-            max_global_time=6.0,
+            max_global_time=timedelta(seconds=6.0),
         )
         assert scheduler.select_next() == "a"  # B blocked, needs A at t≥2
         scheduler.sync_model_time("a", 2.0)
@@ -261,7 +262,7 @@ class TestDifferentTimesteps:
         # B listed first and has no dependency — runs before A at t=0
         scheduler = Scheduler(
             [spec("b", self.AdapterBLatest, dt=3.0), spec("a", self.AdapterA, dt=2.0)],
-            max_global_time=6.0,
+            max_global_time=timedelta(seconds=6.0),
         )
         assert scheduler.select_next() == "b"  # no dependency, listed first
         scheduler.sync_model_time("b", 3.0)
@@ -270,3 +271,45 @@ class TestDifferentTimesteps:
         assert scheduler.select_next() == "a"
         scheduler.sync_model_time("a", 4.0)
         assert scheduler.select_next() == "b"
+
+
+class TestTimeUnits:
+    def test_times_are_seconds(self):
+        scheduler = Scheduler(
+            [spec("model_a", AdapterA, dt=60.0)], max_global_time=timedelta(hours=1)
+        )
+        assert scheduler.max_global_time == 3600.0
+        assert scheduler.timestep_lengths == {"model_a": 60.0}
+        assert scheduler.time_window("model_a") == TimeWindow(0.0, 60.0)
+
+    def test_bare_number_max_global_time_rejected(self):
+        with pytest.raises(TypeError, match="max_global_time must be a datetime.timedelta"):
+            Scheduler([spec("model_a", AdapterA)], max_global_time=3600.0)
+
+
+class TestCompleteStep:
+    def _scheduler(self):
+        return Scheduler(
+            [spec("model_a", AdapterA, dt=60.0)], max_global_time=timedelta(hours=1)
+        )
+
+    def test_accepts_window_end(self):
+        scheduler = self._scheduler()
+        scheduler.complete_step("model_a", 60.0)
+        assert scheduler.model_times["model_a"] == 60.0
+
+    def test_stores_exact_window_end_within_tolerance(self):
+        scheduler = self._scheduler()
+        scheduler.complete_step("model_a", 60.0 + 1e-9)
+        assert scheduler.model_times["model_a"] == 60.0
+
+    @pytest.mark.parametrize(
+        "reported",
+        [0.0, 30.0, 120.0, None, "60"],
+        ids=["no-progress", "short-step", "long-step", "none", "string"],
+    )
+    def test_rejects_other_times(self, reported):
+        scheduler = self._scheduler()
+        with pytest.raises(RuntimeError, match="'model_a' reported time"):
+            scheduler.complete_step("model_a", reported)
+        assert scheduler.model_times["model_a"] == 0.0

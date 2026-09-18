@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from base import Geometry
 
@@ -57,3 +58,13 @@ def test_valid_polygon():
     assert Geometry(
         shape="POLYGON", coords=[(0.0, 0.0), (1.0, 0.0), (0.5, 1.0)]
     ).coords == [(0.0, 0.0), (1.0, 0.0), (0.5, 1.0)]
+
+
+def test_numpy_point():
+    coords = (np.float32(-86.7), np.float32(36.1))
+    assert Geometry(shape="POINT", coords=coords).coords == coords
+
+
+def test_numpy_linestring():
+    coords = [(np.int64(0), np.int64(0)), (np.float32(1.0), np.float64(1.0))]
+    assert Geometry(shape="LINESTRING", coords=coords).coords == coords

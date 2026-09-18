@@ -8,7 +8,31 @@ from supervisory.comm.messages import Message, Response, Registration, Operation
 @pytest.fixture
 def client():
     with patch("supervisory.comm.rabbitmq_client.pika.BlockingConnection"):
-        return RabbitMQClient()
+        return RabbitMQClient(run_id="run_test")
+
+
+class TestRunScopedMessaging:
+    def test_declares_run_scoped_exchange(self, client):
+        client.channel.exchange_declare.assert_called_once_with(
+            exchange="run_test.tasks", exchange_type="direct", auto_delete=True
+        )
+
+    def test_sends_to_run_scoped_exchange(self, client):
+        client._send("sumo", Message(Operation.ADVANCE), lambda r: None)
+        publish = client.channel.basic_publish.call_args.kwargs
+        assert publish["exchange"] == "run_test.tasks"
+        assert publish["routing_key"] == "sumo"
+
+    def test_collects_registrations_from_run_scoped_queue(self, client):
+        client.channel.basic_consume.return_value = "consumer-tag"
+        with pytest.raises(TimeoutError):
+            client.collect_registrations(lambda r: (True, None), expected=1, timeout=0.0)
+        client.channel.queue_declare.assert_any_call(
+            queue="run_test.worker_registration", durable=True, auto_delete=True
+        )
+        assert client.channel.basic_consume.call_args.args[0] == (
+            "run_test.worker_registration"
+        )
 
 
 class TestSendReplyRoundTrip:
@@ -88,3 +112,42 @@ class TestCollectRegistrations:
             client.collect_registrations(
                 lambda r: (True, None), expected=1, timeout=0.0
             )
+
+
+def test_heartbeat_is_set_explicitly():
+    from supervisory.comm.messages import DEFAULT_HEARTBEAT_SECONDS
+
+    with patch("supervisory.comm.rabbitmq_client.pika.BlockingConnection"), patch(
+        "supervisory.comm.rabbitmq_client.pika.ConnectionParameters"
+    ) as parameters:
+        RabbitMQClient(run_id="run_test")
+        RabbitMQClient(run_id="run_test", heartbeat=30)
+    heartbeats = [call.kwargs["heartbeat"] for call in parameters.call_args_list]
+    assert heartbeats == [DEFAULT_HEARTBEAT_SECONDS, 30]
+
+
+class TestRegistrationTimeoutStartsWithWorkers:
+    def test_timeout_not_counted_before_workers_start(self, client):
+        client.channel.basic_consume.return_value = "tag"
+        started = iter([False, False, False, True])
+        with pytest.raises(TimeoutError):
+            client.collect_registrations(
+                lambda r: (True, None),
+                expected=1,
+                timeout=0.0,
+                workers_started=lambda: next(started),
+            )
+        # Waited (processing events) through every round before the start.
+        assert client.connection.process_data_events.call_count >= 3
+
+    def test_check_can_abort(self, client):
+        client.channel.basic_consume.return_value = "tag"
+
+        def job_failed():
+            raise RuntimeError("worker job ended")
+
+        with pytest.raises(RuntimeError, match="worker job ended"):
+            client.collect_registrations(
+                lambda r: (True, None), expected=1, workers_started=job_failed
+            )
+        client.channel.basic_cancel.assert_called_once_with("tag")

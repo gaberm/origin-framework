@@ -1,6 +1,20 @@
 import pytest
 from state_memory.schema_manager import SchemaManager
+from dataclasses import dataclass
+from base import Record, Geometry, SHAPE_TYPE
+from nashville.outputs.charging import ChargingEvent, PortStatus, Station
+from nashville.outputs.sumo import EV, VehicleBattery
 from _records import Vehicle, Battery, RUN_ID
+
+
+@dataclass(kw_only=True)
+class Cell(Record, Geometry):
+    table_name = "cell"
+    primary_key = ("cell_id",)
+    indexed = ("h3_ids", "label")
+    cell_id: str
+    label: str
+    shape: SHAPE_TYPE = "POINT"
 
 
 @pytest.fixture
@@ -98,3 +112,58 @@ def test_insert_rows(schema_manager):
     schema_manager.conn.commit()
     cur.execute(f"SELECT veh_id, soc FROM {RUN_ID}.vehicle ORDER BY time")
     assert cur.fetchall() == [("v1", 0.5), ("v2", 0.8)]
+
+
+def test_list_fields_are_arrays_with_gin_index(schema_manager):
+    schema_manager.setup([Cell])
+    cur = schema_manager.conn.cursor()
+    cur.execute(
+        "SELECT data_type, udt_name FROM information_schema.columns "
+        "WHERE table_schema = %s AND table_name = 'cell' AND column_name = 'h3_ids'",
+        (RUN_ID,),
+    )
+    assert cur.fetchone() == ("ARRAY", "_text")
+    cur.execute(
+        "SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = %s "
+        "AND tablename = 'cell' ORDER BY indexname",
+        (RUN_ID,),
+    )
+    indexes = dict(cur.fetchall())
+    assert "USING gin (h3_ids)" in indexes["idx_cell_h3_ids"]
+    assert "USING btree (label)" in indexes["idx_cell_label"]
+
+
+def _indexes(conn, table):
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = %s "
+        "AND tablename = %s",
+        (RUN_ID, table),
+    )
+    return dict(cur.fetchall())
+
+
+def test_time_field_is_indexed_automatically(schema_manager):
+    schema_manager.setup([Vehicle])
+    indexes = _indexes(schema_manager.conn, "vehicle")
+    assert "USING btree (\"time\")" in indexes["idx_vehicle_time"]
+    # veh_id is served by the primary key, so it gets no index of its own.
+    assert set(indexes) == {"vehicle_pkey", "idx_vehicle_time"}
+
+
+def test_nashville_indexes(schema_manager):
+    schema_manager.setup([EV, VehicleBattery, Station, PortStatus, ChargingEvent])
+    conn = schema_manager.conn
+    assert set(_indexes(conn, "ev")) == {
+        "ev_pkey", "idx_ev_time", "idx_ev_h3_ids", "idx_ev_state",
+        "idx_ev_coords_gist", "idx_ev_coords_4326_gist",
+    }
+    assert set(_indexes(conn, "vehicle_battery")) == {"vehicle_battery_pkey"}
+    assert set(_indexes(conn, "port_status")) == {
+        "port_status_pkey", "idx_port_status_time", "idx_port_status_station_id",
+    }
+    assert set(_indexes(conn, "charging_events")) == {
+        "charging_events_pkey", "idx_charging_events_time",
+        "idx_charging_events_driver_id", "idx_charging_events_tour_id",
+        "idx_charging_events_station_id",
+    }

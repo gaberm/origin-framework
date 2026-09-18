@@ -1,6 +1,8 @@
 import pytest
 from dataclasses import dataclass
-from base import Record
+from base import Record, Timestamp
+from nashville.outputs.charging import ChargingEvent, PortStatus, Station
+from nashville.outputs.sumo import EV, VehicleBattery
 
 
 def test_missing_primary_key_field():
@@ -73,3 +75,59 @@ def test_valid_record():
 
     assert ValidRecord.primary_key == ("column_1",)
     ValidRecord(column_1="v1")
+
+
+class TestTimeFieldIndexed:
+    def test_added_for_timestamped_records(self):
+        @dataclass(kw_only=True)
+        class Reading(Record, Timestamp):
+            table_name = "reading"
+            primary_key = ("sensor_id", "time")
+            indexed = ("value",)
+            sensor_id: str
+            value: float
+
+        assert Reading.indexed == ("time", "value")
+
+    def test_string_indexed_and_no_duplicate(self):
+        @dataclass(kw_only=True)
+        class Reading(Timestamp, Record):
+            table_name = "reading"
+            primary_key = "sensor_id"
+            indexed = "time"
+            sensor_id: str
+
+        assert Reading.indexed == ("time",)
+
+    def test_subclass_keeps_time_index(self):
+        @dataclass(kw_only=True)
+        class Reading(Record, Timestamp):
+            table_name = "reading"
+            primary_key = ("sensor_id",)
+            sensor_id: str
+
+        @dataclass(kw_only=True)
+        class LabelledReading(Reading):
+            indexed = ["label"]
+            label: str
+
+        assert Reading.indexed == ("time",)
+        assert LabelledReading.indexed == ("time", "label")
+
+    def test_not_added_without_timestamp(self):
+        @dataclass(kw_only=True)
+        class Sensor(Record):
+            table_name = "sensor"
+            primary_key = ("sensor_id",)
+            indexed = ["kind"]
+            sensor_id: str
+            kind: str
+
+        assert Sensor.indexed == ("kind",)
+
+    def test_nashville_records(self):
+        assert EV.indexed == ("time", "h3_ids", "state")
+        assert PortStatus.indexed == ("time", "port_id", "station_id")
+        assert ChargingEvent.indexed == ("time", "driver_id", "tour_id", "station_id")
+        assert Station.indexed == ("h3_ids",)
+        assert VehicleBattery.indexed == ()

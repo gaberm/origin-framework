@@ -155,6 +155,88 @@ def test_spatial_join_nearest(spatial_loader):
     assert matches["veh_1"] == "z1"
 
 
+@pytest.mark.parametrize("join_type, expected_rows", [("inner", 2), ("left", 3)])
+def test_spatial_join_nearest_max_distance(spatial_loader, join_type, expected_rows):
+    spec = Input(
+        name="vehicle_location",
+        from_=VehicleLocation,
+        on=SpatialJoin(
+            (VehicleLocation, "coords"),
+            (Zone, "coords"),
+            join_type=join_type,
+            predicate="nearest",
+            max_distance=1000,
+        ),
+        select=Fields((VehicleLocation, "veh_id"), (Zone, "zone_id")),
+    )
+    result = spatial_loader.load_inputs(spec, TimeWindow(0.0, 2.0))
+    rows = result["vehicle_location"]
+    matches = {row["veh_id"]: row["zone_id"] for row in rows}
+    # veh_1 and veh_2 lie inside a zone. veh_3 is hundreds of km from z2, so it
+    # has no zone within 1 km: an inner join drops it, a left join keeps it
+    # without one.
+    assert len(rows) == expected_rows
+    assert matches["veh_1"] == "z1"
+    assert matches["veh_2"] in ("z1", "z2")
+    assert matches.get("veh_3") is None
+
+
+def test_spatial_join_nearest_where(spatial_loader):
+    spec = Input(
+        name="vehicle_location",
+        from_=VehicleLocation,
+        on=SpatialJoin(
+            (VehicleLocation, "coords"),
+            (Zone, "coords"),
+            predicate="nearest",
+            where=Filter(Zone, "zone_id", Equal("z2")),
+        ),
+        select=Fields((VehicleLocation, "veh_id"), (Zone, "zone_id")),
+    )
+    rows = spatial_loader.load_inputs(spec, TimeWindow(0.0, 2.0))["vehicle_location"]
+    # The filter applies while matching: veh_1 lies in z1 but gets z2, the
+    # nearest zone that passes it, instead of being dropped.
+    assert {row["veh_id"]: row["zone_id"] for row in rows} == {
+        "veh_1": "z2",
+        "veh_2": "z2",
+        "veh_3": "z2",
+    }
+
+
+def test_spatial_join_exact_where(spatial_loader):
+    spec = Input(
+        name="vehicle_location",
+        from_=VehicleLocation,
+        on=SpatialJoin(
+            (VehicleLocation, "coords"),
+            (Zone, "coords"),
+            where=Filter("zone_id", Equal("z2")),
+        ),
+        select=Fields((VehicleLocation, "veh_id"), (Zone, "zone_id")),
+    )
+    rows = spatial_loader.load_inputs(spec, TimeWindow(0.0, 2.0))["vehicle_location"]
+    # veh_2 intersects both zones but only its z2 match remains; veh_1 only
+    # intersects z1, so the inner join drops it.
+    assert [(row["veh_id"], row["zone_id"]) for row in rows] == [("veh_2", "z2")]
+
+
+def test_spatial_join_where_values_precede_input_filters(spatial_loader):
+    spec = Input(
+        name="vehicle_location",
+        from_=VehicleLocation,
+        where=Filter(VehicleLocation, "veh_id", Equal("veh_3")),
+        on=SpatialJoin(
+            (VehicleLocation, "coords"),
+            (Zone, "coords"),
+            predicate="nearest",
+            where=Filter(Zone, "zone_id", Equal("z1")),
+        ),
+        select=Fields((VehicleLocation, "veh_id"), (Zone, "zone_id")),
+    )
+    rows = spatial_loader.load_inputs(spec, TimeWindow(0.0, 2.0))["vehicle_location"]
+    assert [(row["veh_id"], row["zone_id"]) for row in rows] == [("veh_3", "z1")]
+
+
 def test_join(loader):
     spec = Input(
         name="vehicle",
@@ -199,3 +281,63 @@ def test_join_drop_duplicates(loader, postgresql):
     # duplicates="drop" collapses the fan-out back to one row per vehicle.
     assert len(result["vehicle"]) == 1
     assert result["vehicle"][0]["veh_id"] == "veh_1"
+
+
+# Rows are inserted out of order on purpose: without ORDER BY, Postgres would
+# usually return them in insertion order.
+
+
+def test_window_rows_are_ordered_by_time_then_key(loader, postgresql):
+    cur = postgresql.cursor()
+    cur.executemany(
+        f"INSERT INTO {RUN_ID}.vehicle (veh_id, soc, time) VALUES (%s, %s, %s)",
+        [("veh_9", 0.1, 5.0), ("veh_5", 0.2, 5.0), ("veh_7", 0.3, 4.0)],
+    )
+    postgresql.commit()
+    spec = Input(name="vehicle", from_=Vehicle, select=Fields("veh_id"))
+    rows = loader.load_inputs(spec, TimeWindow(4.0, 6.0))["vehicle"]
+    assert [row["veh_id"] for row in rows] == ["veh_7", "veh_5", "veh_9"]
+
+
+@pytest.fixture
+def zone_added_last(spatial_loader, postgresql):
+    # z0 also contains veh_2 (7, 7), but comes last in the table.
+    cur = postgresql.cursor()
+    cur.execute(
+        f"INSERT INTO {RUN_ID}.zone (zone_id, coords) VALUES "
+        "('z0', ST_GeomFromText('POLYGON((6 6, 8 6, 8 8, 6 8, 6 6))', 4326))"
+    )
+    postgresql.commit()
+    return spatial_loader
+
+
+def test_join_fan_out_is_ordered_by_joined_key(zone_added_last):
+    spec = Input(
+        name="vehicle_location",
+        from_=VehicleLocation,
+        on=SpatialJoin((VehicleLocation, "coords"), (Zone, "coords")),
+        select=Fields((VehicleLocation, "veh_id"), (Zone, "zone_id")),
+    )
+    rows = zone_added_last.load_inputs(spec, TimeWindow(0.0, 2.0))["vehicle_location"]
+    assert [(row["veh_id"], row["zone_id"]) for row in rows] == [
+        ("veh_1", "z1"),
+        ("veh_2", "z0"),
+        ("veh_2", "z1"),
+        ("veh_2", "z2"),
+    ]
+
+
+def test_drop_duplicates_keeps_smallest_joined_key(zone_added_last):
+    spec = Input(
+        name="vehicle_location",
+        from_=VehicleLocation,
+        on=SpatialJoin(
+            (VehicleLocation, "coords"), (Zone, "coords"), duplicates="drop"
+        ),
+        select=Fields((VehicleLocation, "veh_id"), (Zone, "zone_id")),
+    )
+    rows = zone_added_last.load_inputs(spec, TimeWindow(0.0, 2.0))["vehicle_location"]
+    assert [(row["veh_id"], row["zone_id"]) for row in rows] == [
+        ("veh_1", "z1"),
+        ("veh_2", "z0"),
+    ]

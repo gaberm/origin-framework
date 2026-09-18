@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from dataclasses import dataclass
 from base import Record, Geometry, SHAPE_TYPE, Filter, Equal, KeyJoin, SpatialJoin, Fields, Input, Latest
@@ -136,6 +137,69 @@ def test_spatial_join_nearest_rejects_right_and_full(join_type):
         )
 
 
+def test_spatial_join_max_distance():
+    join = SpatialJoin(
+        (VehicleLocation, "coords"), (Zone, "coords"), predicate="nearest", max_distance=400
+    )
+    assert join.max_distance == 400
+
+
+def test_spatial_join_default_max_distance():
+    join = SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), predicate="nearest")
+    assert join.max_distance is None
+
+
+def test_spatial_join_max_distance_requires_nearest():
+    with pytest.raises(ValueError, match="max_distance requires predicate='nearest'"):
+        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), max_distance=400)
+
+
+@pytest.mark.parametrize("max_distance", [0, -5, float("nan"), float("inf"), True, "400"])
+def test_spatial_join_invalid_max_distance(max_distance):
+    with pytest.raises(ValueError, match="max_distance must be a positive number"):
+        SpatialJoin(
+            (VehicleLocation, "coords"),
+            (Zone, "coords"),
+            predicate="nearest",
+            max_distance=max_distance,
+        )
+
+
+def test_spatial_join_where():
+    join = SpatialJoin(
+        (VehicleLocation, "coords"), (Zone, "coords"), where=Filter(Zone, "zone_id", Equal("z1"))
+    )
+    assert [filter_.field for filter_ in join.where] == ["zone_id"]
+
+
+def test_spatial_join_where_defaults_to_right_record():
+    join = SpatialJoin(
+        (VehicleLocation, "coords"), (Zone, "coords"), where=Filter("zone_id", Equal("z1"))
+    )
+    assert join.where[0].from_ is None
+
+
+def test_spatial_join_where_rejects_left_record():
+    with pytest.raises(ValueError, match="filters apply to Zone"):
+        SpatialJoin(
+            (VehicleLocation, "coords"),
+            (Zone, "coords"),
+            where=Filter(VehicleLocation, "veh_id", Equal("v1")),
+        )
+
+
+def test_spatial_join_where_unknown_field():
+    with pytest.raises(AttributeError, match="Zone has no field 'typo'"):
+        SpatialJoin(
+            (VehicleLocation, "coords"), (Zone, "coords"), where=Filter(Zone, "typo", Equal(1))
+        )
+
+
+def test_spatial_join_where_requires_filters():
+    with pytest.raises(TypeError, match=r"must be \(list of\) Filter"):
+        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), where="zone_id = 'z1'")
+
+
 def test_empty_fields():
     with pytest.raises(TypeError, match="requires at least one field name"):
         Fields()
@@ -239,3 +303,13 @@ def test_valid_latest_input():
         select=Fields("veh_id", "soc"),
         read_policy=Latest(by="veh_id"),
     )
+
+
+def test_spatial_join_numpy_max_distance():
+    join = SpatialJoin(
+        (VehicleLocation, "coords"),
+        (Zone, "coords"),
+        predicate="nearest",
+        max_distance=np.float64(400.0),
+    )
+    assert join.max_distance == 400.0

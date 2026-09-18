@@ -5,11 +5,29 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "supervisory-model"
 version = "0.1.0"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
+dependencies = [
+    "eclipse-sumo>=1.27.1",
+    "h3>=4.5.0",
+    "libsumo>=1.27.1",
+    "numpy>=2.2.1",
+    "pandas>=2.2.3",
+    "pika>=1.4.4",
+    "psycopg2-binary>=2.9.12",
+    "pyproj>=3.7.1",
+    "python-dotenv>=1.2.3",
+    "requests>=2.31.0",
+    "rich>=15.0.0",
+    "shapely>=2.1.2",
+    "sumolib>=1.27.1",
+    "traci>=1.27.1",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=9.1.1", "pytest-postgresql>=9.0.0"]
 
 [tool.setuptools.packages.find]
 include = ["adapter*", "base*", "nashville*", "state_memory*", "supervisory*"]
 
 [tool.pytest.ini_options]
-postgresql_exec = "/opt/homebrew/opt/postgresql@16/bin/pg_ctl"
 pythonpath = ["tests/state_memory"]

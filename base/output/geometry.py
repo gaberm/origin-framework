@@ -10,11 +10,10 @@ class Geometry:
     shape: SHAPE_TYPE
     coords: tuple[float, float] | list[tuple[float, float]]
     srid: int = 4326
-    h3_ids: list[str] | None = None  # stored as TEXT[]
+    h3_ids: list[str] | None = None
     coords_4326: list | None = None
 
     def __post_init__(self):
-        # Chained so that every base class of a record validates.
         parent_post_init = getattr(super(), "__post_init__", None)
         if parent_post_init is not None:
             parent_post_init()
@@ -61,7 +60,11 @@ def to_wkt(
     if shape == "POLYGON" and points[0] != points[-1]:
         points = points + [points[0]]
     coord_list = ", ".join(f"{x} {y}" for x, y in points)
-    return f"{shape}({coord_list})" if shape == "LINESTRING" else f"{shape}(({coord_list}))"
+    return (
+        f"{shape}({coord_list})"
+        if shape == "LINESTRING"
+        else f"{shape}(({coord_list}))"
+    )
 
 
 def to_ewkt(

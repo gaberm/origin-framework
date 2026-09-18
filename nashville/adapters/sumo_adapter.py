@@ -54,7 +54,6 @@ class SumoAdapter(Adapter):
             ]
         )
         self._api = api
-        # SUMO's clock starts at the config's begin time (e.g. 07:45).
         self._begin_s = self._api.simulation.getTime()
         self._net_offset, self._proj = self._read_projection(self._resolve_net_file())
 
@@ -168,8 +167,6 @@ class SumoAdapter(Adapter):
                 veh_class = self._get_veh_class(veh_id)
                 coords = self._get_vehicle_coords(veh_id)
                 if coords is None:
-                    # E.g. it arrived while teleporting, so it has no parking
-                    # position to match a station against.
                     warnings.warn(
                         f"arrived vehicle '{veh_id}' has no valid position; skipped",
                         RuntimeWarning,
@@ -195,7 +192,6 @@ class SumoAdapter(Adapter):
     def _get_departed_evs(self) -> list[EV]:
         evs = []
         time = self.current_time()
-        # Static attributes were saved in advance(), for battery vehicles only.
         for veh_id in self._departed_ids:
             soc = self._get_soc(veh_id)
             if soc is not None:

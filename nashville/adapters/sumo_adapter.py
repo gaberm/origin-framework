@@ -1,469 +1,378 @@
-import gzip
-import os
-import warnings
-from datetime import timedelta
-import xml.etree.ElementTree as ET
-import pyproj
 from adapter import Adapter
-from nashville.inputs.sumo import vehicle_soc
-from nashville.outputs.sumo import EV, VehicleBattery
-
-try:
-    import libsumo as api
-except ImportError:
-    import traci as api
-tc = api.constants
+from nashville.inputs.sumo import vehicle_charge
+from nashville.outputs.sumo import ArrivedEV, DepartedEV, VehicleBattery
+import libsumo
+import math
+import warnings
+from libsumo import constants as traci_constants
+from datetime import timedelta
+from typing import Literal
 
 
 class SumoAdapter(Adapter):
-    input_types = vehicle_soc
-    output_types = [EV, VehicleBattery]
-    _EV_SPEED_THRESHOLD_MPS = 15 / 3.6
-    _ICE_SPEED_THRESHOLD_MPS = 30 / 3.6
-    _ASSIST_FRACTION = 0.5
+    input_types = [vehicle_charge]
+    output_types = [ArrivedEV, DepartedEV, VehicleBattery]
+    constant_types = []
 
     def __init__(self, name, timestep_length, sumo_config):
-        super().__init__(
-            name=name,
-            timestep_length=timestep_length,
-        )
-        self._sumo_config = sumo_config
-        self._api = None
-        self._begin_s = None  # SUMO's clock at the start of the run
-        self._net_offset = None
-        self._proj = None
-        self._departed_ids = []  # in the latest step
-        self._static_veh_attrs = {}
-        self._dynamic_veh_attrs = {}
-        self._subscription_results = {}
-        self._vehicle_by_driver = {}  # driver_id -> battery vehicle on the road
+        super().__init__(name=name, timestep_length=timestep_length)
+        self.sumo_config = sumo_config
+        self.batteries_stats = {}
+        self.evs_awaiting_charge = {}
+        self.phev_controller = PHEVController()
 
     def initialize(self):
-        api.start(
+        libsumo.start(
             [
                 "sumo",
                 "-c",
-                self._sumo_config,
-                # The spec, not the config, sets the step length; the command
-                # line overrides the config's value.
+                self.sumo_config,
                 "--step-length",
                 str(self.timestep_length.total_seconds()),
-                # "--no-warnings",
-                "--error-log",
-                os.devnull,
+                "--keep-after-arrival",
+                "1",
             ]
         )
-        self._api = api
-        self._begin_s = self._api.simulation.getTime()
-        self._net_offset, self._proj = self._read_projection(self._resolve_net_file())
+        self.sumo_start_time = libsumo.simulation.getTime()
 
-    def current_time(self) -> timedelta:
-        return timedelta(seconds=self._api.simulation.getTime() - self._begin_s)
-
-    def _resolve_net_file(self) -> str:
-        config_dir = os.path.dirname(self._sumo_config)
-        net_file = ET.parse(self._sumo_config).find(".//net-file").get("value")
-        return os.path.join(config_dir, net_file)
-
-    @staticmethod
-    def _read_projection(net_file: str) -> tuple[tuple[float, float], pyproj.Proj]:
-        """The network's offset and projection, as sumolib's convertXY2LonLat
-        uses them. Only <location>, at the top of the file, is read: loading
-        the whole network with sumolib is slow and memory-hungry."""
-        opener = gzip.open if net_file.endswith(".gz") else open
-        with opener(net_file, "rb") as file:
-            for _, element in ET.iterparse(file, events=("start",)):
-                if element.tag == "location":
-                    proj_parameter = element.get("projParameter")
-                    if proj_parameter == "!":
-                        raise ValueError(
-                            f"{net_file} has no geographic projection "
-                            "(projParameter='!')"
-                        )
-                    offset_x, offset_y = element.get("netOffset").split(",")
-                    offset = (float(offset_x), float(offset_y))
-                    return offset, pyproj.Proj(proj_parameter)
-        raise ValueError(f"{net_file} has no <location> element")
-
-    def _to_lon_lat(self, x: float, y: float) -> tuple[float, float]:
-        offset_x, offset_y = self._net_offset
-        return self._proj(x - offset_x, y - offset_y, inverse=True)
-
-    def read_outputs(self) -> list[EV]:
-        output = []
-        output += self._get_arrived_evs()
-        output += self._get_departed_evs()
-        output += self._get_battery()
-        return output
-
-    def _get_vehicle_coords(self, veh_id: str) -> tuple[float, float] | None:
-        dynamic_attrs = self._dynamic_veh_attrs.get(veh_id)
-        if dynamic_attrs is None:
-            return None
-        x, y = dynamic_attrs["x"], dynamic_attrs["y"]
-        if api.constants.INVALID_DOUBLE_VALUE in (x, y):
-            return None
-        return self._to_lon_lat(x, y)
-
-    def _get_soc(self, veh_id: str) -> float:
-        dynamic_attrs = self._dynamic_veh_attrs.get(veh_id)
-        static_attrs = self._static_veh_attrs.get(veh_id)
-        if (
-            dynamic_attrs is None
-            or static_attrs is None
-            or not static_attrs["capacity_wh"]
-        ):
-            return None
-        try:
-            # SUMO's actualBatteryCapacity is the charge left in Wh, despite
-            # its name, so this is the state of charge.
-            return float(dynamic_attrs["battery_charge"]) / float(
-                static_attrs["capacity_wh"]
-            )
-        except (TypeError, ValueError, ZeroDivisionError):
-            return None
-
-    def _get_tour_id(self, veh_id: str) -> int:
-        static_attrs = self._static_veh_attrs.get(veh_id)
-        return static_attrs["tour_id"] if static_attrs else None
-
-    def _get_driver_id(self, veh_id: str) -> str:
-        static_attrs = self._static_veh_attrs.get(veh_id)
-        return static_attrs["driver_id"] if static_attrs else veh_id
-
-    def _battery_charge(self, veh_id: str) -> float | None:
-        try:
-            return float(self._dynamic_veh_attrs[veh_id]["battery_charge"])
-        except (KeyError, TypeError, ValueError):
-            return None
-
-    def _get_fuel_type(self, veh_id: str) -> str:
-        static_attrs = self._static_veh_attrs.get(veh_id)
-        veh_type = static_attrs["veh_type"] if static_attrs else None
-        return self._classify_veh_type(veh_type)
-
-    @staticmethod
-    def _classify_veh_type(veh_type: str | None) -> str:
-        veh_type = (veh_type or "").upper()
-        if veh_type.startswith("PHEV"):
-            return "PHEV"
-        if veh_type.startswith("EV"):
-            return "EV"
-        return "ICE"
-
-    def _get_veh_class(self, veh_id: str) -> str:
-        static_attrs = self._static_veh_attrs.get(veh_id)
-        return static_attrs["veh_class"] if static_attrs else None
-
-    def _get_arrived_evs(self) -> list[EV]:
-        evs = []
-        time = self.current_time()
-        for veh_id in self._api.simulation.getArrivedIDList():
-            soc = self._get_soc(veh_id)
-            if soc is not None:
-                tour_id = self._get_tour_id(veh_id)
-                driver_id = self._get_driver_id(veh_id)
-                fuel_type = self._get_fuel_type(veh_id)
-                veh_class = self._get_veh_class(veh_id)
-                coords = self._get_vehicle_coords(veh_id)
-                if coords is None:
-                    warnings.warn(
-                        f"arrived vehicle '{veh_id}' has no valid position; skipped",
-                        RuntimeWarning,
-                    )
-                else:
-                    lon, lat = coords
-                    evs.append(
-                        EV(
-                            veh_id=veh_id,
-                            tour_id=tour_id,
-                            driver_id=driver_id,
-                            soc=soc,
-                            state="arrived",
-                            fuel_type=fuel_type,
-                            veh_class=veh_class,
-                            time_s=time,
-                            coords=[lon, lat],
-                        )
-                    )
-            self._forget_vehicle(veh_id)
-        return evs
-
-    def _get_departed_evs(self) -> list[EV]:
-        evs = []
-        time = self.current_time()
-        for veh_id in self._departed_ids:
-            soc = self._get_soc(veh_id)
-            if soc is not None:
-                tour_id = self._get_tour_id(veh_id)
-                driver_id = self._get_driver_id(veh_id)
-                self._vehicle_by_driver[driver_id] = veh_id
-                fuel_type = self._get_fuel_type(veh_id)
-                veh_class = self._get_veh_class(veh_id)
-                coords = self._get_vehicle_coords(veh_id)
-                if coords is None:
-                    warnings.warn(
-                        f"departed vehicle '{veh_id}' has no valid position; skipped",
-                        RuntimeWarning,
-                    )
-                    continue
-                lon, lat = coords
-                evs.append(
-                    EV(
-                        veh_id=veh_id,
-                        tour_id=tour_id,
-                        driver_id=driver_id,
-                        soc=soc,
-                        state="departed",
-                        fuel_type=fuel_type,
-                        veh_class=veh_class,
-                        time_s=time,
-                        coords=[lon, lat],
-                    )
-                )
-        return evs
-
-    def _get_battery(self) -> list[VehicleBattery]:
-        capacities = []
-        for veh_id in self._departed_ids:
-            static_attrs = self._static_veh_attrs.get(veh_id)
-            if (
-                static_attrs is None
-                or static_attrs["capacity_wh"] is None
-                or static_attrs["charging_power_w"] is None
-            ):
-                continue
-            capacities.append(
-                VehicleBattery(
-                    veh_id=veh_id,
-                    capacity_wh=static_attrs["capacity_wh"],
-                    charging_power_w=static_attrs["charging_power_w"],
-                )
-            )
-        return capacities
+    def current_time(self):
+        return timedelta(seconds=libsumo.simulation.getTime() - self.sumo_start_time)
 
     def write_inputs(self, inputs: dict[str, list[dict]]):
-        for row in inputs.get(vehicle_soc.name, []):
-            self._apply_charging_result(row["driver_id"], row["final_soc"])
+        drivers_awaiting_charge = self.evs_awaiting_charge.keys()
+        for row in inputs.get(vehicle_charge.name, []):
+            driver_id = row["driver_id"]
+            if driver_id in drivers_awaiting_charge:
+                veh_id = self.evs_awaiting_charge[driver_id]
+                self._set_charge(veh_id, row["final_charge_wh"])
+                self.evs_awaiting_charge.pop(driver_id)
 
-    def _apply_charging_result(self, driver_id: str, final_soc: float):
-        """Give the driver's vehicle on the road the charge its last charging
-        session ended with. The result arrives after the vehicle departed, so
-        the charge is shifted rather than overwritten, keeping the energy used
-        since departure."""
-        veh_id = self._vehicle_by_driver.get(driver_id)
-        static_attrs = self._static_veh_attrs.get(veh_id)
-        if (
-            static_attrs is None
-            or not static_attrs["capacity_wh"]
-            or static_attrs["departure_charge_wh"] is None
-        ):
-            # E.g. a trip shorter than the charging step: the vehicle already
-            # arrived. The message leaves out ids so it prints only once.
-            warnings.warn(
-                "charging result for a driver with no vehicle on the road; skipped",
-                RuntimeWarning,
-            )
+    def _set_charge(self, veh_id: str, final_charge_wh: float):
+        current_charge = self._battery_charge_wh(veh_id)
+        if current_charge is None:
             return
-        capacity_wh = static_attrs["capacity_wh"]
-        delta_wh = final_soc * capacity_wh - static_attrs["departure_charge_wh"]
+        stats = self.batteries_stats[veh_id]
+        used_since_departure = stats["departure_charge_wh"] - current_charge
+        new_charge = min(
+            max(final_charge_wh - used_since_departure, 0.0), stats["capacity_wh"]
+        )
+        libsumo.vehicle.setParameter(
+            veh_id, "device.battery.actualBatteryCapacity", str(new_charge)
+        )
+
+    def advance(self):
+        libsumo.simulationStep()
+        for departed_veh_id in libsumo.simulation.getDepartedIDList():
+            veh_type = self._veh_type(departed_veh_id)
+            if veh_type in ["EV_car_std", "EV_car_long", "PHEV_car_std"]:
+                self.batteries_stats[departed_veh_id] = {
+                    "veh_type": veh_type,
+                    "capacity_wh": self._battery_capacity_wh(departed_veh_id),
+                    "departure_charge_wh": self._battery_charge_wh(departed_veh_id),
+                }
+                self.evs_awaiting_charge[
+                    libsumo.vehicle.getParameter(departed_veh_id, "driver_id")
+                ] = departed_veh_id
+            if veh_type == "PHEV_car_std":
+                self.phev_controller.add_phev(departed_veh_id, veh_type)
+        self.phev_controller.update_phev_soc(self.current_time())
+
+    def _veh_type(self, veh_id: str) -> str | None:
+        if veh_id in self.batteries_stats:
+            return self.batteries_stats[veh_id]["veh_type"]
         try:
-            charge_wh = float(
-                self._api.vehicle.getParameter(
+            return libsumo.vehicle.getTypeID(veh_id)
+        except libsumo.TraCIException:
+            return None
+
+    def _battery_capacity_wh(self, veh_id: str) -> float | None:
+        try:
+            return float(
+                libsumo.vehicle.getParameter(veh_id, "device.battery.capacity")
+            )
+        except libsumo.TraCIException:
+            return None
+
+    def _battery_charge_wh(self, veh_id: str) -> float | None:
+        try:
+            return float(
+                libsumo.vehicle.getParameter(
                     veh_id, "device.battery.actualBatteryCapacity"
                 )
             )
-            new_charge_wh = min(max(charge_wh + delta_wh, 0.0), capacity_wh)
-            self._api.vehicle.setParameter(
-                veh_id, "device.battery.actualBatteryCapacity", str(new_charge_wh)
-            )
-        except (api.exceptions.apiException, ValueError) as error:
-            warnings.warn(f"could not apply charging result: {error}", RuntimeWarning)
-            return
-        static_attrs["departure_charge_wh"] = final_soc * capacity_wh
-        dynamic_attrs = self._dynamic_veh_attrs.get(veh_id, {})
-        if "battery_charge" in dynamic_attrs:
-            dynamic_attrs["battery_charge"] = new_charge_wh
-        if "phev_soc" in dynamic_attrs:
-            # The PHEV logic writes its tracked charge back to SUMO, so it has
-            # to see the change as well.
-            dynamic_attrs["phev_soc"] = min(
-                max(dynamic_attrs["phev_soc"] + delta_wh, 0.0), capacity_wh
-            )
-
-    def advance(self):
-        self._api.simulationStep()
-        self._departed_ids = self._api.simulation.getDepartedIDList()
-        battery_vehicles = self._subscribe_new_departures()
-        self._subscription_results = self._api.vehicle.getAllSubscriptionResults()
-        self._update_dynamic_veh_attrs()
-        # After the update: the departure charge comes from the subscription.
-        for veh_id, veh_type in battery_vehicles:
-            self._save_static_attrs(veh_id, veh_type)
-        self._update_phev()
-
-    def _save_static_attrs(self, veh_id: str, veh_type: str):
-        if veh_id in self._static_veh_attrs:
-            return
-        self._static_veh_attrs[veh_id] = {
-            "capacity_wh": self._read_capacity(veh_id),
-            "charging_power_w": self._read_max_charge_rate(veh_id),
-            "tour_id": self._read_tour_id(veh_id),
-            "driver_id": self._read_driver_id(veh_id),
-            "departure_charge_wh": self._battery_charge(veh_id),
-            "veh_class": self._read_veh_class(veh_id),
-            "veh_type": veh_type,
-        }
-
-    def _read_capacity(self, veh_id: str) -> float | None:
-        try:
-            capacity = self._api.vehicle.getParameter(veh_id, "device.battery.capacity")
-            return float(capacity) if capacity else None
-        except api.exceptions.apiException:
+        except libsumo.TraCIException:
             return None
 
-    def _read_max_charge_rate(self, veh_id: str) -> float | None:
-        try:
-            max_charge_rate = self._api.vehicle.getParameter(
-                veh_id, "device.battery.maximumChargeRate"
-            )
-            return float(max_charge_rate) if max_charge_rate else None
-        except api.exceptions.apiException:
-            return None
+    def read_outputs(self) -> list[ArrivedEV | DepartedEV | VehicleBattery]:
+        outputs = []
+        outputs += self._get_ev_batteries(libsumo.simulation.getDepartedIDList())
+        outputs += self._get_arrived_evs()
+        outputs += self._get_departed_evs()
+        return outputs
 
-    def _read_tour_id(self, veh_id: str) -> int | None:
-        try:
-            return int(self._api.vehicle.getParameter(veh_id, "tour_id"))
-        except (api.exceptions.apiException, ValueError):
-            return None
-
-    def _read_driver_id(self, veh_id: str) -> str:
-        # Trucks have no household and person, so their vehicle id stands in.
-        try:
-            return self._api.vehicle.getParameter(veh_id, "driver_id") or veh_id
-        except api.exceptions.apiException:
-            return veh_id
-
-    def _read_veh_class(self, veh_id: str) -> str | None:
-        try:
-            return self._api.vehicle.getVehicleClass(veh_id)
-        except api.exceptions.apiException:
-            return None
-
-    def _read_veh_type(self, veh_id: str) -> str | None:
-        try:
-            return self._api.vehicle.getTypeID(veh_id)
-        except api.exceptions.apiException:
-            return None
-
-    def _forget_vehicle(self, veh_id: str):
-        static_attrs = self._static_veh_attrs.pop(veh_id, None)
-        self._dynamic_veh_attrs.pop(veh_id, None)
-        driver_id = static_attrs["driver_id"] if static_attrs else None
-        if self._vehicle_by_driver.get(driver_id) == veh_id:
-            del self._vehicle_by_driver[driver_id]
-
-    def _subscribe_new_departures(self) -> list[tuple[str, str]]:
-        """Subscribe the battery vehicles among the departed ones and return
-        them with their type. Vehicles without a battery cost one call."""
-        battery_vehicles = []
-        for veh_id in self._departed_ids:
-            veh_type = self._read_veh_type(veh_id)
-            fuel_type = self._classify_veh_type(veh_type)
-            if fuel_type == "ICE":
-                continue
-            battery_vehicles.append((veh_id, veh_type))
-            var_ids = [tc.VAR_POSITION, tc.VAR_PARAMETER]
-            # A plain string, not an ("s", key) tuple: api sends both the
-            # same way, but libsumo rejects tuples ("Unsupported variable").
-            parameters = {tc.VAR_PARAMETER: "device.battery.actualBatteryCapacity"}
-            if fuel_type == "PHEV":
-                var_ids.append(tc.VAR_SPEED)
-            try:
-                self._api.vehicle.subscribe(veh_id, var_ids, parameters=parameters)
-            except api.exceptions.apiException as error:
-                # Without this subscription the vehicle never gets a SOC and
-                # is dropped from the EV output. The message leaves out the
-                # vehicle ID so an error that hits every vehicle prints once.
-                warnings.warn(f"battery subscription failed: {error}", RuntimeWarning)
-        return battery_vehicles
-
-    def _update_dynamic_veh_attrs(self):
-        for veh_id, result in self._subscription_results.items():
-            if tc.VAR_POSITION not in result or tc.VAR_PARAMETER not in result:
-                continue
-            x, y = result[tc.VAR_POSITION]
-            self._dynamic_veh_attrs.setdefault(veh_id, {}).update(
-                {
-                    "x": x,
-                    "y": y,
-                    "battery_charge": result[tc.VAR_PARAMETER],
-                }
-            )
-
-    def _update_phev(self):
-        for veh_id, result in self._subscription_results.items():
-            if tc.VAR_SPEED not in result or tc.VAR_PARAMETER not in result:
-                continue
-            speed = float(result[tc.VAR_SPEED])
-            soc = float(result[tc.VAR_PARAMETER])
-            dynamic_attrs = self._dynamic_veh_attrs.setdefault(veh_id, {})
-            if "phev_mode" not in dynamic_attrs:
-                mode = "EV" if speed <= self._EV_SPEED_THRESHOLD_MPS else "ICE"
-                dynamic_attrs["phev_speed"] = speed
-                dynamic_attrs["phev_soc"] = soc
-                dynamic_attrs["phev_mode"] = mode
-                self._switch_emissions(veh_id, mode)
-            else:
-                dynamic_attrs["phev_speed"] = speed
-                dynamic_attrs["phev_soc"] = self._update_soc(
-                    veh_id, dynamic_attrs, soc, speed
+    def _get_ev_batteries(self, departed_veh_ids: list[str]) -> list[VehicleBattery]:
+        batteries = []
+        for veh_id in departed_veh_ids:
+            capacity = self._capacity_wh(veh_id)
+            charging_power = self._charging_power_w(veh_id)
+            if capacity and charging_power:
+                batteries.append(
+                    VehicleBattery(
+                        veh_id=veh_id,
+                        capacity_wh=capacity,
+                        charging_power_w=charging_power,
+                    )
                 )
+        return batteries
 
-    def _update_soc(self, veh_id, state, raw_soc, speed):
-        current_soc = state["phev_soc"]
-
-        mode = state["phev_mode"]
-        if current_soc <= 0:
-            mode = "ICE"
-        elif mode == "EV" and speed > self._ICE_SPEED_THRESHOLD_MPS:
-            mode = "ICE"
-        elif mode == "ICE" and speed < self._EV_SPEED_THRESHOLD_MPS:
-            mode = "EV"
-        # SUMO keeps a vehicle's emission class, so set it only on a change.
-        if mode != state["phev_mode"]:
-            state["phev_mode"] = mode
-            self._switch_emissions(veh_id, mode)
-
-        if current_soc <= 0:
-            self._write_battery_charge(veh_id, raw_soc, current_soc)
-            return current_soc
-
-        if mode == "ICE":
-            delta = raw_soc - current_soc
-            if self._EV_SPEED_THRESHOLD_MPS <= speed <= self._ICE_SPEED_THRESHOLD_MPS:
-                credited_soc = current_soc + delta * self._ASSIST_FRACTION
-            else:
-                credited_soc = current_soc
-            self._write_battery_charge(veh_id, raw_soc, credited_soc)
-            return credited_soc
-
-        return raw_soc
-
-    def _write_battery_charge(self, veh_id, sumo_charge, charge):
-        # Undo SUMO's drain; skipped when there is nothing to undo.
-        if sumo_charge != charge:
-            self._api.vehicle.setParameter(
-                veh_id, "device.battery.actualBatteryCapacity", str(charge)
+    def _charging_power_w(self, veh_id: str) -> float | None:
+        try:
+            return float(
+                libsumo.vehicle.getParameter(veh_id, "device.battery.maximumChargeRate")
             )
+        except libsumo.TraCIException:
+            return None
 
-    def _switch_emissions(self, veh_id, mode):
-        if mode == "ICE":
-            self._api.vehicle.setEmissionClass(veh_id, "HBEFA4/PC_petrol_Euro-6ab")
-        elif mode == "EV":
-            self._api.vehicle.setEmissionClass(veh_id, "Energy/unknown")
+    def _get_arrived_evs(self) -> list[ArrivedEV]:
+        arrived_evs = []
+        arrived_ev_ids = self._get_ev_ids(state="arrived")
+        current_time = self.current_time()
+        for veh_id in arrived_ev_ids:
+            driver_id = self._driver_id(veh_id)
+            charge = self._battery_charge_wh(veh_id)
+            coords = self._arrival_coords(veh_id)
+            if charge is None or coords is None:
+                warnings.warn(
+                    f"arrived EV '{veh_id}' without charge or arrival position; "
+                    "skipped",
+                    RuntimeWarning,
+                )
+            else:
+                arrived_evs.append(
+                    ArrivedEV(
+                        veh_id=veh_id,
+                        driver_id=driver_id,
+                        charge_wh=charge,
+                        veh_type=self._veh_type(veh_id),
+                        time_s=current_time,
+                        coords=coords,
+                    )
+                )
+            self.batteries_stats.pop(veh_id, None)
+            self.evs_awaiting_charge.pop(driver_id, None)
+            self.phev_controller.remove_phev(veh_id)
+        return arrived_evs
+
+    def _get_ev_ids(self, state: Literal["arrived", "departed"]) -> list[str]:
+        if state == "arrived":
+            veh_ids = libsumo.simulation.getArrivedIDList()
+        elif state == "departed":
+            veh_ids = libsumo.simulation.getDepartedIDList()
+        else:
+            raise ValueError(f"state must be 'arrived' or 'departed', not {state}")
+        return [veh_id for veh_id in veh_ids if veh_id in self.batteries_stats]
+
+    def _get_departed_evs(self) -> list[DepartedEV]:
+        departed_evs = []
+        departed_ev_ids = self._get_ev_ids(state="departed")
+        current_time = self.current_time()
+        for veh_id in departed_ev_ids:
+            charge = self._battery_charge_wh(veh_id)
+            if charge is not None:
+                departed_evs.append(
+                    DepartedEV(
+                        veh_id=veh_id,
+                        driver_id=self._driver_id(veh_id),
+                        charge_wh=charge,
+                        time_s=current_time,
+                    )
+                )
+        return departed_evs
+
+    def _driver_id(self, veh_id: str) -> str | None:
+        try:
+            return libsumo.vehicle.getParameter(veh_id, "driver_id")
+        except libsumo.TraCIException:
+            return None
+
+    def _capacity_wh(self, veh_id: str) -> float | None:
+        battery = self.batteries_stats.get(veh_id)
+        return battery["capacity_wh"] if battery else None
+
+    def _arrival_coords(self, veh_id: str) -> tuple[float, float] | None:
+        try:
+            last_edge = libsumo.vehicle.getRoute(veh_id)[-1]
+            arrival_pos = libsumo.lane.getLength(f"{last_edge}_0")
+            return libsumo.simulation.convert2D(last_edge, arrival_pos, toGeo=True)
+        except libsumo.TraCIException:
+            return None
 
     def terminate(self):
-        if self._api is not None:
-            self._api.close()
-            self._api = None
+        libsumo.close()
+
+
+class PHEVController:
+    _SUMO_ENERGY_DEFAULTS = {
+        "frontSurfaceArea": 2.6,
+        "airDragCoefficient": 0.35,
+        "rollDragCoefficient": 0.01,
+        "constantPowerIntake": 100.0,
+        "propulsionEfficiency": 0.98,
+        "recuperationEfficiency": 0.96,
+        "rotatingMass": 40.0,
+    }
+    _G = 9.81
+    _AIR_DENSITY = 1.2
+
+    def __init__(
+        self,
+        ev_power_limit_kw: float = 60,
+        reserve_soc: float = 0.2,
+        ice_duration: timedelta = timedelta(seconds=30),
+    ):
+        self.ev_power_limit_kw = ev_power_limit_kw
+        self.reserve_soc = reserve_soc
+        self.ice_duration = ice_duration
+        self.veh_types = {}
+        self.phevs = {}
+
+    def _energy_param(self, veh_type: str, key: str) -> float:
+        try:
+            param = libsumo.vehicletype.getParameter(veh_type, key)
+        except libsumo.TraCIException:
+            param = ""
+        return float(param) if param else self._SUMO_ENERGY_DEFAULTS[key]
+
+    def _store_veh_type(self, veh_type: str):
+        params = self.veh_types.get(veh_type)
+        if params is None:
+            params = {
+                key: self._energy_param(veh_type, key)
+                for key in self._SUMO_ENERGY_DEFAULTS
+            }
+            params["mass"] = libsumo.vehicletype.getMass(veh_type)
+            self.veh_types[veh_type] = params
+
+    def add_phev(self, veh_id: str, veh_type: str):
+        self._store_veh_type(veh_type)
+        self._subscribe_to_phev(veh_id)
+        self.phevs[veh_id] = {
+            "veh_type": veh_type,
+            "capacity_wh": float(
+                libsumo.vehicle.getParameter(veh_id, "device.battery.capacity")
+            ),
+            "current_mode": "EV",
+            "last_ice_activation": None,
+        }
+
+    def _subscribe_to_phev(self, veh_id: str):
+        var = [
+            traci_constants.VAR_PARAMETER,
+            traci_constants.VAR_SPEED,
+            traci_constants.VAR_ACCELERATION,
+        ]
+        parameters = {
+            traci_constants.VAR_PARAMETER: "device.battery.actualBatteryCapacity"
+        }
+        libsumo.vehicle.subscribe(veh_id, var, parameters=parameters)
+
+    def update_phev_soc(self, current_time: timedelta):
+        results = self._get_subscription_results()
+        step_s = libsumo.simulation.getDeltaT()
+        for veh_id, result in results.items():
+            # SUMO's Energy model uses the mean speed over the step, not the
+            # speed at its end.
+            mean_speed = result["speed"] - result["accel"] * step_s / 2
+            power_kw = self._compute_power_kw(
+                self.phevs[veh_id]["veh_type"],
+                mean_speed,
+                result["accel"],
+            )
+            if self.phevs[veh_id]["current_mode"] == "ICE" and power_kw < 0:
+                self._recuperate_energy(veh_id, -power_kw, result["charge_wh"])
+            new_mode = self._determine_mode(
+                power_kw, result["charge_wh"], veh_id, current_time
+            )
+            self._switch_emission_class(
+                veh_id, self.phevs[veh_id]["current_mode"], new_mode
+            )
+
+    def _recuperate_energy(self, veh_id: str, power_kw: float, charge_wh: float):
+        capacity_wh = self.phevs[veh_id]["capacity_wh"]
+        step_h = libsumo.simulation.getDeltaT() / 3600
+        new_charge_wh = min(charge_wh + power_kw * 1000 * step_h, capacity_wh)
+        libsumo.vehicle.setParameter(
+            veh_id, "device.battery.actualBatteryCapacity", str(new_charge_wh)
+        )
+
+    def _get_subscription_results(self) -> dict[str, dict[str, float]]:
+        results = {}
+        for veh_id, res in libsumo.vehicle.getAllSubscriptionResults().items():
+            if (
+                traci_constants.VAR_SPEED not in res
+                or traci_constants.VAR_PARAMETER not in res
+            ):
+                continue
+            results[veh_id] = {
+                "speed": float(res[traci_constants.VAR_SPEED]),
+                "accel": float(res[traci_constants.VAR_ACCELERATION]),
+                "charge_wh": float(res[traci_constants.VAR_PARAMETER]),
+            }
+        return results
+
+    def _determine_mode(
+        self, power_kw: float, charge_wh: float, veh_id: str, current_time: timedelta
+    ):
+        """PHEVs drive in ICE mode when their SOC is below the reserve level
+        (reserve_soc), when they need more power than the electric motor can
+        provide (ev_power_limit_kw), or when the ICE was activated within the
+        last ice_duration (last_ice_activation). Otherwise, they drive in EV
+        mode."""
+        soc = charge_wh / self.phevs[veh_id]["capacity_wh"]
+        if soc < self.reserve_soc or power_kw >= self.ev_power_limit_kw:
+            self.phevs[veh_id]["last_ice_activation"] = current_time
+            return "ICE"
+        last_ice_activation = self.phevs[veh_id]["last_ice_activation"]
+        if (
+            last_ice_activation is not None
+            and current_time < last_ice_activation + self.ice_duration
+        ):
+            return "ICE"
+        return "EV"
+
+    def _switch_emission_class(self, veh_id: str, current_mode: str, new_mode: str):
+        if current_mode == new_mode:
+            return
+        if new_mode == "ICE":
+            libsumo.vehicle.setEmissionClass(veh_id, "HBEFA4/PC_petrol_Euro-6ab")
+        else:
+            libsumo.vehicle.setEmissionClass(veh_id, "Energy/unknown")
+        self.phevs[veh_id]["current_mode"] = new_mode
+
+    def _compute_power_kw(
+        self,
+        veh_type: str,
+        speed: float,
+        accel: float,
+        slope_deg: float = 0.0,
+    ) -> float:
+        params = self.veh_types[veh_type]
+        mass = params["mass"]
+        slope = math.radians(slope_deg)
+
+        inertia_n = (mass + params["rotatingMass"]) * accel
+        gravity_n = mass * self._G * math.sin(slope)
+        rolling_n = mass * self._G * params["rollDragCoefficient"] * math.cos(slope)
+        drag_area = params["airDragCoefficient"] * params["frontSurfaceArea"]
+        drag_n = 0.5 * self._AIR_DENSITY * drag_area * speed**2
+
+        power_w = (inertia_n + gravity_n + rolling_n + drag_n) * speed
+        power_w += params["constantPowerIntake"]
+        if power_w > 0:
+            power_w /= params["propulsionEfficiency"]
+        else:
+            power_w *= params["recuperationEfficiency"]
+        return power_w / 1000
+
+    def remove_phev(self, veh_id: str):
+        self.phevs.pop(veh_id, None)

@@ -64,9 +64,8 @@ class ChargingAdapter(Adapter):
         # else that fails is a bug and should stop the run.
         self._charging_model.add_vehicle(
             veh_id=row["veh_id"],
-            tour_id=row["tour_id"],
             driver_id=row["driver_id"],
-            soc=row["soc"],
+            soc=row["charge_wh"] / row["capacity_wh"],
             capacity_kwh=row["capacity_wh"] / 1000,
             charging_power_kw=row["charging_power_w"] / 1000,
             station_id=row["station_id"],
@@ -96,11 +95,10 @@ class ChargingAdapter(Adapter):
         return [
             ChargingEvent(
                 veh_id=session["veh_id"],
-                tour_id=session["tour_id"],
                 driver_id=session["driver_id"],
                 station_id=self._charging_model.get_station_id(session["port_id"]),
                 port_id=session["port_id"],
-                final_soc=session["final_soc"],
+                final_charge_wh=session["final_charge_kwh"] * 1000,
                 end_reason=session["end_reason"],
                 time_s=time,
             )

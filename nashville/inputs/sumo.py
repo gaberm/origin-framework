@@ -1,8 +1,8 @@
 from base import Input, Fields
 from nashville.outputs.charging import ChargingEvent
 
-vehicle_soc = Input(
-    name="vehicle_soc",
+vehicle_charge = Input(
+    name="vehicle_charge",
     from_=ChargingEvent,
-    select=Fields("driver_id", "final_soc"),
+    select=Fields("driver_id", "final_charge_wh"),
 )

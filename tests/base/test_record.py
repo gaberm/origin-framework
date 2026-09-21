@@ -2,7 +2,7 @@ import pytest
 from dataclasses import dataclass
 from base import Record, Timestamp
 from nashville.outputs.charging import ChargingEvent, PortStatus, Station
-from nashville.outputs.sumo import EV, VehicleBattery
+from nashville.outputs.sumo import ArrivedEV, DepartedEV, VehicleBattery
 
 
 def test_missing_primary_key_field():
@@ -126,8 +126,9 @@ class TestTimeFieldIndexed:
         assert Sensor.indexed == ("kind",)
 
     def test_nashville_records(self):
-        assert EV.indexed == ("time_s", "h3_ids", "state")
+        assert ArrivedEV.indexed == ("time_s", "h3_ids")
+        assert DepartedEV.indexed == ("time_s",)
         assert PortStatus.indexed == ("time_s", "port_id", "station_id")
-        assert ChargingEvent.indexed == ("time_s", "driver_id", "tour_id", "station_id")
+        assert ChargingEvent.indexed == ("time_s", "driver_id", "station_id")
         assert Station.indexed == ("h3_ids",)
         assert VehicleBattery.indexed == ()

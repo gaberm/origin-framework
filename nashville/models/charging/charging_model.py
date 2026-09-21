@@ -145,7 +145,6 @@ class ChargingModel:
     def add_vehicle(
         self,
         veh_id: str,
-        tour_id: int,
         driver_id: str,
         soc: float,
         capacity_kwh: float,
@@ -165,7 +164,6 @@ class ChargingModel:
                 "port_id": port_id,
                 "started_at": self.time,
                 "veh_id": veh_id,
-                "tour_id": tour_id,
                 "driver_id": driver_id,
                 "soc": soc,
                 "capacity_kwh": capacity_kwh,
@@ -214,9 +212,9 @@ class ChargingModel:
                     "started_at": session["started_at"],
                     "finished_at": self.time,
                     "veh_id": session["veh_id"],
-                    "tour_id": session["tour_id"],
                     "driver_id": session["driver_id"],
                     "final_soc": session["soc"],
+                    "final_charge_kwh": session["soc"] * session["capacity_kwh"],
                     "end_reason": end_reason,
                 }
             )
@@ -270,7 +268,6 @@ class ChargingModel:
             {
                 "time": self.time,
                 "veh_id": session["veh_id"],
-                "tour_id": session["tour_id"],
                 "driver_id": session["driver_id"],
                 "port_id": session["port_id"],
                 "load_kw": float(load),

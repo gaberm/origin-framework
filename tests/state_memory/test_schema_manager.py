@@ -3,7 +3,7 @@ from state_memory.schema_manager import SchemaManager
 from dataclasses import dataclass
 from base import Record, Geometry, SHAPE_TYPE
 from nashville.outputs.charging import ChargingEvent, PortStatus, Station
-from nashville.outputs.sumo import EV, VehicleBattery
+from nashville.outputs.sumo import ArrivedEV, DepartedEV, VehicleBattery
 from _records import Vehicle, Battery, RUN_ID
 
 
@@ -152,18 +152,30 @@ def test_time_field_is_indexed_automatically(schema_manager):
 
 
 def test_nashville_indexes(schema_manager):
-    schema_manager.setup([EV, VehicleBattery, Station, PortStatus, ChargingEvent])
+    schema_manager.setup(
+        [ArrivedEV, DepartedEV, VehicleBattery, Station, PortStatus, ChargingEvent]
+    )
     conn = schema_manager.conn
-    assert set(_indexes(conn, "ev")) == {
-        "ev_pkey", "idx_ev_time_s", "idx_ev_h3_ids", "idx_ev_state",
-        "idx_ev_coords_gist", "idx_ev_coords_4326_gist",
+    assert set(_indexes(conn, "arrived_ev")) == {
+        "arrived_ev_pkey",
+        "idx_arrived_ev_time_s",
+        "idx_arrived_ev_h3_ids",
+        "idx_arrived_ev_coords_gist",
+        "idx_arrived_ev_coords_4326_gist",
+    }
+    assert set(_indexes(conn, "departed_ev")) == {
+        "departed_ev_pkey",
+        "idx_departed_ev_time_s",
     }
     assert set(_indexes(conn, "vehicle_battery")) == {"vehicle_battery_pkey"}
     assert set(_indexes(conn, "port_status")) == {
-        "port_status_pkey", "idx_port_status_time_s", "idx_port_status_station_id",
+        "port_status_pkey",
+        "idx_port_status_time_s",
+        "idx_port_status_station_id",
     }
     assert set(_indexes(conn, "charging_events")) == {
-        "charging_events_pkey", "idx_charging_events_time_s",
-        "idx_charging_events_driver_id", "idx_charging_events_tour_id",
+        "charging_events_pkey",
+        "idx_charging_events_time_s",
+        "idx_charging_events_driver_id",
         "idx_charging_events_station_id",
     }

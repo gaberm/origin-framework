@@ -34,12 +34,11 @@ class PortStatus(Record, Timestamp):
 class ChargingEvent(Record, Timestamp):
     table_name = "charging_events"
     primary_key = "veh_id"
-    indexed = ("driver_id", "tour_id", "station_id")
+    indexed = ("driver_id", "station_id")
 
     veh_id: str
-    tour_id: int
     driver_id: str
     station_id: str
     port_id: str
-    final_soc: float
+    final_charge_wh: float
     end_reason: str

@@ -3,19 +3,26 @@ from dataclasses import dataclass
 
 
 @dataclass(kw_only=True)
-class EV(Record, Geometry, Timestamp):
-    table_name = "ev"
-    primary_key = ("veh_id", "state")
-    indexed = ("h3_ids", "state")
+class ArrivedEV(Record, Geometry, Timestamp):
+    table_name = "arrived_ev"
+    primary_key = ("veh_id",)
+    indexed = ("h3_ids",)
 
     veh_id: str
-    tour_id: int
     driver_id: str
-    soc: float
-    state: str
-    fuel_type: str
-    veh_class: str
+    charge_wh: float
+    veh_type: str
     shape: SHAPE_TYPE = "POINT"
+
+
+@dataclass(kw_only=True)
+class DepartedEV(Record, Timestamp):
+    table_name = "departed_ev"
+    primary_key = ("veh_id",)
+
+    veh_id: str
+    driver_id: str
+    charge_wh: float
 
 
 @dataclass(kw_only=True)

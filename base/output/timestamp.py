@@ -6,35 +6,50 @@ from typing import ClassVar
 
 @dataclass(kw_only=True)
 class Timestamp:
-    time_s: float | int | timedelta
+    """Base class for records that happen at a point in simulation time.
+
+    `time_field` names the field that holds the time, in seconds or as a
+    timedelta. The default is "time_s" but can be overridden.
+    """
+
     time_field: ClassVar[str] = "time_s"
 
     def __post_init__(self):
         parent_post_init = getattr(super(), "__post_init__", None)
         if parent_post_init is not None:
             parent_post_init()
-        if not isinstance(self.time_s, timedelta) and (
-            isinstance(self.time_s, bool) or not isinstance(self.time_s, Real)
+        self._validate_time()
+
+    def _validate_time(self):
+        time = getattr(self, self.time_field)
+        if not isinstance(time, timedelta) and (
+            isinstance(time, bool) or not isinstance(time, Real)
         ):
             raise TypeError(
                 f"{type(self).__name__}.{self.time_field} must be a number of "
-                f"seconds or a timedelta; got {type(self.time_s).__name__!r}"
+                f"seconds or a timedelta; got {type(time).__name__!r}"
             )
-        if isinstance(self.time_s, timedelta):
-            self.time_s = self.time_s.total_seconds()
-        if self.time_s < 0:
+        if isinstance(time, timedelta):
+            time = time.total_seconds()
+        if time < 0:
             raise ValueError(
                 f"{type(self).__name__}.{self.time_field} must be non-negative"
             )
-        if isinstance(self.time_s, int):
-            self.time_s = float(self.time_s)
+        setattr(self, self.time_field, float(time))
 
     def __init_subclass__(cls, **kwargs):
+        cls._declare_time_field()
         super().__init_subclass__(**kwargs)
-        all_annotations = {
+
+    @classmethod
+    def _declare_time_field(cls):
+        declared = {
             name
             for parent in cls.__mro__
-            for name in getattr(parent, "__annotations__", {})
+            for name in parent.__dict__.get("__annotations__", {})
         }
-        if cls.time_field not in all_annotations:
-            raise TypeError(f"time_field must be a field in {cls.__name__}")
+        if cls.time_field in declared:
+            return
+        if "__annotations__" not in cls.__dict__:
+            cls.__annotations__ = {}
+        cls.__annotations__[cls.time_field] = float | int | timedelta

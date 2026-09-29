@@ -7,11 +7,23 @@ SHAPE_TYPE = Literal["POINT", "LINESTRING", "POLYGON"]
 
 @dataclass(kw_only=True)
 class Geometry:
+    """Base class for records that have a location.
+
+    `shape` is "POINT", "LINESTRING" or "POLYGON".
+
+    `coords` is one (x, y) pair for a POINT, otherwise a list of pairs,
+    e.g. [(x1, y1), (x2, y2), ...]. For 4326, x is longitude and y latitude.
+
+    `epsg_code` is the EPSG code of the coordinate system `coords` are in. The default
+    is 4326 (WGS84).
+
+    The state memory stores `coords` in 4326 and adds the H3 cells they
+    cover as `h3_ids`.
+    """
+
     shape: SHAPE_TYPE
     coords: tuple[float, float] | list[tuple[float, float]]
-    srid: int = 4326
-    h3_ids: list[str] | None = None
-    coords_4326: list | None = None
+    epsg_code: int = 4326
 
     def __post_init__(self):
         parent_post_init = getattr(super(), "__post_init__", None)
@@ -48,28 +60,3 @@ class Geometry:
             and len(coord) == 2
             and all(isinstance(val, Real) for val in coord)
         )
-
-
-def to_wkt(
-    coords: tuple[float, float] | list[tuple[float, float]], shape: SHAPE_TYPE
-) -> str:
-    if shape == "POINT":
-        x, y = coords
-        return f"POINT({x} {y})"
-    points = list(coords)
-    if shape == "POLYGON" and points[0] != points[-1]:
-        points = points + [points[0]]
-    coord_list = ", ".join(f"{x} {y}" for x, y in points)
-    return (
-        f"{shape}({coord_list})"
-        if shape == "LINESTRING"
-        else f"{shape}(({coord_list}))"
-    )
-
-
-def to_ewkt(
-    coords: tuple[float, float] | list[tuple[float, float]],
-    shape: SHAPE_TYPE,
-    srid: int,
-) -> str:
-    return f"SRID={srid};{to_wkt(coords, shape)}"

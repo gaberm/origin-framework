@@ -9,6 +9,24 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class ModelSpec:
+    """Describes one model in a simulation; used by the supervisory model to
+    schedule it.
+
+    `name` is a unique name for the model and is used internally.
+
+    `adapter` is the Adapter subclass that wraps the model.
+
+    `timestep_length` is how far the model advances per step, e.g.
+    timedelta(seconds=1).
+
+    `params` are extra keyword arguments for the adapter's __init__, e.g.
+    {"config": "path/to/config.json"}.
+
+    `dependencies` names the models this model waits for before each step.
+    By default they are inferred from the adapter's inputs; set it to
+    override them, or to () to wait for none.
+    """
+
     name: str
     adapter: type[Adapter]
     timestep_length: timedelta

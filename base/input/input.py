@@ -1,292 +1,10 @@
 from __future__ import annotations
 from dataclasses import dataclass, fields as dataclass_fields
-from numbers import Real
-from typing import Any
+from base.input.fields import Fields
+from base.input.filter import Filter, validate_where
+from base.input.join import KeyJoin, SpatialJoin
 from base.output.record import Record
-from base.output.geometry import Geometry
 from base.utils import as_list
-
-
-@dataclass(frozen=True)
-class Condition:
-    operator: str
-    value: Any
-
-
-def Equal(value: Any) -> Condition:
-    return Condition("=", value)
-
-
-def NotEqual(value: Any) -> Condition:
-    return Condition("!=", value)
-
-
-def Less(value: Any) -> Condition:
-    return Condition("<", value)
-
-
-def LessEqual(value: Any) -> Condition:
-    return Condition("<=", value)
-
-
-def Greater(value: Any) -> Condition:
-    return Condition(">", value)
-
-
-def GreaterEqual(value: Any) -> Condition:
-    return Condition(">=", value)
-
-
-class Filter:
-    __slots__ = ("from_", "field", "condition")
-
-    def __init__(
-        self,
-        from_or_field: type[Record] | str,
-        field_or_condition: str | Condition,
-        condition: Condition | None = None,
-    ):
-        if isinstance(from_or_field, type):
-            self.from_, self.field, self.condition = (
-                from_or_field,
-                field_or_condition,
-                condition,
-            )
-        else:
-            self.from_, self.field, self.condition = (
-                None,
-                from_or_field,
-                field_or_condition,
-            )
-        self._validate_condition()
-
-    def _validate_condition(self):
-        if not isinstance(self.condition, Condition):
-            raise TypeError(
-                f"{self.__class__.__name__}.condition must be a Condition; got {type(self.condition).__name__!r}"
-            )
-
-
-_VALID_JOIN_MODES = ("inner", "left", "right", "full")
-
-
-class KeyJoin:
-    __slots__ = (
-        "left_record",
-        "left_field",
-        "right_record",
-        "right_field",
-        "join_type",
-        "duplicates",
-    )
-
-    VALID_MODES = _VALID_JOIN_MODES
-
-    def __init__(
-        self,
-        left: tuple[type[Record], str],
-        right: tuple[type[Record], str],
-        join_type: str = "inner",
-        duplicates: str = "keep",
-    ):
-        self.left_record, self.left_field = left
-        self.right_record, self.right_field = right
-        self.join_type = join_type
-        self.duplicates = duplicates
-        self._validate()
-
-    def _validate(self):
-        context = f"KeyJoin({self.left_record.__name__} → {self.right_record.__name__})"
-        if self.left_record is self.right_record:
-            raise TypeError(f"{context}: left and right records must be different")
-        for record, field in (
-            (self.left_record, self.left_field),
-            (self.right_record, self.right_field),
-        ):
-            valid_fields = {field.name for field in dataclass_fields(record)}
-            if field not in valid_fields:
-                raise AttributeError(
-                    f"{context}: {record.__name__} has no field {field!r}. Valid: {sorted(valid_fields)}"
-                )
-        if self.join_type not in self.VALID_MODES:
-            raise ValueError(
-                f"{context}: join_type must be one of {self.VALID_MODES}, got {self.join_type!r}"
-            )
-        if self.duplicates not in ("keep", "drop"):
-            raise ValueError(
-                f"{context}: duplicates must be 'keep' or 'drop', got {self.duplicates!r}"
-            )
-
-
-_VALID_PREDICATES = ("exact", "nearest")
-
-
-class SpatialJoin:
-    __slots__ = (
-        "left_record",
-        "left_field",
-        "right_record",
-        "right_field",
-        "join_type",
-        "duplicates",
-        "predicate",
-        "max_distance",
-        "where",
-    )
-
-    VALID_MODES = _VALID_JOIN_MODES
-    VALID_PREDICATES = _VALID_PREDICATES
-
-    def __init__(
-        self,
-        left: tuple[type[Record], str],
-        right: tuple[type[Record], str],
-        join_type: str = "inner",
-        duplicates: str = "keep",
-        predicate: str = "exact",
-        max_distance: float | None = None,
-        where: Filter | list[Filter] = None,
-    ):
-        self.left_record, self.left_field = left
-        self.right_record, self.right_field = right
-        self.join_type = join_type
-        self.duplicates = duplicates
-        self.predicate = predicate
-        self.max_distance = max_distance
-        self.where = as_list(where) if where is not None else []
-        context = (
-            f"SpatialJoin({self.left_record.__name__} → {self.right_record.__name__})"
-        )
-        self._validate_records(context)
-        self._validate_where(context)
-        self._validate_parameters(context)
-
-    def _validate_records(self, context: str):
-        if self.left_record is self.right_record:
-            raise TypeError(f"{context}: left and right records must be different")
-        for record, field in (
-            (self.left_record, self.left_field),
-            (self.right_record, self.right_field),
-        ):
-            if not issubclass(record, Geometry):
-                raise TypeError(
-                    f"{context}: SpatialJoin requires Geometry records, got {record.__name__} which is not a Geometry record"
-                )
-            valid_fields = {field.name for field in dataclass_fields(record)}
-            if field not in valid_fields:
-                raise AttributeError(
-                    f"{context}: {record.__name__} has no field {field!r}. Valid: {sorted(valid_fields)}"
-                )
-
-    def _validate_where(self, context: str):
-        valid_fields = {field.name for field in dataclass_fields(self.right_record)}
-        for filter_ in self.where:
-            if not isinstance(filter_, Filter):
-                raise TypeError(
-                    f"{context}.where: must be (list of) Filter; got {type(filter_).__name__!r}"
-                )
-            if filter_.from_ not in (None, self.right_record):
-                raise ValueError(
-                    f"{context}.where: filters apply to {self.right_record.__name__}, got {filter_.from_.__name__}"
-                )
-            if filter_.field not in valid_fields:
-                raise AttributeError(
-                    f"{context}.where: {self.right_record.__name__} has no field {filter_.field!r}. Valid: {sorted(valid_fields)}"
-                )
-
-    def _validate_parameters(self, context: str):
-        if self.join_type not in self.VALID_MODES:
-            raise ValueError(
-                f"{context}: join_type must be one of {self.VALID_MODES}, got {self.join_type!r}"
-            )
-        if self.duplicates not in ("keep", "drop"):
-            raise ValueError(
-                f"{context}: duplicates must be 'keep' or 'drop', got {self.duplicates!r}"
-            )
-        if self.predicate not in self.VALID_PREDICATES:
-            raise ValueError(
-                f"{context}: predicate must be one of {self.VALID_PREDICATES}, got {self.predicate!r}"
-            )
-        if self.predicate == "nearest" and self.join_type in ("right", "full"):
-            raise ValueError(
-                f"{context}: predicate='nearest' does not support join_type={self.join_type!r} "
-                "(Postgres has no RIGHT/FULL JOIN LATERAL); use 'inner' or 'left'"
-            )
-        if self.max_distance is not None:
-            if self.predicate != "nearest":
-                raise ValueError(
-                    f"{context}: max_distance requires predicate='nearest'"
-                )
-            if (
-                isinstance(self.max_distance, bool)
-                or not isinstance(self.max_distance, Real)
-                or not 0 < self.max_distance < float("inf")
-            ):
-                raise ValueError(
-                    f"{context}: max_distance must be a positive number of metres, got {self.max_distance!r}"
-                )
-
-
-class Fields:
-    __slots__ = ("selected_fields",)
-
-    def __init__(self, *args):
-        if not args:
-            raise TypeError("Fields(...) requires at least one field name")
-        self.selected_fields = {}
-        if self._is_explicit(args):
-            for arg in args:
-                self.selected_fields.update(self._parse_field(arg))
-        else:
-            field_names = (
-                args[0]
-                if len(args) == 1 and isinstance(args[0], (list, tuple))
-                else args
-            )
-            if not field_names:
-                raise TypeError("Fields(...) requires at least one field name")
-            self._validate_fields(field_names)
-            self.selected_fields = {None: tuple(field_names)}
-
-    @staticmethod
-    def _is_explicit(args) -> bool:
-        return (
-            isinstance(args[0], tuple)
-            and bool(args[0])
-            and isinstance(args[0][0], type)
-        )
-
-    def _parse_field(self, arg) -> tuple:
-        if not (isinstance(arg, tuple) and arg and isinstance(arg[0], type)):
-            raise TypeError(f"Fields: expected (Entity, field, ...) tuple, got {arg!r}")
-        entity, *field_names = arg
-        if not field_names:
-            raise TypeError(f"Fields: no field names given for {entity.__name__}")
-        valid_fields = {
-            dataclass_field.name for dataclass_field in dataclass_fields(entity)
-        }
-        self._validate_fields(field_names, valid_fields)
-        return {entity.table_name: tuple(field_names)}
-
-    @staticmethod
-    def _validate_fields(field_names, valid_fields: set[str] = None) -> None:
-        for field_name in field_names:
-            if not isinstance(field_name, str):
-                raise TypeError(
-                    f"Fields: expected string field name, got {field_name!r}"
-                )
-            if valid_fields is not None and field_name not in valid_fields:
-                raise AttributeError(
-                    f"Fields: no field {field_name!r}. Valid: {sorted(valid_fields)}"
-                )
-
-    def __repr__(self) -> str:
-        parts = []
-        for table_name, names in self.selected_fields.items():
-            if table_name is not None:
-                parts.append(table_name)
-            parts.append(repr(names))
-        return f"Fields({', '.join(parts)})"
 
 
 class ReadPolicy:
@@ -309,73 +27,109 @@ class Latest(ReadPolicy):
 
 
 class Input:
+    """Describes, like an SQL query, what the StateMemory reads for a model.
+
+    `name` is the key the rows are returned under, e.g. {"EV": [{"veh_id": 1, "soc": 0.5}, ...]}.
+
+    `from_` is the record to read.
+
+    `select` names the fields to return (see Fields).
+
+    `where` keeps only the rows that match all its filters (see Filter).
+
+    `on` joins other records, in the order given. Each join starts from
+    `from_` or a record joined before it.
+
+    `read_policy` says which rows are read: Window() (the default) or Latest.
+
+    `name`, `from_` and `select` are required, e.g.
+    Input(name="EV", from_=EV, select=Fields("veh_id", "soc")).
+    """
+
     def __init__(
         self,
         *,
         name: str,
-        from_: type[Record] | list[type[Record]],
+        from_: type[Record],
         select: Fields,
         where: Filter | list[Filter] = None,
         on: KeyJoin | SpatialJoin | list[KeyJoin | SpatialJoin] = None,
-        read_policy: ReadPolicy = None,
+        read_policy: ReadPolicy = Window(),
     ):
         self.name = name
         self.from_ = from_
         self.where = as_list(where) if where is not None else []
         self.on = as_list(on) if on is not None else []
         self.select = select
-        self.read_policy = read_policy if read_policy is not None else Window()
+        self.read_policy = read_policy
         self._validate_from()
-        self._validate_where()
         self._validate_on()
+        validate_where(self.where, self.records(), self.name)
         self._resolve_select()
         self._validate_policy()
 
     def _validate_from(self):
-        records = as_list(self.from_)
-        for record in records:
-            if not (isinstance(record, type) and issubclass(record, Record)):
-                raise TypeError(
-                    f"{self.name}: from_ must be a Record subclass; got {type(record).__name__!r}"
-                )
+        if not (isinstance(self.from_, type) and issubclass(self.from_, Record)):
+            raise TypeError(
+                f"{self.name}: from_ must be a Record subclass; got {type(self.from_).__name__!r}"
+            )
 
     def _validate_on(self):
+        """Each join must start from `from_` or a record joined before it, and
+        join a record not yet in the query."""
+        joined = [self.from_]
         for join in self.on:
             if not isinstance(join, (KeyJoin, SpatialJoin)):
                 raise TypeError(
                     f"{self.name}.on: must be (list of) KeyJoin/SpatialJoin; got {type(join).__name__!r}"
                 )
+            names = ", ".join(record.__name__ for record in joined)
+            if join.left_record not in joined:
+                raise ValueError(
+                    f"{self.name}.on: joins must start from {names}, got {join.left_record.__name__}"
+                )
+            if join.right_record in joined:
+                raise ValueError(
+                    f"{self.name}.on: {join.right_record.__name__} is already in the query"
+                )
+            joined.append(join.right_record)
 
-    def _validate_where(self):
-        for filter_ in self.where:
-            if not isinstance(filter_, Filter):
-                raise TypeError(
-                    f"{self.name}.where: must be (list of) Filter; got {type(filter_).__name__!r}"
-                )
-            record = filter_.from_ if filter_.from_ is not None else self.from_
-            valid_fields = {field.name for field in dataclass_fields(record)}
-            if filter_.field not in valid_fields:
-                raise AttributeError(
-                    f"{self.name}.where: {record.__name__} has no field {filter_.field!r}. Valid: {sorted(valid_fields)}"
-                )
+    def records(self) -> list[type[Record]]:
+        """The records this input reads: `from_` first, then those it joins."""
+        return [self.from_] + [join.right_record for join in self.on]
 
     def _resolve_select(self):
+        """Check `select` and set `selected_fields` from it."""
         if not isinstance(self.select, Fields):
             raise TypeError(
                 f"{self.name}.select must be Fields; got {type(self.select).__name__!r}"
             )
-        if None in self.select.selected_fields:
-            field_names = self.select.selected_fields.pop(None)
-            from_record = (
-                self.from_ if not isinstance(self.from_, list) else self.from_[0]
-            )
-            valid_fields = {field.name for field in dataclass_fields(from_record)}
+        self._resolve_implicit_fields()
+        self._validate_selected_tables()
+
+    def _resolve_implicit_fields(self):
+        """Set `selected_fields` to the field names per table, with implicit
+        fields under `from_` once checked against it. `select` itself is left
+        as is, so one Fields can be shared between inputs."""
+        self.selected_fields = dict(self.select.selected_fields)
+        if None in self.selected_fields:
+            field_names = self.selected_fields.pop(None)
+            valid_fields = {field.name for field in dataclass_fields(self.from_)}
             for field_name in field_names:
                 if field_name not in valid_fields:
                     raise AttributeError(
-                        f"{self.name}.select: {from_record.__name__} has no field {field_name!r}. Valid: {sorted(valid_fields)}"
+                        f"{self.name}.select: {self.from_.__name__} has no field {field_name!r}. Valid: {sorted(valid_fields)}"
                     )
-            self.select.selected_fields[from_record.table_name] = field_names
+            self.selected_fields[self.from_.table_name] = field_names
+
+    def _validate_selected_tables(self):
+        """Selected fields must come from `from_` or a joined record."""
+        table_names = [record.table_name for record in self.records()]
+        for table_name in self.selected_fields:
+            if table_name not in table_names:
+                raise ValueError(
+                    f"{self.name}.select: fields must come from {', '.join(table_names)}, got {table_name}"
+                )
 
     def _validate_policy(self):
         if not isinstance(self.read_policy, (Window, Latest)):

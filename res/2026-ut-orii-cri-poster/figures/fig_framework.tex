@@ -1,0 +1,58 @@
+% Model coupling in the new-business scenario: live exchange through the
+% Supervisory Model (top row), file exchange between the other models (dashed)
+\begin{tikzpicture}[
+    x=1in, y=1in,
+    model/.style={draw=utsmokey!70, line width=3pt, rounded corners=0.2in,
+                  fill=utsmokey!12, text=utsmokey,
+                  minimum width=3.9in, minimum height=1.0in, inner xsep=14pt,
+                  font=\fontsize{28}{34}\selectfont\bfseries},
+    super/.style={model, draw=none, fill=utorange, text=white, minimum height=1.3in},
+    live/.style={{Stealth[length=20pt,width=16pt]}-{Stealth[length=20pt,width=16pt]},
+                 line width=3pt, color=utsmokey},
+    file/.style={-{Stealth[length=20pt,width=16pt]}, line width=3pt,
+                 color=utsmokey, dash pattern=on 12pt off 8pt},
+    lbl/.style={font=\fontsize{22}{27}\selectfont, text=utsmokey,
+                fill=white, inner sep=6pt, align=center},
+  ]
+
+  % ---- models ------------------------------------------------------------
+  \node[model] (T) at (0,0)     {\icon{0.55in}{transportation-light}\ Traffic};
+  \node[super] (S) at (5.4,0)   {\icon{0.55in}{supervisory-white-light}\ %
+                                 \begin{tabular}[c]{@{}c@{}}Supervisory\\Model\end{tabular}};
+  \node[model] (C) at (10.8,0)  {\icon{0.55in}{charging-light}\ Charging};
+  \node[model] (W) at (4.6,-2.8)  {\icon{0.55in}{weather-light}\ Weather};
+  \node[model] (B) at (10.8,-2.8) {\icon{0.55in}{building-light}\ Building};
+  \node[model] (G) at (16.1,-1.4) {\icon{0.55in}{grid-light}\ Power Grid};
+
+  % ---- live-exchange panel -------------------------------------------------
+  \coordinate (LIVEtop) at ([yshift=0.95in]S.north);
+  \begin{scope}[on background layer]
+    \node[draw=utorange, line width=2pt, dash pattern=on 10pt off 7pt,
+          rounded corners=0.25in, fill=white, dotgrid=utorange!45,
+          inner xsep=0.4in, inner ysep=0.3in, fit=(T)(S)(C)(LIVEtop)] (LIVE) {};
+  \end{scope}
+  \node[anchor=north, yshift=-4pt, inner sep=12pt, inner xsep=16pt, fill=white,
+        font=\fontsize{24}{28}\selectfont\bfseries, text=utorange] at (LIVE.north)
+    {ORIGIN framework (Live exchange)};
+
+  % ---- arrows ----------------------------------------------------------------
+  \draw[live] (T) -- (S) node[lbl, midway, above=4pt, fill=none] {EVs};
+  \draw[live] (S) -- (C) node[lbl, midway, above=4pt, fill=none] {EVs};
+  \draw[file] (W) -- (B) node[lbl, midway, above=4pt] {File: Weather\\conditions};
+  \draw[file] (C.east) .. controls +(1.7,0) and +(0,1.0) .. (G.north)
+      node[lbl, pos=0.45, above right] {File: Power use\\by chargers};
+  \draw[file] (B.east) .. controls +(1.7,0) and +(0,-1.0) .. (G.south)
+      node[lbl, pos=0.45, below right] (lblB) {File: Power use\\by buildings};
+
+  % ---- key: solid = live exchange, dashed = file exchange ------------------
+  \node[lbl, fill=none, anchor=west] (Klive) at (-1.2,-2.4) {Live exchange};
+  \draw[live] (-2.3,-2.4) -- (Klive.west);
+  \node[lbl, fill=none, anchor=west] (Kfile) at (-1.2,-3.1) {File exchange};
+  \draw[file] (-2.3,-3.1) -- (Kfile.west);
+
+  % ---- bounding box: visible parts only (the dots would stretch it) ----------
+  \pgfresetboundingbox
+  \path ([shift={(-0.1in,0.1in)}]LIVE.north west)
+        ([shift={(0.1in,-0.1in)}]G.east |- lblB.south)
+        (Kfile.south);
+\end{tikzpicture}%

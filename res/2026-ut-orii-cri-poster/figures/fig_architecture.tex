@@ -1,0 +1,85 @@
+% Software architecture: one supervisor and two model workers, each on its
+% own compute node. Orange = ORIGIN framework, grey = model side.
+\begin{tikzpicture}[
+    x=1in, y=1in,
+    comp/.style={minimum width=3.9in, minimum height=1.0in, align=center,
+                 line width=3pt, text=utorange, rounded corners=0.2in,
+                 font=\fontsize{28}{34}\selectfont\bfseries},
+    fcomp/.style={comp, draw=utorange, fill=utorange!13},
+    mcomp/.style={comp, draw=utsmokey!70, fill=utsmokey!12, text=utsmokey},
+    super/.style={comp, draw=utorange, fill=utorange, text=white, minimum height=1.3in},
+    % external simulation models: "predefined process" shape (double side bars)
+    external/.style={path picture={
+        \draw[utsmokey!70, line width=3pt]
+          ([xshift=0.22in]path picture bounding box.south west) --
+          ([xshift=0.22in]path picture bounding box.north west)
+          ([xshift=-0.22in]path picture bounding box.south east) --
+          ([xshift=-0.22in]path picture bounding box.north east);}},
+    database/.style={fcomp, cylinder, shape border rotate=90, aspect=0.12,
+                     rounded corners=0pt, inner xsep=4pt,
+                     minimum width=3.2in, minimum height=1.95in},
+    link/.style={{Stealth[length=18pt,width=15pt]}-{Stealth[length=18pt,width=15pt]},
+                 line width=3pt, color=utsmokey, shorten <=3pt, shorten >=3pt},
+    msg/.style={{Stealth[length=20pt,width=17pt]}-{Stealth[length=20pt,width=17pt]},
+                color=utorange, line cap=round, line width=5pt,
+                dash pattern=on 0pt off 11pt},
+    wpanel/.style={fill=white, draw=utsmokey!70, rounded corners=0.25in,
+                   line width=2pt, dash pattern=on 10pt off 7pt,
+                   dotgrid=utsmokey!32, inner xsep=0.4in, inner ysep=0.3in,
+                   minimum width=5.6in},
+    spanel/.style={wpanel, draw=utorange, dotgrid=utorange!45},
+    paneltitle/.style={inner sep=10pt, inner xsep=14pt, fill=white,
+                       font=\fontsize{24}{28}\selectfont\bfseries},
+    nodetag/.style={fill=white, line width=2pt, rounded corners=0.2in,
+                    inner xsep=14pt, inner ysep=6pt,
+                    font=\fontsize{22}{26}\selectfont\bfseries},
+    envelope/.style={circle, fill=white, draw=utorange, line width=3pt, solid,
+                     minimum size=0.75in, inner sep=0pt},
+  ]
+
+  % ---- components --------------------------------------------------------
+  \node[fcomp]           (TW) at (-6.7, 0)   {Adapter Worker};
+  \node[mcomp]           (TA) at (-6.7,-2.4) {SUMO Adapter};
+  \node[mcomp, external] (TM) at (-6.7,-4.8) {SUMO};
+
+  \node[fcomp, minimum height=1.3in] (MB) at (0,0) {Message Broker\\{\mdseries(RabbitMQ)}};
+  \node[super] (SM) at (0,-2.4) {Supervisory\\Model};
+  \node[database, anchor=north] (DB) at (0,-4.3) {State Memory\\{\mdseries(PostgreSQL)}};
+
+  \node[fcomp]           (CW) at (6.7, 0)   {Adapter Worker};
+  \node[mcomp]           (CA) at (6.7,-2.4) {Charging Adapter};
+  \node[mcomp, external] (CM) at (6.7,-4.8) {Charging Model};
+
+  % ---- panels (fitted around their titles) ---------------------------------
+  \node[paneltitle, text=utsmokey] (TT) at (-6.7,1.15)
+    {\icon{0.45in}{transportation-light}\ Traffic worker};
+  \node[paneltitle, text=utorange] (ST) at (0,1.15)
+    {\icon{0.45in}{supervisory-light}\ Supervisor};
+  \node[paneltitle, text=utsmokey] (CT) at (6.7,1.15)
+    {\icon{0.45in}{charging-light}\ Charging worker};
+
+  \coordinate (TMbot) at ([yshift=-0.35in]TM.south);
+  \coordinate (CMbot) at ([yshift=-0.35in]CM.south);
+  \coordinate (DBbot) at ([yshift=-0.3in]DB.south);
+  \begin{scope}[on background layer]
+    \node[wpanel, fit=(TT)(TW)(TM)(TMbot)] (PT) {};
+    \node[spanel, fit=(ST)(MB)(DB)(DBbot)] (PS) {};
+    \node[wpanel, fit=(CT)(CW)(CM)(CMbot)] (PC) {};
+  \end{scope}
+
+  \node[nodetag, draw=utsmokey!70, text=utsmokey] at (PT.south) {Compute node 2};
+  \node[nodetag, draw=utorange, text=utorange] (NS) at (PS.south) {Compute node 1};
+  \node[nodetag, draw=utsmokey!70, text=utsmokey] at (PC.south) {Compute node 3};
+
+  % ---- links -----------------------------------------------------------------
+  \draw[link] (TW) -- (TA);  \draw[link] (TA) -- (TM);
+  \draw[link] (CW) -- (CA);  \draw[link] (CA) -- (CM);
+  \draw[link] (MB) -- (SM);  \draw[link] (SM) -- (DB);
+  \draw[msg] (TW) -- (MB) node[midway, envelope] {\includegraphics[height=0.4in]{message-light}};
+  \draw[msg] (CW) -- (MB) node[midway, envelope] {\includegraphics[height=0.4in]{message-light}};
+
+  % ---- bounding box: visible parts only (the dots would stretch it) ----------
+  \pgfresetboundingbox
+  \path ([shift={(-0.1in,0.1in)}]PT.north west)
+        ([shift={(0.1in,-0.1in)}]PC.east |- NS.south);
+\end{tikzpicture}%

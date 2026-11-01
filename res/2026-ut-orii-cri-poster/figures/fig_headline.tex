@@ -1,0 +1,15 @@
+% News headline framed by large orange quotation marks
+\begin{center}
+\begin{tikzpicture}
+  \node[inner sep=0pt] (img) {\includegraphics[width=0.8\linewidth]{headline.png}};
+  % quotation marks are overlays, so they do not change the figure size
+  \node[overlay, anchor=north east, inner sep=0pt, xshift=-12pt, yshift=12pt,
+        font=\fontsize{160}{160}\selectfont\bfseries, text=utorange]
+    at (img.north west) {``};
+  \node[overlay, anchor=north west, inner sep=0pt, xshift=12pt, yshift=0.55in,
+        font=\fontsize{160}{160}\selectfont\bfseries, text=utorange]
+    at (img.south east) {''};
+  \path[use as bounding box] ([yshift=0.15in]img.north west)
+                             rectangle ([yshift=-0.1in]img.south east);
+\end{tikzpicture}
+\end{center}

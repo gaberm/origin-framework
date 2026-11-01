@@ -1,0 +1,46 @@
+% Life cycle of a model: steps 2-4 repeat on the ring every model timestep
+\begin{tikzpicture}[
+    x=1in, y=1in,
+    lcbox/.style={minimum width=3.9in, minimum height=1.3in, align=center,
+                 rounded corners=0.2in, text=utorange,
+                 font=\fontsize{28}{34}\selectfont\bfseries},
+    % repeating steps 2-4: light orange; one-time steps 1 and 5: light grey
+    lcring/.style={lcbox, draw=utorange, line width=3pt, fill=utorange!13},
+    lcend/.style={lcbox, draw=utsmokey!70, line width=3pt, fill=utsmokey!12,
+                  text=utsmokey},
+    lcarrow/.style={-{Stealth[length=20pt,width=16pt]}, line width=3pt,
+                  color=utsmokey},
+  ]
+  \def\R{2.9}                                    % ring radius (inches)
+  \def\num#1{{\color{utorange}#1}\enspace}       % step number
+  \def\sub{\fontsize{20}{24}\selectfont\mdseries\color{utsmokey}}
+
+  % ---- ring with arrow heads half-way between the steps (clockwise) ----
+  \begin{scope}[on background layer]
+    \draw[utorange, line width=5pt] (0,0) circle (\R);
+  \end{scope}
+  \foreach \a in {150,30,-90}
+    \draw[utorange, line width=5pt, -{Stealth[length=30pt,width=26pt]}]
+      (\a+6:\R) arc[start angle=\a+6, end angle=\a-6, radius=\R];
+
+  % ---- steps 2-4, 120 degrees apart ------------------------------------
+  \node[lcring] (S2) at (210:\R) {\num{2}write\_inputs()\\[-2pt]{\sub Feed the model its input}};
+  \node[lcring] (S3) at (90:\R)  {\num{3}advance()\\[-2pt]{\sub Advance one model timestep}};
+  \node[lcring] (S4) at (-30:\R) {\num{4}read\_outputs()\\[-2pt]{\sub Collect the outputs}};
+  \node[align=center, text=utorange, font=\fontsize{24}{28}\selectfont\bfseries]
+    at (0,0.3) {repeat until\\final\\simulation time};
+
+  % ---- steps 1 and 5, above and outside the ring ------------------------
+  \node[lcend] (S1) at ([shift={(-3.7in,2.2in)}]S2.center)
+    {\num{1}initialize()\\[-2pt]{\sub Start the model}};
+  \node[lcend] (S5) at ([shift={(3.7in,2.2in)}]S4.center)
+    {\num{5}terminate()\\[-2pt]{\sub Shut the model down}};
+  \draw[lcarrow] (S1.south) |- (S2.west);
+  \draw[lcarrow] (S4.east) -| (S5.south);
+
+  % ---- bounding box: visible parts only -----------------------------------
+  \pgfresetboundingbox
+  \path ([xshift=-0.1in]S1.west) ([xshift=0.1in]S5.east)
+        ([yshift=0.1in]S3.north) ([yshift=0.1in]S1.north)
+        (0,-\R-0.2) ([yshift=-0.1in]S2.south);
+\end{tikzpicture}%

@@ -3,13 +3,11 @@ import dataclasses
 import time
 from datetime import timedelta
 from typing import TYPE_CHECKING
-from base import ModelSpec, as_list
+from base import ModelSpec, Observation, as_list, refs
 from supervisory.comm.rabbitmq_client import RabbitMQClient, Response
 from supervisory.comm.messages import Registration
 from supervisory.console_display import ConsoleDisplay
 from supervisory.scheduling.scheduler import Scheduler
-from supervisory.geo.cell_assigner import assign_cells
-from supervisory.geo.coords_converter import convert_coords
 
 # Use TYPE_CHECKING to avoid circular imports during runtime
 if TYPE_CHECKING:
@@ -25,11 +23,11 @@ class SupervisoryModel:
         max_global_time: timedelta,
         registration_timeout: float | int = 120.0,
         response_timeout: float | int = 60.0,
-        data_adapters: list = None,
         shutdown_timeout: float | int = 10.0,
         workers_started=None,
     ):
         self.model_names = [spec.name for spec in model_specs]
+        self._validate_model_names()
         self.routing_keys = {spec.name: spec.routing_key for spec in model_specs}
         self.output_types = {
             spec.name: spec.adapter.output_types for spec in model_specs
@@ -42,7 +40,6 @@ class SupervisoryModel:
         self.scheduler = Scheduler(model_specs, max_global_time)
         self.state_memory = state_memory
         self.rabbitmq_client = rabbitmq_client
-        self.data_adapters = data_adapters or []
         self.registration_timeout = registration_timeout
         self.response_timeout = response_timeout
         # How long a failed run waits for workers to confirm termination.
@@ -51,6 +48,16 @@ class SupervisoryModel:
         # registration timeout only starts then (see collect_registrations).
         self.workers_started = workers_started
         self.display = ConsoleDisplay()
+
+    def _validate_model_names(self):
+        """Model names must be unique, because they are used as routing keys by RabbitMQ."""
+        duplicate_names = sorted(
+            {name for name in self.model_names if self.model_names.count(name) > 1}
+        )
+        if duplicate_names:
+            raise ValueError(
+                f"Model names must be unique; duplicated names: {duplicate_names}"
+            )
 
     def await_workers(self):
         with self.display.wait_list(self.model_names, "Await Workers") as wait_list:
@@ -83,31 +90,23 @@ class SupervisoryModel:
         self.state_memory.setup(self._record_types())
 
     def _record_types(self) -> list:
-        """Flattened, de-duplicated Record classes across outputs and constants."""
+        """Flattened, de-duplicated Record classes across outputs and constants,
+        with each entity's start observation after it."""
         types = []
         for value in list(self.output_types.values()) + list(
             self.constant_types.values()
         ):
             if value is not None:
-                types += as_list(value)
+                for record_type in as_list(value):
+                    types.append(record_type)
+                    observation = getattr(record_type, "start_observation", None)
+                    if observation is not None:
+                        types.append(observation)
         return list(dict.fromkeys(types))
 
     def reset_state_memory(self, drop_tables: bool = False):
         self.display.warning("Resetting state memory tables.")
         self.state_memory.reset_tables(drop_tables=drop_tables)
-
-    def load_data(self):
-        if not self.data_adapters:
-            return
-        names = [type(data_adapter).__name__ for data_adapter in self.data_adapters]
-        with self.display.loading_data(names) as view:
-            for data_adapter, name in zip(self.data_adapters, names):
-                for dataset in data_adapter.load_data():
-                    if dataset.h3_index:
-                        dataset = assign_cells(dataset, resolution=9)
-                    self.state_memory.insert_external_dataset(dataset)
-                    view.record(name)
-                view.mark_done(name)
 
     def _broadcast(self, send_fn, operation: str, dashboard: bool = False) -> dict:
         """Send an RPC to every worker and wait for all responses."""
@@ -136,23 +135,11 @@ class SupervisoryModel:
             self.rabbitmq_client.read_constants, "read_constants"
         )
         for name in self.model_names:
-            constant_cls = self.constant_types.get(name)
-            if constant_cls is None:
-                continue
-            if isinstance(constant_cls, (list, tuple)):
-                raise NotImplementedError(
-                    f"'{name}' declares multiple ConstantTypes; type-tagged "
-                    "records are required to route them and are not yet supported."
-                )
+            constant_types = self.constant_types.get(name)
             payload = responses[name].payload
-            if not payload:
+            if constant_types is None or not payload:
                 continue
-            records = [constant_cls(**rec) for rec in payload]
-            records = [convert_coords(rec) for rec in records]
-            records = assign_cells(records, resolution=9)
-            self.state_memory.insert_outputs(
-                constant_cls, [dataclasses.asdict(rec) for rec in records]
-            )
+            self._store_records(constant_types, payload)
 
     def write_inputs(self, name: str):
         inputs = self.state_memory.load_inputs(
@@ -184,17 +171,43 @@ class SupervisoryModel:
                 self.routing_keys[name], on_ack=ack
             ),
         )
-        self._store_outputs(name, response.payload)
+        self._store_records(self.output_types[name], response.payload)
 
-    def _store_outputs(self, name: str, payload):
-        records = self._deserialize(self.output_types[name], payload)
-        records = [convert_coords(record) for record in records]
-        records = assign_cells(records, resolution=9)
+    def _store_records(self, record_types, payload):
         by_type = {}
-        for record in records:
+        for record in self._deserialize(record_types, payload):
             by_type.setdefault(type(record), []).append(dataclasses.asdict(record))
-        for record_type, rows in by_type.items():
-            self.state_memory.insert_outputs(record_type, rows)
+        for record_type in self._storage_order(list(by_type)):
+            self.state_memory.insert_outputs(record_type, by_type[record_type])
+
+    @staticmethod
+    def _storage_order(record_types: list[type]) -> list[type]:
+        """Each record after the entities it references, and observations
+        after all entities, so foreign keys and start or end observations
+        find their entity. Keeps the given order otherwise."""
+        ordered = []
+
+        def add(record_type, visiting):
+            if record_type in ordered or record_type in visiting:
+                return
+            for target in refs(record_type).values():
+                if target in record_types:
+                    add(target, visiting | {record_type})
+            ordered.append(record_type)
+
+        entities = [
+            record_type
+            for record_type in record_types
+            if not issubclass(record_type, Observation)
+        ]
+        for record_type in entities:
+            add(record_type, frozenset())
+        observations = [
+            record_type
+            for record_type in record_types
+            if issubclass(record_type, Observation)
+        ]
+        return ordered + observations
 
     def _deserialize(self, output_cls, payload) -> list:
         if isinstance(output_cls, list):
@@ -216,7 +229,7 @@ class SupervisoryModel:
             # connection closes.
             for name, response in responses.items():
                 if response.payload:
-                    self._store_outputs(name, response.payload)
+                    self._store_records(self.output_types[name], response.payload)
         except BaseException:
             self._shut_down_after_error()
             raise
@@ -321,7 +334,6 @@ class SupervisoryModel:
         self.display.print_dependencies(self.scheduler.dependencies)
         self.await_workers()
         self.setup_state_memory()
-        self.load_data()
         self.initialize_components()
         self.read_constants()
         with self.display.run_dashboard(self.scheduler.max_global_time) as dashboard:

@@ -11,9 +11,10 @@ from _records import Vehicle, Battery, RUN_ID
 class Cell(Record, Geometry):
     table_name = "cell"
     primary_key = ("cell_id",)
-    indexed = ("h3_ids", "label")
+    indexed = ("tags", "label")
     cell_id: str
     label: str
+    tags: list[str]
     shape: SHAPE_TYPE = "POINT"
 
 
@@ -119,7 +120,7 @@ def test_list_fields_are_arrays_with_gin_index(schema_manager):
     cur = schema_manager.conn.cursor()
     cur.execute(
         "SELECT data_type, udt_name FROM information_schema.columns "
-        "WHERE table_schema = %s AND table_name = 'cell' AND column_name = 'h3_ids'",
+        "WHERE table_schema = %s AND table_name = 'cell' AND column_name = 'tags'",
         (RUN_ID,),
     )
     assert cur.fetchone() == ("ARRAY", "_text")
@@ -129,8 +130,22 @@ def test_list_fields_are_arrays_with_gin_index(schema_manager):
         (RUN_ID,),
     )
     indexes = dict(cur.fetchall())
-    assert "USING gin (h3_ids)" in indexes["idx_cell_h3_ids"]
+    assert "USING gin (tags)" in indexes["idx_cell_tags"]
     assert "USING btree (label)" in indexes["idx_cell_label"]
+
+
+def test_geometry_tables_get_4326_coords_and_h3_ids(schema_manager):
+    schema_manager.setup([Cell])
+    cur = schema_manager.conn.cursor()
+    cur.execute(
+        "SELECT srid, type FROM geometry_columns "
+        "WHERE f_table_schema = %s AND f_table_name = 'cell'",
+        (RUN_ID,),
+    )
+    assert cur.fetchall() == [(4326, "GEOMETRY")]
+    indexes = _indexes(schema_manager.conn, "cell")
+    assert "USING gist (coords)" in indexes["idx_cell_coords_gist"]
+    assert "USING gin (h3_ids)" in indexes["idx_cell_h3_ids"]
 
 
 def _indexes(conn, table):
@@ -161,7 +176,6 @@ def test_nashville_indexes(schema_manager):
         "idx_arrived_ev_time_s",
         "idx_arrived_ev_h3_ids",
         "idx_arrived_ev_coords_gist",
-        "idx_arrived_ev_coords_4326_gist",
     }
     assert set(_indexes(conn, "departed_ev")) == {
         "departed_ev_pkey",

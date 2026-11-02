@@ -1,6 +1,6 @@
 import pytest
 from pyproj import Transformer
-from supervisory.geo.coords_converter import to_4326_coords
+from state_memory.location import to_4326_coords
 
 coord_uni_4326 = (35.95, -83.93)
 coord_lab_4326 = (35.93, -84.31)
@@ -13,11 +13,11 @@ coord_lab_3857 = Transformer.from_crs(4326, 3857, always_xy=True).transform(
 )
 
 
-def test_to_4326_coords_espg_code_4326():
+def test_to_4326_coords_epsg_code_4326():
     assert to_4326_coords(coord_uni_4326, "POINT", 4326) == coord_uni_4326
 
 
-def test_to_4326_coords_bad_espg_code():
+def test_to_4326_coords_bad_epsg_code():
     with pytest.raises(ValueError, match="Invalid EPSG code"):
         to_4326_coords(coord_uni_4326, "POINT", 0)
 

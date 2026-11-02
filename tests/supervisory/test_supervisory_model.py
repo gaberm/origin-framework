@@ -1,7 +1,8 @@
 import pytest
 from datetime import timedelta
 from adapter.adapter import Adapter
-from base import ModelSpec
+from dataclasses import dataclass
+from base import Entity, Observation, StartObservation, ModelSpec, ref
 from supervisory.supervisory_model import SupervisoryModel
 from supervisory.comm.messages import Registration
 from _records import Vehicle, Battery
@@ -13,7 +14,6 @@ model = SupervisoryModel(
     state_memory=None,
     rabbitmq_client=None,
     max_global_time=timedelta(0),
-    data_adapters=[],
 )
 
 vehicle_payload_1 = {"veh_id": "veh_1", "time_s": 1.0, "soc": 0.5}
@@ -74,6 +74,28 @@ def test_record_types_flattens_lists():
         model.output_types = original_output_types
         model.constant_types = original_constant_types
 
+
+
+def test_record_types_add_start_observations():
+    class Departure(StartObservation):
+        charge_wh: float
+
+    @dataclass(kw_only=True)
+    class Trip(Entity):
+        id_field = "veh_id"
+        start_observation = Departure
+
+        veh_id: str
+
+    original_output_types = model.output_types
+    original_constant_types = model.constant_types
+    try:
+        model.output_types = {"transportation": [Trip, Vehicle]}
+        model.constant_types = {}
+        assert model._record_types() == [Trip, Departure, Vehicle]
+    finally:
+        model.output_types = original_output_types
+        model.constant_types = original_constant_types
 
 class TestValidateRegistration:
     def setup_method(self):
@@ -152,6 +174,74 @@ def test_terminate_stores_final_outputs_before_closing():
     supervisor.terminate()
 
     assert calls == [("insert", Vehicle, [vehicle_payload_1]), ("close",)]
+
+
+def test_store_outputs_writes_entities_before_observations():
+    @dataclass(kw_only=True)
+    class Trip(Entity):
+        id_field = "veh_id"
+        veh_id: str
+
+    @dataclass(kw_only=True)
+    class TripEnd(Observation):
+        id_field = "veh_id"
+        observation_type = "end"
+        entity = Trip
+        veh_id: str
+
+    state_memory = MagicMock()
+    supervisor = SupervisoryModel(
+        model_specs=[],
+        state_memory=state_memory,
+        rabbitmq_client=MagicMock(),
+        max_global_time=timedelta(0),
+    )
+    supervisor.output_types = {"model_a": [TripEnd, Trip]}
+    trip_end = {"_type": "TripEnd", "veh_id": "veh_1", "time_s": 5.0}
+    trip = {"_type": "Trip", "veh_id": "veh_1", "start_s": 0.0, "end_s": None}
+
+    supervisor._store_outputs("model_a", [trip_end, trip])
+
+    stored = [call.args[0] for call in state_memory.insert_outputs.call_args_list]
+    assert stored == [Trip, TripEnd]
+
+
+def test_store_outputs_writes_referenced_entities_first():
+    @dataclass(kw_only=True)
+    class Station(Entity):
+        id_field = "station_id"
+        station_id: str
+
+    @dataclass(kw_only=True)
+    class Port(Entity):
+        id_field = "port_id"
+        port_id: str
+        station_id: str = ref(Station)
+
+    @dataclass(kw_only=True)
+    class Load(Observation):
+        id_field = "port_id"
+        entity = Port
+        port_id: str
+
+    state_memory = MagicMock()
+    supervisor = SupervisoryModel(
+        model_specs=[],
+        state_memory=state_memory,
+        rabbitmq_client=MagicMock(),
+        max_global_time=timedelta(0),
+    )
+    supervisor.output_types = {"model_a": [Load, Port, Station]}
+    payload = [
+        {"_type": "Load", "port_id": "p1", "time_s": 5.0},
+        {"_type": "Port", "port_id": "p1", "station_id": "s1", "start_s": None},
+        {"_type": "Station", "station_id": "s1", "start_s": None},
+    ]
+
+    supervisor._store_outputs("model_a", payload)
+
+    stored = [call.args[0] for call in state_memory.insert_outputs.call_args_list]
+    assert stored == [Station, Port, Load]
 
 
 def test_wait_for_all_raises_on_timeout():

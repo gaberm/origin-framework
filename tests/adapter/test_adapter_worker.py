@@ -8,25 +8,45 @@ from supervisory.comm.messages import Message, Response, Operation
 from _records import Vehicle, Battery
 
 
+def _spec(**params):
+    spec = MagicMock()
+    spec.name = "test_worker"
+    spec.routing_key = "test_rk"
+    spec.queue_name = "test_queue"
+    spec.timestep_length = timedelta(seconds=1)
+    spec.params = params
+    spec.adapter.return_value.timestep_length = spec.timestep_length
+    return spec
+
+
 @pytest.fixture
 def worker():
     with patch("adapter.adapter_worker.pika.BlockingConnection"):
-        mock_adapter = MagicMock()
-        mock_adapter.name = "test_worker"
-        mock_adapter.timestep_length = timedelta(seconds=1)
         return AdapterWorker(
             host="localhost",
             port=5672,
             username="guest",
             password="guest",
-            routing_key="test_rk",
-            queue_name="test_queue",
-            adapter=mock_adapter,
+            spec=_spec(),
             run_id="run_test",
         )
 
 
 class TestRunScopedMessaging:
+    def test_builds_adapter_from_spec_and_run(self):
+        spec = _spec(sumo_config="main.sumocfg")
+        with patch("adapter.adapter_worker.pika.BlockingConnection"):
+            worker = AdapterWorker(
+                "localhost", 5672, "guest", "guest", spec=spec, run_id="run_test"
+            )
+        spec.adapter.assert_called_once_with(
+            name="test_worker",
+            run_id="run_test",
+            timestep_length=timedelta(seconds=1),
+            sumo_config="main.sumocfg",
+        )
+        assert worker.adapter is spec.adapter.return_value
+
     def test_queue_and_exchange_are_scoped_to_run(self, worker):
         worker.channel.queue_declare.assert_called_once_with(
             queue="run_test.test_queue", durable=True, auto_delete=True
@@ -243,6 +263,5 @@ def test_worker_sets_heartbeat_explicitly():
     with patch("adapter.adapter_worker.pika.BlockingConnection"), patch(
         "adapter.adapter_worker.pika.ConnectionParameters"
     ) as parameters:
-        adapter = MagicMock(timestep_length=timedelta(seconds=1))
-        AdapterWorker("localhost", 5672, "guest", "guest", "rk", "q", adapter, "run_test")
+        AdapterWorker("localhost", 5672, "guest", "guest", _spec(), "run_test")
     assert parameters.call_args.kwargs["heartbeat"] == DEFAULT_HEARTBEAT_SECONDS

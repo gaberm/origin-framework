@@ -1,7 +1,25 @@
 import numpy as np
 import pytest
 from dataclasses import dataclass
-from base import Record, Geometry, SHAPE_TYPE, Filter, Equal, KeyJoin, SpatialJoin, Fields, Input, Latest
+from base import (
+    Entity,
+    Record,
+    Geometry,
+    SHAPE_TYPE,
+    Filter,
+    Equal,
+    Less,
+    LessEqual,
+    Greater,
+    GreaterEqual,
+    In,
+    NotIn,
+    KeyJoin,
+    SpatialJoin,
+    Fields,
+    Input,
+    Latest,
+)
 
 
 @dataclass(kw_only=True)
@@ -47,6 +65,33 @@ def test_valid_filter():
     assert filter_.condition == Equal("v1")
 
 
+def test_in_and_not_in_store_values_as_tuple():
+    # A tuple keeps Condition hashable.
+    assert In(["v1", "v2"]) == In(("v1", "v2"))
+    assert In(["v1", "v2"]).value == ("v1", "v2")
+    assert NotIn({"v1"}).operator == "<> ALL"
+    hash(In(["v1"]))
+
+
+@pytest.mark.parametrize("condition", [In, NotIn])
+def test_in_and_not_in_reject_empty_values(condition):
+    with pytest.raises(ValueError, match="at least one value"):
+        condition([])
+
+
+@pytest.mark.parametrize("condition", [Less, LessEqual, Greater, GreaterEqual])
+@pytest.mark.parametrize("value", [0, -1.5, 3, np.float64(2.5)])
+def test_comparisons_keep_real_values(condition, value):
+    assert condition(value).value == value
+
+
+@pytest.mark.parametrize("condition", [Less, LessEqual, Greater, GreaterEqual])
+@pytest.mark.parametrize("value", [None, True, "5", [1]])
+def test_comparisons_reject_non_real_values(condition, value):
+    with pytest.raises(ValueError, match="real value expected"):
+        condition(value)
+
+
 def test_join_same_record():
     with pytest.raises(TypeError, match="left and right records must be different"):
         KeyJoin((Vehicle, "veh_id"), (Vehicle, "veh_id"))
@@ -68,70 +113,55 @@ def test_valid_join():
     assert join.right_record is Battery
     assert join.left_field == "veh_id"
     assert join.right_field == "veh_id"
-    assert join.duplicates == "keep"
-
-
-def test_join_drop_duplicates():
-    join = KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id"), duplicates="drop")
-    assert join.duplicates == "drop"
-
-
-def test_join_invalid_duplicates():
-    with pytest.raises(ValueError, match="duplicates must be 'keep' or 'drop'"):
-        KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id"), duplicates="bad")
 
 
 def test_spatial_join_same_record():
     with pytest.raises(TypeError, match="left and right records must be different"):
-        SpatialJoin((VehicleLocation, "coords"), (VehicleLocation, "coords"))
+        SpatialJoin(VehicleLocation, VehicleLocation)
 
 
 def test_spatial_join_non_geometry_record():
     with pytest.raises(TypeError, match="requires Geometry records"):
-        SpatialJoin((Vehicle, "veh_id"), (Zone, "coords"))
+        SpatialJoin(Vehicle, Zone)
 
 
 def test_spatial_join_invalid_mode():
     with pytest.raises(ValueError, match="join_type must be one of"):
-        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), join_type="bad_mode")
-
-
-def test_spatial_join_invalid_duplicates():
-    with pytest.raises(ValueError, match="duplicates must be 'keep' or 'drop'"):
-        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), duplicates="bad")
+        SpatialJoin(VehicleLocation, Zone, join_type="bad_mode")
 
 
 def test_valid_spatial_join():
-    join = SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), join_type="left", duplicates="drop")
+    join = SpatialJoin(
+        VehicleLocation,
+        Zone,
+        join_type="left",
+    )
     assert join.left_record is VehicleLocation
     assert join.right_record is Zone
-    assert join.left_field == "coords"
-    assert join.right_field == "coords"
     assert join.join_type == "left"
-    assert join.duplicates == "drop"
 
 
 def test_spatial_join_default_predicate():
-    join = SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"))
-    assert join.predicate == "exact"
-
-
-def test_spatial_join_nearest_predicate():
-    join = SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), predicate="nearest")
+    join = SpatialJoin(VehicleLocation, Zone)
     assert join.predicate == "nearest"
+
+
+def test_spatial_join_exact_predicate():
+    join = SpatialJoin(VehicleLocation, Zone, predicate="exact")
+    assert join.predicate == "exact"
 
 
 def test_spatial_join_invalid_predicate():
     with pytest.raises(ValueError, match="predicate must be one of"):
-        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), predicate="bad")
+        SpatialJoin(VehicleLocation, Zone, predicate="bad")
 
 
 @pytest.mark.parametrize("join_type", ["right", "full"])
 def test_spatial_join_nearest_rejects_right_and_full(join_type):
     with pytest.raises(ValueError, match="does not support join_type"):
         SpatialJoin(
-            (VehicleLocation, "coords"),
-            (Zone, "coords"),
+            VehicleLocation,
+            Zone,
             join_type=join_type,
             predicate="nearest",
         )
@@ -139,27 +169,32 @@ def test_spatial_join_nearest_rejects_right_and_full(join_type):
 
 def test_spatial_join_max_distance():
     join = SpatialJoin(
-        (VehicleLocation, "coords"), (Zone, "coords"), predicate="nearest", max_distance=400
+        VehicleLocation,
+        Zone,
+        predicate="nearest",
+        max_distance=400,
     )
     assert join.max_distance == 400
 
 
 def test_spatial_join_default_max_distance():
-    join = SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), predicate="nearest")
+    join = SpatialJoin(VehicleLocation, Zone, predicate="nearest")
     assert join.max_distance is None
 
 
 def test_spatial_join_max_distance_requires_nearest():
     with pytest.raises(ValueError, match="max_distance requires predicate='nearest'"):
-        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), max_distance=400)
+        SpatialJoin(VehicleLocation, Zone, predicate="exact", max_distance=400)
 
 
-@pytest.mark.parametrize("max_distance", [0, -5, float("nan"), float("inf"), True, "400"])
+@pytest.mark.parametrize(
+    "max_distance", [0, -5, float("nan"), float("inf"), True, "400"]
+)
 def test_spatial_join_invalid_max_distance(max_distance):
     with pytest.raises(ValueError, match="max_distance must be a positive number"):
         SpatialJoin(
-            (VehicleLocation, "coords"),
-            (Zone, "coords"),
+            VehicleLocation,
+            Zone,
             predicate="nearest",
             max_distance=max_distance,
         )
@@ -167,14 +202,18 @@ def test_spatial_join_invalid_max_distance(max_distance):
 
 def test_spatial_join_where():
     join = SpatialJoin(
-        (VehicleLocation, "coords"), (Zone, "coords"), where=Filter(Zone, "zone_id", Equal("z1"))
+        VehicleLocation,
+        Zone,
+        where=Filter(Zone, "zone_id", Equal("z1")),
     )
     assert [filter_.field for filter_ in join.where] == ["zone_id"]
 
 
 def test_spatial_join_where_defaults_to_right_record():
     join = SpatialJoin(
-        (VehicleLocation, "coords"), (Zone, "coords"), where=Filter("zone_id", Equal("z1"))
+        VehicleLocation,
+        Zone,
+        where=Filter("zone_id", Equal("z1")),
     )
     assert join.where[0].from_ is None
 
@@ -182,8 +221,8 @@ def test_spatial_join_where_defaults_to_right_record():
 def test_spatial_join_where_rejects_left_record():
     with pytest.raises(ValueError, match="filters apply to Zone"):
         SpatialJoin(
-            (VehicleLocation, "coords"),
-            (Zone, "coords"),
+            VehicleLocation,
+            Zone,
             where=Filter(VehicleLocation, "veh_id", Equal("v1")),
         )
 
@@ -191,13 +230,15 @@ def test_spatial_join_where_rejects_left_record():
 def test_spatial_join_where_unknown_field():
     with pytest.raises(AttributeError, match="Zone has no field 'typo'"):
         SpatialJoin(
-            (VehicleLocation, "coords"), (Zone, "coords"), where=Filter(Zone, "typo", Equal(1))
+            VehicleLocation,
+            Zone,
+            where=Filter(Zone, "typo", Equal(1)),
         )
 
 
 def test_spatial_join_where_requires_filters():
     with pytest.raises(TypeError, match=r"must be \(list of\) Filter"):
-        SpatialJoin((VehicleLocation, "coords"), (Zone, "coords"), where="zone_id = 'z1'")
+        SpatialJoin(VehicleLocation, Zone, where="zone_id = 'z1'")
 
 
 def test_empty_fields():
@@ -255,22 +296,91 @@ def test_select_nonexistent_field_raises():
 
 def test_where_non_filter_raises():
     with pytest.raises(TypeError, match="must be .list of. Filter"):
-        Input(name="BadInput", from_=Vehicle, where=["not_a_filter"], select=Fields("veh_id"))
+        Input(
+            name="BadInput",
+            from_=Vehicle,
+            where=["not_a_filter"],
+            select=Fields("veh_id"),
+        )
 
 
 def test_where_nonexistent_field_raises():
     with pytest.raises(AttributeError, match="no field 'typo'"):
-        Input(name="BadInput", from_=Vehicle, where=[Filter("typo", Equal("v1"))], select=Fields("veh_id"))
+        Input(
+            name="BadInput",
+            from_=Vehicle,
+            where=[Filter("typo", Equal("v1"))],
+            select=Fields("veh_id"),
+        )
 
 
 def test_on_non_join_raises():
     with pytest.raises(TypeError, match="must be .list of. KeyJoin"):
-        Input(name="BadInput", from_=Vehicle, on=["not_a_join"], select=Fields("veh_id"))
+        Input(
+            name="BadInput", from_=Vehicle, on=["not_a_join"], select=Fields("veh_id")
+        )
+
+
+def test_on_chained_join():
+    Input(
+        name="VehicleInput",
+        from_=VehicleLocation,
+        on=[
+            KeyJoin((VehicleLocation, "veh_id"), (Vehicle, "veh_id")),
+            KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
+        ],
+        select=Fields("veh_id"),
+    )
+
+
+def test_on_join_from_unread_record_raises():
+    with pytest.raises(
+        ValueError, match="joins must start from Vehicle, got VehicleLocation"
+    ):
+        Input(
+            name="BadInput",
+            from_=Vehicle,
+            on=KeyJoin((VehicleLocation, "veh_id"), (Battery, "veh_id")),
+            select=Fields("veh_id"),
+        )
+
+
+def test_on_join_before_its_left_record_raises():
+    with pytest.raises(
+        ValueError, match="joins must start from VehicleLocation, got Vehicle"
+    ):
+        Input(
+            name="BadInput",
+            from_=VehicleLocation,
+            on=[
+                KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
+                KeyJoin((VehicleLocation, "veh_id"), (Vehicle, "veh_id")),
+            ],
+            select=Fields("veh_id"),
+        )
+
+
+def test_on_record_joined_twice_raises():
+    with pytest.raises(ValueError, match="Battery is already in the query"):
+        Input(
+            name="BadInput",
+            from_=Vehicle,
+            on=[
+                KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
+                KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
+            ],
+            select=Fields("veh_id"),
+        )
 
 
 def test_invalid_read_policy_raises():
     with pytest.raises(TypeError, match="read_policy must be"):
-        Input(name="BadInput", from_=Vehicle, select=Fields("veh_id"), read_policy="window")
+        Input(
+            name="BadInput",
+            from_=Vehicle,
+            select=Fields("veh_id"),
+            read_policy="window",
+        )
 
 
 def test_name_is_set():
@@ -279,8 +389,43 @@ def test_name_is_set():
 
 
 def test_select_resolves_table_name():
-    vehicle_input = Input(name="VehicleInput", from_=Vehicle, select=Fields("veh_id", "soc"))
-    assert "vehicle" in vehicle_input.select.selected_fields
+    vehicle_input = Input(
+        name="VehicleInput", from_=Vehicle, select=Fields("veh_id", "soc")
+    )
+    assert vehicle_input.selected_fields == {"vehicle": ("veh_id", "soc")}
+
+
+def test_select_is_not_modified():
+    fields = Fields("veh_id")
+    Input(name="VehicleInput", from_=Vehicle, select=fields)
+    assert fields.selected_fields == {None: ("veh_id",)}
+
+
+def test_select_shared_between_inputs():
+    fields = Fields("veh_id")
+    Input(name="VehicleInput", from_=Vehicle, select=fields)
+    battery_input = Input(name="BatteryInput", from_=Battery, select=fields)
+    assert battery_input.selected_fields == {"battery": ("veh_id",)}
+
+
+def test_select_joined_record():
+    vehicle_input = Input(
+        name="VehicleInput",
+        from_=Vehicle,
+        on=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
+        select=Fields((Vehicle, "veh_id"), (Battery, "capacity")),
+    )
+    assert vehicle_input.selected_fields == {
+        "vehicle": ("veh_id",),
+        "battery": ("capacity",),
+    }
+
+
+def test_select_unread_record_raises():
+    with pytest.raises(
+        ValueError, match="select: fields must come from vehicle, got battery"
+    ):
+        Input(name="BadInput", from_=Vehicle, select=Fields((Battery, "capacity")))
 
 
 def test_valid_simple_input():
@@ -305,11 +450,65 @@ def test_valid_latest_input():
     )
 
 
+def test_latest_on_entity_raises():
+    @dataclass(kw_only=True)
+    class Trip(Entity):
+        id_field = "veh_id"
+        veh_id: str
+
+    with pytest.raises(ValueError, match="Trip is an Entity"):
+        Input(
+            name="TripInput",
+            from_=Trip,
+            select=Fields("veh_id"),
+            read_policy=Latest(by="veh_id"),
+        )
+
+
 def test_spatial_join_numpy_max_distance():
     join = SpatialJoin(
-        (VehicleLocation, "coords"),
-        (Zone, "coords"),
+        VehicleLocation,
+        Zone,
         predicate="nearest",
         max_distance=np.float64(400.0),
     )
     assert join.max_distance == 400.0
+
+
+def test_from_list_raises():
+    with pytest.raises(
+        TypeError,
+        match="from_ must be a Record subclass; got 'list'",
+    ):
+        Input(name="BadInput", from_=[Vehicle, Battery], select=Fields("veh_id"))
+
+
+def test_where_implicit_filter_with_join_applies_to_from():
+    with pytest.raises(AttributeError, match="Vehicle has no field 'capacity'"):
+        Input(
+            name="VehicleInput",
+            from_=Vehicle,
+            on=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
+            where=Filter("capacity", Equal(1.0)),
+            select=Fields("veh_id"),
+        )
+
+
+def test_where_filter_on_joined_record():
+    Input(
+        name="VehicleInput",
+        from_=Vehicle,
+        on=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
+        where=Filter(Battery, "capacity", Equal(1.0)),
+        select=Fields("veh_id"),
+    )
+
+
+def test_where_filter_on_unread_record_raises():
+    with pytest.raises(ValueError, match="filters apply to Vehicle, got Battery"):
+        Input(
+            name="VehicleInput",
+            from_=Vehicle,
+            where=Filter(Battery, "capacity", Equal(1.0)),
+            select=Fields("veh_id"),
+        )

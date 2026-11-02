@@ -16,6 +16,27 @@ def test_missing_primary_key_field():
             primary_key = ("column_1",)
 
 
+def test_missing_primary_key():
+    with pytest.raises(ValueError, match="BadRecord must declare a primary_key"):
+
+        @dataclass(kw_only=True)
+        class BadRecord(Record):
+            table_name = "bad_record"
+
+            column_1: str
+
+
+def test_empty_primary_key():
+    with pytest.raises(ValueError, match="BadRecord must declare a primary_key"):
+
+        @dataclass(kw_only=True)
+        class BadRecord(Record):
+            table_name = "bad_record"
+            primary_key = ()
+
+            column_1: str
+
+
 def test_missing_indexed_field():
     with pytest.raises(
         ValueError, match="BadRecord: indexed field 'column_2' is not declared"
@@ -33,7 +54,7 @@ def test_missing_indexed_field():
 def test_invalid_on_conflict_type():
     with pytest.raises(
         ValueError,
-        match=".on_conflict must be 'IGNORE' or 'UPDATE'; got",
+        match=".on_conflict must be 'ignore' or 'update'; got",
     ):
 
         @dataclass(kw_only=True)
@@ -126,9 +147,9 @@ class TestTimeFieldIndexed:
         assert Sensor.indexed == ("kind",)
 
     def test_nashville_records(self):
-        assert ArrivedEV.indexed == ("time_s", "h3_ids")
+        assert ArrivedEV.indexed == ("time_s",)
         assert DepartedEV.indexed == ("time_s",)
         assert PortStatus.indexed == ("time_s", "port_id", "station_id")
         assert ChargingEvent.indexed == ("time_s", "driver_id", "station_id")
-        assert Station.indexed == ("h3_ids",)
+        assert Station.indexed == ()
         assert VehicleBattery.indexed == ()

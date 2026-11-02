@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from base import Record, Geometry, SHAPE_TYPE
+from base import Entity, Record, Geometry, SHAPE_TYPE
 from base.output.timestamp import Timestamp
 
 RUN_ID = "run_test"
@@ -35,3 +35,9 @@ class Zone(Record, Geometry):
     primary_key = ("zone_id",)
     zone_id: str
     shape: SHAPE_TYPE = "POLYGON"
+
+
+@dataclass(kw_only=True)
+class Trip(Entity):
+    id_field = "veh_id"
+    veh_id: str

@@ -1,8 +1,7 @@
 import pytest
 from datetime import timedelta
 from dataclasses import dataclass
-from base import Record, Input, Fields, ModelSpec, KeyJoin
-from base.input.input import Latest
+from base import Record, Input, Fields, ModelSpec, KeyJoin, Latest
 from adapter.adapter import Adapter
 from supervisory.scheduling.scheduler import Scheduler
 from supervisory.scheduling.time_window import TimeWindow

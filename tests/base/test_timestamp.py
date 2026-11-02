@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from datetime import timedelta
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from base import Timestamp
 
 
@@ -10,12 +10,25 @@ class SimpleTimestamp(Timestamp):
     pass
 
 
-def test_bad_time_field():
-    with pytest.raises(TypeError, match="time_field must be a field in"):
+def test_custom_time_field_is_added():
+    @dataclass(kw_only=True)
+    class CustomTimestamp(Timestamp):
+        time_field = "t"
 
-        @dataclass(kw_only=True)
-        class BadTimestamp(Timestamp):
-            time_field = "missing_field"
+    assert [f.name for f in fields(CustomTimestamp)] == ["t"]
+    assert CustomTimestamp(t=timedelta(seconds=5)).t == 5.0
+    with pytest.raises(ValueError, match=r"\.t must be non-negative"):
+        CustomTimestamp(t=-1)
+
+
+def test_declared_time_field_is_kept():
+    @dataclass(kw_only=True)
+    class DeclaredTimestamp(Timestamp):
+        time_field = "t"
+        t: float = 0.0
+
+    assert [f.name for f in fields(DeclaredTimestamp)] == ["t"]
+    assert DeclaredTimestamp().t == 0.0
 
 
 def test_bad_time_type():

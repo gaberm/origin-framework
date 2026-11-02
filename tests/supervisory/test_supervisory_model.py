@@ -176,7 +176,7 @@ def test_terminate_stores_final_outputs_before_closing():
     assert calls == [("insert", Vehicle, [vehicle_payload_1]), ("close",)]
 
 
-def test_store_outputs_writes_entities_before_observations():
+def test_store_records_writes_entities_before_observations():
     @dataclass(kw_only=True)
     class Trip(Entity):
         id_field = "veh_id"
@@ -196,17 +196,16 @@ def test_store_outputs_writes_entities_before_observations():
         rabbitmq_client=MagicMock(),
         max_global_time=timedelta(0),
     )
-    supervisor.output_types = {"model_a": [TripEnd, Trip]}
     trip_end = {"_type": "TripEnd", "veh_id": "veh_1", "time_s": 5.0}
     trip = {"_type": "Trip", "veh_id": "veh_1", "start_s": 0.0, "end_s": None}
 
-    supervisor._store_outputs("model_a", [trip_end, trip])
+    supervisor._store_records([TripEnd, Trip], [trip_end, trip])
 
     stored = [call.args[0] for call in state_memory.insert_outputs.call_args_list]
     assert stored == [Trip, TripEnd]
 
 
-def test_store_outputs_writes_referenced_entities_first():
+def test_store_records_writes_referenced_entities_first():
     @dataclass(kw_only=True)
     class Station(Entity):
         id_field = "station_id"
@@ -231,14 +230,13 @@ def test_store_outputs_writes_referenced_entities_first():
         rabbitmq_client=MagicMock(),
         max_global_time=timedelta(0),
     )
-    supervisor.output_types = {"model_a": [Load, Port, Station]}
     payload = [
         {"_type": "Load", "port_id": "p1", "time_s": 5.0},
         {"_type": "Port", "port_id": "p1", "station_id": "s1", "start_s": None},
         {"_type": "Station", "station_id": "s1", "start_s": None},
     ]
 
-    supervisor._store_outputs("model_a", payload)
+    supervisor._store_records([Load, Port, Station], payload)
 
     stored = [call.args[0] for call in state_memory.insert_outputs.call_args_list]
     assert stored == [Station, Port, Load]

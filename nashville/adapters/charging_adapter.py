@@ -3,7 +3,6 @@ from typing import Mapping
 from adapter import Adapter
 from nashville.inputs.charging import (
     arrived_bevs,
-    arrived_distribution_center_trucks,
     arrived_phevs,
     departed_vehicles,
 )
@@ -15,7 +14,6 @@ class ChargingAdapter(Adapter):
     input_types = [
         arrived_bevs,
         arrived_phevs,
-        arrived_distribution_center_trucks,
         departed_vehicles,
     ]
     output_types = [ChargingStep, ChargingSession]
@@ -66,7 +64,6 @@ class ChargingAdapter(Adapter):
         arrivals = [
             *inputs.get(arrived_bevs.name, []),
             *inputs.get(arrived_phevs.name, []),
-            *inputs.get(arrived_distribution_center_trucks.name, []),
         ]
         departures = inputs.get(departed_vehicles.name, [])
         events = [(row["time_s"], False, row) for row in arrivals]

@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from typing import Sequence
-from base.input.input import Input, KeyJoin, Latest, SpatialJoin
+from base import Entity, Input, KeyJoin, Latest, SpatialJoin
 from base.utils import as_list
 from supervisory.scheduling.time_window import TimeWindow
 
@@ -48,12 +48,23 @@ class InputLoader:
     ) -> tuple[str, list]:
         fields = self._select_fields(input_spec)
         from_clause, from_values = self._from_clause(input_spec)
-        time_field = self._time_field(input_spec)
         filter_clauses, filter_values = self._filter_clauses(
             input_spec.where, input_spec.from_
         )
-        common = (fields, from_clause, time_field, filter_clauses, filter_values)
 
+        if issubclass(input_spec.from_, Entity):
+            query, values = self._complete_entity_query(
+                input_spec,
+                time_range,
+                fields,
+                from_clause,
+                filter_clauses,
+                filter_values,
+            )
+            return query, from_values + values
+
+        time_field = self._time_field(input_spec)
+        common = (fields, from_clause, time_field, filter_clauses, filter_values)
         if isinstance(input_spec.read_policy, Latest):
             query, values = self._complete_latest_query(input_spec, time_range, *common)
         else:
@@ -73,11 +84,6 @@ class InputLoader:
         filter_clauses: list[str],
         filter_values: list,
     ) -> tuple[str, list]:
-        if self._deduplication_key(input_spec) is not None:
-            raise ValueError(
-                f"{input_spec.name}: a join with duplicates='drop' cannot be "
-                f"combined with read_policy=Latest"
-            )
         by = input_spec.read_policy.by
         where = " AND ".join([f"{time_field} < %s"] + filter_clauses)
         values = [time_range.end] + filter_values
@@ -100,23 +106,47 @@ class InputLoader:
         filter_clauses: list[str],
         filter_values: list,
     ) -> tuple[str, list]:
-        dedup_key = self._deduplication_key(input_spec)
         where = " AND ".join(
             [f"{time_field} >= %s AND {time_field} < %s"] + filter_clauses
         )
         values = [time_range.start, time_range.end] + filter_values
         # A fixed row order, so results don't depend on how Postgres happens
-        # to return rows with equal times. DISTINCT ON has to sort by its key
-        # first; the joined keys then decide which duplicate is kept.
-        joined_keys = self._joined_keys(input_spec)
-        if dedup_key:
-            distinct = f"DISTINCT ON ({dedup_key}) "
-            order_by = [dedup_key, *joined_keys]
-        else:
-            distinct = ""
-            order_by = [time_field, *self._row_key(input_spec), *joined_keys]
+        # to return rows with equal times. The joined keys order a row's
+        # matches when a join fans out.
+        order_by = [
+            time_field,
+            *self._row_key(input_spec),
+            *self._joined_keys(input_spec),
+        ]
         query = (
-            f"SELECT {distinct}{', '.join(fields)} "
+            f"SELECT {', '.join(fields)} "
+            f"FROM {from_clause} WHERE {where} ORDER BY {', '.join(order_by)}"
+        )
+        return query, values
+
+    def _complete_entity_query(
+        self,
+        input_spec: Input,
+        time_range: TimeWindow,
+        fields: list[str],
+        from_clause: str,
+        filter_clauses: list[str],
+        filter_values: list,
+    ) -> tuple[str, list]:
+        """The entities active during the window: started before it ends and
+        not ended by the time it starts. A missing start or end is no limit."""
+        table_name = input_spec.from_.table_name
+        where = " AND ".join(
+            [
+                f"({table_name}.start_s IS NULL OR {table_name}.start_s < %s)",
+                f"({table_name}.end_s IS NULL OR {table_name}.end_s > %s)",
+            ]
+            + filter_clauses
+        )
+        values = [time_range.end, time_range.start] + filter_values
+        order_by = [*self._row_key(input_spec), *self._joined_keys(input_spec)]
+        query = (
+            f"SELECT {', '.join(fields)} "
             f"FROM {from_clause} WHERE {where} ORDER BY {', '.join(order_by)}"
         )
         return query, values
@@ -124,7 +154,7 @@ class InputLoader:
     def _select_fields(self, input_spec: Input) -> list[str]:
         return [
             f"{table_name}.{field_name}"
-            for table_name, field_names in input_spec.select.selected_fields.items()
+            for table_name, field_names in input_spec.selected_fields.items()
             for field_name in field_names
         ]
 
@@ -155,8 +185,8 @@ class InputLoader:
     def _spatial_join_clause(self, join: SpatialJoin) -> tuple[str, list]:
         keyword = _SQL_JOIN_KEYWORDS[join.join_type]
         right_table = join.right_record.table_name
-        left = f"{join.left_record.table_name}.{join.left_field}"
-        right = f"{right_table}.{join.right_field}"
+        left = f"{join.left_record.table_name}.coords"
+        right = f"{right_table}.coords"
         # The join's own filters narrow the candidates before matching.
         filter_clauses, values = self._filter_clauses(join.where, join.right_record)
         if join.predicate == "nearest":
@@ -192,15 +222,6 @@ class InputLoader:
         where = f"WHERE {' AND '.join(conditions)} " if conditions else ""
         return f"{where}ORDER BY {order}"
 
-    def _deduplication_key(self, input_spec: Input) -> str | None:
-        has_drop_join = any(join.duplicates == "drop" for join in input_spec.on)
-        if not has_drop_join:
-            return None
-        base_table = input_spec.from_
-        return ", ".join(
-            f"{base_table.table_name}.{key}" for key in base_table.primary_key
-        )
-
     @staticmethod
     def _row_key(input_spec: Input) -> list[str]:
         record = input_spec.from_
@@ -226,6 +247,12 @@ class InputLoader:
         for filter_ in filters:
             record = filter_.from_ if filter_.from_ is not None else default_record
             field = f"{record.table_name}.{filter_.field}"
-            clauses.append(f"{field} {filter_.condition.operator} %s")
-            values.append(filter_.condition.value)
+            value = filter_.condition.value
+            # In and NotIn hold a tuple, which has to go as a list: psycopg2
+            # (the pool) and psycopg 3 (the tests) both pass a list as an array,
+            # which "= ANY" and "<> ALL" need, but psycopg2 passes a tuple as a
+            # row. The parentheses are required around an array and harmless
+            # around anything else.
+            clauses.append(f"{field} {filter_.condition.operator} (%s)")
+            values.append(list(value) if isinstance(value, tuple) else value)
         return clauses, values

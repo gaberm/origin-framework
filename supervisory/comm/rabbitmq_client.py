@@ -3,6 +3,7 @@ import uuid
 import pika
 import json
 from typing import Any
+from .connection import connect
 from .messages import (
     DEFAULT_HEARTBEAT_SECONDS,
     Operation,
@@ -26,14 +27,7 @@ class RabbitMQClient:
     ):
         self.run_id = run_id
         self.exchange = task_exchange(run_id)
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(
-                host=host,
-                port=port,
-                credentials=pika.PlainCredentials(username, password),
-                heartbeat=heartbeat,
-            )
-        )
+        self.connection = connect(host, port, username, password, heartbeat)
         self.channel = self.connection.channel()
         # Must match the worker's declaration (see AdapterWorker).
         self.channel.exchange_declare(

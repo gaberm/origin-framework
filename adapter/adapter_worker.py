@@ -7,6 +7,7 @@ from datetime import timedelta
 import numpy as np
 import pika
 from base import ModelSpec
+from supervisory.comm.connection import connect
 from supervisory.comm.messages import (
     DEFAULT_HEARTBEAT_SECONDS,
     Message,
@@ -67,14 +68,7 @@ class AdapterWorker:
         self.registration_timeout = registration_timeout
         self.run_id = run_id
         self.queue_name = task_queue(run_id, spec.queue_name)
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(
-                host=host,
-                port=port,
-                credentials=pika.PlainCredentials(username, password),
-                heartbeat=heartbeat,
-            )
-        )
+        self.connection = connect(host, port, username, password, heartbeat)
         self.channel = self.connection.channel()
         self.channel.exchange_declare(
             exchange=task_exchange(run_id), exchange_type="direct", auto_delete=True

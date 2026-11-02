@@ -17748,5 +17748,54 @@
         "power_kw": 7.2
       }
     ]
+  },
+  {
+    "id": "station-925",
+    "source": "building-test",
+    "source_id": "distribution-center",
+    "latitude": 36.1152,
+    "longitude": -86.8847,
+    "ports": [
+      {
+        "port": "port-1885",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port": "port-1886",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port": "port-1887",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port": "port-1888",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port": "port-1889",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port": "port-1890",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port": "port-1891",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      },
+      {
+        "port": "port-1892",
+        "level": "dc_fast",
+        "power_kw": 150.0
+      }
+    ]
   }
 ]

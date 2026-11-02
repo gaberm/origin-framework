@@ -200,8 +200,12 @@ class ChargingModel:
         if not available_ports:
             if raise_if_unavailable:
                 raise ValueError(f"no available port at station '{station_id}'")
+            # The time makes each warning unique, so Python's default filter
+            # shows every full station rather than only its first.
             warnings.warn(
-                f"no available port at station '{station_id}'", RuntimeWarning
+                f"no available port at station '{station_id}' "
+                f"at time {self.time:g} s",
+                RuntimeWarning,
             )
             return None
         return random.choice(available_ports)

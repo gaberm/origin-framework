@@ -4,12 +4,13 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import Sequence
 import psycopg2.pool
-from base import Input, Record
-from base.output.geometry import Geometry, to_ewkt
+from base import Input, Observation, Record
+from base.output.geometry import Geometry, SHAPE_TYPE
 from state_memory.validation import validate_run_id
 from supervisory.scheduling.time_window import TimeWindow
 from .input_loader import InputLoader
-from .schema_manager import SchemaManager, COORDS_FIELDS
+from .location import with_location
+from .schema_manager import SchemaManager
 
 
 def _generate_run_id() -> str:
@@ -64,8 +65,11 @@ class StateMemory:
         self._raise_failed_background_writes()
         if not rows:
             return
-        columns, geometry_columns = self._resolve_columns(entity_cls, rows[0])
-        buf = self._prepare_copy_payload(rows, columns, geometry_columns)
+        is_geometry = issubclass(entity_cls, Geometry)
+        if is_geometry:
+            rows = [with_location(row) for row in rows]
+        columns = list(rows[0].keys())
+        buf = self._prepare_copy_payload(rows, columns, is_geometry)
         if entity_cls.diagnostic:
             self._background_writes.append(
                 self._executor.submit(self._write_records, entity_cls, columns, buf)
@@ -100,22 +104,43 @@ class StateMemory:
                 cur.execute(
                     self._move_staged_rows_query(entity_cls, columns, table, staging)
                 )
+                if issubclass(entity_cls, Observation):
+                    query = self._entity_lifetime_query(entity_cls, staging)
+                    if query is not None:
+                        cur.execute(query)
             conn.commit()
+
+    def _entity_lifetime_query(
+        self, observation_cls: type[Observation], staging: str
+    ) -> str | None:
+        """Sets each observed entity's `start_s` to its earliest staged start
+        observation, or its `end_s` to its latest staged end observation."""
+        if observation_cls.observation_type == "start":
+            column, aggregate = "start_s", "MIN"
+        elif observation_cls.observation_type == "end":
+            column, aggregate = "end_s", "MAX"
+        else:
+            return None
+        entity_table = f"{self.run_id}.{observation_cls.entity.table_name}"
+        key_list = ", ".join(observation_cls.id_field)
+        matches = " AND ".join(
+            f"entity.{key} = observed.{key}" for key in observation_cls.id_field
+        )
+        time_field = observation_cls.time_field
+        return (
+            f"UPDATE {entity_table} AS entity SET {column} = observed.{column} "
+            f"FROM (SELECT {key_list}, {aggregate}({time_field}) AS {column} "
+            f"FROM {staging} GROUP BY {key_list}) AS observed WHERE {matches}"
+        )
 
     @staticmethod
     def _move_staged_rows_query(
         entity_cls: type[Record], columns: list[str], table: str, staging: str
     ) -> str:
         column_list = ", ".join(columns)
-        primary_key = getattr(entity_cls, "primary_key", ())
-        if not primary_key:
-            return (
-                f"INSERT INTO {table} ({column_list}) "
-                f"SELECT {column_list} FROM {staging}"
-            )
-        key_list = ", ".join(primary_key)
-        updated = [col for col in columns if col not in primary_key]
-        if entity_cls.on_conflict == "UPDATE" and updated:
+        key_list = ", ".join(entity_cls.primary_key)
+        updated = [col for col in columns if col not in entity_cls.primary_key]
+        if entity_cls.on_conflict == "update" and updated:
             select = (
                 f"SELECT DISTINCT ON ({key_list}) {column_list} FROM {staging} "
                 f"ORDER BY {key_list}, _row DESC"
@@ -130,27 +155,15 @@ class StateMemory:
             f"ON CONFLICT ({key_list}) {action}"
         )
 
-    @staticmethod
-    def _resolve_columns(
-        entity_cls: type[Record], first_row: dict
-    ) -> tuple[list[str], set[str]]:
-        columns = list(first_row.keys())
-        geometry_columns = (
-            {col for col in columns if col in COORDS_FIELDS}
-            if issubclass(entity_cls, Geometry)
-            else set()
-        )
-        return columns, geometry_columns
-
     @classmethod
     def _prepare_copy_payload(
-        cls, rows: list[dict], columns: list[str], geometry_columns: set[str]
+        cls, rows: list[dict], columns: list[str], is_geometry: bool
     ) -> io.StringIO:
         buf = io.StringIO()
         for row in rows:
             buf.write(
                 "\t".join(
-                    cls._serialize_value(row, col, geometry_columns) for col in columns
+                    cls._serialize_value(row, col, is_geometry) for col in columns
                 )
             )
             buf.write("\n")
@@ -158,13 +171,12 @@ class StateMemory:
         return buf
 
     @staticmethod
-    def _serialize_value(row: dict, col: str, geometry_columns: set[str]) -> str:
+    def _serialize_value(row: dict, col: str, is_geometry: bool) -> str:
         value = row[col]
         if value is None:
             return _COPY_NULL
-        if col in geometry_columns:
-            srid = row["srid"] if col == "coords" else 4326
-            value = to_ewkt(value, row["shape"], srid)
+        if is_geometry and col == "coords":
+            value = to_ewkt(value, row["shape"], 4326)
         elif isinstance(value, list):
             value = _array_literal(value)
         return str(value).translate(_COPY_TEXT_ESCAPES)
@@ -188,20 +200,6 @@ class StateMemory:
     def delete_run(self, run_id: str):
         self._schema.delete_run(run_id)
 
-    def insert_external_dataset(self, dataset) -> None:
-        self._schema.setup_external_table(dataset)
-        if not dataset.data:
-            return
-        columns = list(dataset.data.keys())
-        n_rows = len(next(iter(dataset.data.values())))
-        rows = [{col: dataset.data[col][i] for col in columns} for i in range(n_rows)]
-        buf = self._prepare_copy_payload(rows, columns, geometry_columns=set())
-        query = (
-            f"COPY {self.run_id}.{dataset.table_name} "
-            f"({', '.join(columns)}) FROM STDIN"
-        )
-        self._execute_copy(query, buf)
-
     def close_conn(self):
         try:
             self._executor.shutdown(wait=True)
@@ -209,3 +207,20 @@ class StateMemory:
         finally:
             self._pool.putconn(self._schema_conn)
             self._pool.closeall()
+
+
+def to_ewkt(
+    coords: tuple[float, float] | list[tuple[float, float]],
+    shape: SHAPE_TYPE,
+    epsg_code: int,
+) -> str:
+    """Convert Geometry fields to PostGIS EWKT (WKT prefixed with SRID)"""
+    if shape == "POINT":
+        x, y = coords
+        return f"SRID={epsg_code};POINT({x} {y})"
+    points = list(coords)
+    if shape == "POLYGON" and points[0] != points[-1]:
+        points = points + [points[0]]
+    coord_list = ", ".join(f"{x} {y}" for x, y in points)
+    body = f"({coord_list})" if shape == "LINESTRING" else f"(({coord_list}))"
+    return f"SRID={epsg_code};{shape}{body}"

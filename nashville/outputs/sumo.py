@@ -1,35 +1,46 @@
-from base import Record, Geometry, SHAPE_TYPE, Timestamp
 from dataclasses import dataclass
+from base import SHAPE_TYPE, Entity, Geometry, StartObservation, Observation, ref
 
 
 @dataclass(kw_only=True)
-class ArrivedEV(Record, Geometry, Timestamp):
-    table_name = "arrived_ev"
-    primary_key = ("veh_id",)
-    indexed = ("h3_ids",)
+class EV(Entity):
+    id_field = "driver_id"
 
-    veh_id: str
     driver_id: str
-    charge_wh: float
     veh_type: str
+
+
+class Departure(StartObservation, Geometry):
     shape: SHAPE_TYPE = "POINT"
 
 
 @dataclass(kw_only=True)
-class DepartedEV(Record, Timestamp):
-    table_name = "departed_ev"
-    primary_key = ("veh_id",)
+class Trip(Entity):
+    id_field = "veh_id"
+    start_observation = Departure
 
     veh_id: str
-    driver_id: str
-    charge_wh: float
+    driver_id: str = ref(EV)
 
 
 @dataclass(kw_only=True)
-class VehicleBattery(Record):
-    table_name = "vehicle_battery"
-    primary_key = ("veh_id",)
+class Arrival(Observation, Geometry):
+    id_field = "veh_id"
+    observation_type = "end"
+
+    entity = Trip
 
     veh_id: str
+    charge_wh: float
+    shape: SHAPE_TYPE = "POINT"
+
+
+@dataclass(kw_only=True)
+class VehicleBattery(Entity):
+    id_field = "veh_id"
+
+    veh_id: str
+    driver_id: str = ref(EV)
     capacity_wh: float
-    charging_power_w: float
+    charge_level_table: list[float]
+    charge_curve_table: list[float]

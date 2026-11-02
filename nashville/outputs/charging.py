@@ -1,44 +1,49 @@
 from dataclasses import dataclass
-from base import Geometry, Record, SHAPE_TYPE, Timestamp
+from base import SHAPE_TYPE, Entity, Geometry, Observation, ref
+from nashville.outputs.sumo import EV, Trip
 
 
 @dataclass(kw_only=True)
-class Station(Record, Geometry):
-    table_name = "stations"
-    primary_key = ("station_id",)
-    indexed = ("h3_ids",)
+class Station(Entity, Geometry):
+    id_field = "station_id"
 
     station_id: str
+    source_id: str
     ac_ports: int
     dc_ports: int
     shape: SHAPE_TYPE = "POINT"
 
 
 @dataclass(kw_only=True)
-class PortStatus(Record, Timestamp):
-    table_name = "port_status"
-    primary_key = (
-        "port_id",
-        "station_id",
-    )
-    indexed = ("port_id", "station_id")
+class Port(Entity):
+    id_field = ("port_id", "station_id")
+
+    port_id: str
+    station_id: str = ref(Station)
+
+
+@dataclass(kw_only=True)
+class ChargingStep(Observation):
+    id_field = ("port_id", "station_id")
     diagnostic = True
+
+    entity = Port
 
     port_id: str
     station_id: str
-    driver_id: str
+    driver_id: str = ref(EV)
     load_kw: float
 
 
 @dataclass(kw_only=True)
-class ChargingEvent(Record, Timestamp):
-    table_name = "charging_events"
-    primary_key = "veh_id"
-    indexed = ("driver_id", "station_id")
+class ChargingSession(Observation):
+    id_field = ("port_id", "station_id")
 
-    veh_id: str
-    driver_id: str
-    station_id: str
+    entity = Port
+
     port_id: str
+    station_id: str
+    veh_id: str = ref(Trip)
+    driver_id: str = ref(EV)
     final_charge_wh: float
     end_reason: str

@@ -18,7 +18,8 @@ class Geometry:
     is 4326 (WGS84).
 
     The state memory stores `coords` in 4326 and adds the H3 cells they
-    cover as `h3_ids`.
+    cover as `h3_ids`. It doesn't store `epsg_code`, which is always 4326
+    once stored.
     """
 
     shape: SHAPE_TYPE

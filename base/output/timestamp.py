@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from datetime import timedelta
 from numbers import Real
 from typing import ClassVar
+from base.output.abstractable import Abstractable
 
 
 @dataclass(kw_only=True)
-class Timestamp:
+class Timestamp(Abstractable):
     """Base class for records that happen at a point in simulation time.
 
     `time_field` names the field that holds the time, in seconds or as a
@@ -37,9 +38,10 @@ class Timestamp:
             )
         setattr(self, self.time_field, float(time))
 
-    def __init_subclass__(cls, **kwargs):
-        cls._declare_time_field()
-        super().__init_subclass__(**kwargs)
+    def __init_subclass__(cls, abstract: bool = False, **kwargs):
+        if not abstract:
+            cls._declare_time_field()
+        super().__init_subclass__(abstract=abstract, **kwargs)
 
     @classmethod
     def _declare_time_field(cls):

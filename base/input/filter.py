@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, fields as dataclass_fields
+from numbers import Real
 from typing import Any, Iterable
 from base.output.record import Record
 
@@ -11,35 +12,48 @@ class Condition:
 
 
 def Equal(value: Any) -> Condition:
-    return Condition("=", value)
+    return Condition("=", _not_none(value))
 
 
 def NotEqual(value: Any) -> Condition:
-    return Condition("!=", value)
+    return Condition("!=", _not_none(value))
 
 
 def Less(value: Any) -> Condition:
-    return Condition("<", value)
+    return Condition("<", _real_value(value))
 
 
 def LessEqual(value: Any) -> Condition:
-    return Condition("<=", value)
+    return Condition("<=", _real_value(value))
 
 
 def Greater(value: Any) -> Condition:
-    return Condition(">", value)
+    return Condition(">", _real_value(value))
 
 
 def GreaterEqual(value: Any) -> Condition:
-    return Condition(">=", value)
+    return Condition(">=", _real_value(value))
 
 
 def In(values: Iterable) -> Condition:
-    return Condition("IN", _non_empty_tuple(values, "In"))
+    return Condition("= ANY", _non_empty_tuple(values, "In"))
 
 
 def NotIn(values: Iterable) -> Condition:
-    return Condition("NOT IN", _non_empty_tuple(values, "NotIn"))
+    return Condition("<> ALL", _non_empty_tuple(values, "NotIn"))
+
+
+def _not_none(value: Any) -> Any:
+    if value is None:
+        raise ValueError(f"None is not allowed as a value")
+    return value
+
+
+def _real_value(value: Any) -> Real:
+    """>, >=, < and <= require a real value."""
+    if isinstance(value, bool) or not isinstance(value, Real):
+        raise ValueError(f"real value expected; got {value!r}")
+    return value
 
 
 def _non_empty_tuple(values: Iterable, name: str) -> tuple:

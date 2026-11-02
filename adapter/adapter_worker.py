@@ -6,7 +6,7 @@ import uuid
 from datetime import timedelta
 import numpy as np
 import pika
-from adapter.adapter import Adapter
+from base import ModelSpec
 from supervisory.comm.messages import (
     DEFAULT_HEARTBEAT_SECONDS,
     Message,
@@ -38,22 +38,35 @@ def _to_seconds(value, what: str) -> float:
 
 
 class AdapterWorker:
+    """Runs one adapter and connects it to the SupervisoryModel over RabbitMQ.
+
+    Builds the adapter from its ModelSpec, registers with the supervisor,
+    then runs the supervisor's commands on the adapter and replies to each
+    one until it is told to terminate.
+    """
+
     def __init__(
         self,
         host: str,
         port: int,
         username: str,
         password: str,
-        routing_key: str,
-        queue_name: str,
-        adapter: Adapter,
+        spec: ModelSpec,
         run_id: str,
         registration_timeout: float = 30.0,
         heartbeat: int = DEFAULT_HEARTBEAT_SECONDS,
     ):
+        if not isinstance(run_id, str):
+            raise TypeError(f"run_id must be a str; got {type(run_id).__name__!r}")
+        self.adapter = spec.adapter(
+            name=spec.name,
+            run_id=run_id,
+            timestep_length=spec.timestep_length,
+            **spec.params,
+        )
         self.registration_timeout = registration_timeout
         self.run_id = run_id
-        self.queue_name = task_queue(run_id, queue_name)
+        self.queue_name = task_queue(run_id, spec.queue_name)
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(
                 host=host,
@@ -72,12 +85,11 @@ class AdapterWorker:
         self.channel.queue_bind(
             queue=self.queue_name,
             exchange=task_exchange(run_id),
-            routing_key=routing_key,
+            routing_key=spec.routing_key,
         )
         self.channel.basic_qos(prefetch_count=1)
-        self.routing_key = routing_key
-        self.name = adapter.name
-        self.adapter = adapter
+        self.routing_key = spec.routing_key
+        self.name = spec.name
         self._handlers = {
             "initialize": self.initialize,
             "read_constants": self.read_constants,
@@ -104,9 +116,7 @@ class AdapterWorker:
             name=self.name,
             routing_key=self.routing_key,
             metadata={
-                "timestep_length": _to_seconds(
-                    self.adapter.timestep_length, "Adapter.timestep_length"
-                )
+                "timestep_length": self.adapter.timestep_length.total_seconds()
             },
         )
         self.channel.basic_publish(
@@ -153,26 +163,33 @@ class AdapterWorker:
         return Response(success=True)
 
     def read_constants(self, payload) -> Response:
+        constants = self.adapter.read_constants()
         return Response(
             success=True,
-            payload=[dataclasses.asdict(r) for r in self.adapter.read_constants()],
+            payload=self._serialize(constants, self.adapter.constant_types),
         )
 
     def read_outputs(self, payload) -> Response:
         outputs = self.adapter.read_outputs()
-        return Response(success=True, payload=self._serialize_outputs(outputs))
+        return Response(
+            success=True,
+            payload=self._serialize(outputs, self.adapter.output_types),
+        )
 
-    def _serialize_outputs(self, outputs):
-        if not isinstance(outputs, list):
-            return outputs.to_dict()
-        is_multi_type = isinstance(self.adapter.output_types, list)
+    @staticmethod
+    def _serialize(records, record_types):
+        """Records as dicts, tagged with their `_type` when the adapter
+        declares several record types, so the supervisor can tell them apart."""
+        if not isinstance(records, list):
+            return records.to_dict()
+        is_multi_type = isinstance(record_types, list)
         return [
             (
-                {"_type": type(output).__name__, **dataclasses.asdict(output)}
+                {"_type": type(record).__name__, **dataclasses.asdict(record)}
                 if is_multi_type
-                else dataclasses.asdict(output)
+                else dataclasses.asdict(record)
             )
-            for output in outputs
+            for record in records
         ]
 
     def advance(self, payload) -> Response:
@@ -187,7 +204,10 @@ class AdapterWorker:
         outputs = self.adapter.terminate()
         if not outputs:
             return Response(success=True)
-        return Response(success=True, payload=self._serialize_outputs(outputs))
+        return Response(
+            success=True,
+            payload=self._serialize(outputs, self.adapter.output_types),
+        )
 
     def run(self):
         print(f"[{self.__class__.__name__}] Waiting for commands...")

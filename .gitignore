@@ -15,3 +15,8 @@ supervisory/__pycache__
 supervisory/time/__pycache__
 .env
 test.ipynb
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz

@@ -3,6 +3,7 @@ from dataclasses import dataclass, fields as dataclass_fields
 from base.input.fields import Fields
 from base.input.filter import Filter, validate_where
 from base.input.join import KeyJoin, SpatialJoin
+from base.output.entity import Entity
 from base.output.record import Record
 from base.utils import as_list
 
@@ -13,7 +14,9 @@ class ReadPolicy:
 
 @dataclass(frozen=True)
 class Window(ReadPolicy):
-    """Return all rows whose timestamp lies in [start, end)."""
+    """Return all rows whose timestamp lies in [start, end). For an Entity,
+    return those active during it: started before `end` and not ended by
+    `start`, where a missing `start_s` or `end_s` counts as no limit."""
 
     kind: str = "window"
 
@@ -41,6 +44,7 @@ class Input:
     `from_` or a record joined before it.
 
     `read_policy` says which rows are read: Window() (the default) or Latest.
+    An Entity has one row per id, so it can only be read with Window().
 
     `name`, `from_` and `select` are required, e.g.
     Input(name="EV", from_=EV, select=Fields("veh_id", "soc")).
@@ -135,4 +139,9 @@ class Input:
         if not isinstance(self.read_policy, (Window, Latest)):
             raise TypeError(
                 f"{self.name}.read_policy must be Window() or Latest(...); got {type(self.read_policy).__name__!r}"
+            )
+        if isinstance(self.read_policy, Latest) and issubclass(self.from_, Entity):
+            raise ValueError(
+                f"{self.name}.read_policy: {self.from_.__name__} is an Entity, "
+                f"which has one row per id; read it with Window()"
             )

@@ -11,7 +11,9 @@ sumo_spec = ModelSpec(
     adapter=SumoAdapter,
     timestep_length=timedelta(seconds=1),
     params={
-        "sumo_config": str(_NASHVILLE_DIR / "data" / "sumo-0-23" / "main.sumocfg"),
+        "sumo_config": str(
+            _NASHVILLE_DIR / "data" / "sumo-0-23-revised" / "main.sumocfg"
+        ),
     },
     dependencies=(),
 )

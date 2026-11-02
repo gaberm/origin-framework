@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import fields as dataclass_fields
 from numbers import Real
 from base.input.filter import Filter, validate_where
+from base.output.entity import refs
 from base.output.record import Record
 from base.output.geometry import Geometry
 from base.utils import as_list
@@ -13,7 +14,9 @@ class KeyJoin:
     """Joins two records where a field of one equals a field of the other.
 
     `left` and `right` are (record, field) pairs, e.g. (EV, "veh_id") and
-    (Battery, "veh_id").
+    (Battery, "veh_id"). They can also be just the records, e.g. Trip and
+    EV, if exactly one of them has a ref() field naming the other; the join
+    then matches that field to the other's id.
 
     `join_type` is "inner" (default), "left", "right" or "full", as in SQL.
 
@@ -32,14 +35,43 @@ class KeyJoin:
 
     def __init__(
         self,
-        left: tuple[type[Record], str],
-        right: tuple[type[Record], str],
+        left: tuple[type[Record], str] | type[Record],
+        right: tuple[type[Record], str] | type[Record],
         join_type: str = "inner",
     ):
+        if isinstance(left, type) and isinstance(right, type):
+            left, right = self._ref_fields(left, right)
+        elif isinstance(left, type) or isinstance(right, type):
+            raise TypeError(
+                "KeyJoin: left and right must both be (record, field) pairs "
+                "or both be records"
+            )
         self.left_record, self.left_field = left
         self.right_record, self.right_field = right
         self.join_type = join_type
         self._validate()
+
+    @staticmethod
+    def _ref_fields(
+        left: type[Record], right: type[Record]
+    ) -> tuple[tuple[type[Record], str], tuple[type[Record], str]]:
+        """The (record, field) pairs of the one ref() between the records."""
+        candidates = [
+            ((left, name), (right, right.id_field[0]))
+            for name, target in refs(left).items()
+            if target is right
+        ] + [
+            ((left, left.id_field[0]), (right, name))
+            for name, target in refs(right).items()
+            if target is left
+        ]
+        if len(candidates) != 1:
+            found = "no ref()" if not candidates else "several ref() fields"
+            raise ValueError(
+                f"KeyJoin({left.__name__} → {right.__name__}): {found} between "
+                f"them; pass (record, field) pairs"
+            )
+        return candidates[0]
 
     def _validate(self):
         context = f"KeyJoin({self.left_record.__name__} → {self.right_record.__name__})"

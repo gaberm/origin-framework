@@ -1,8 +1,7 @@
 import math
 from datetime import timedelta
 from numbers import Real
-from base import ModelSpec
-from base.input.input import Latest
+from base import Latest, ModelSpec
 from base.utils import as_list
 from supervisory.scheduling.time_window import TimeWindow
 
@@ -107,12 +106,7 @@ class Scheduler:
             for input_cls in as_list(spec.adapter.input_types):
                 if isinstance(getattr(input_cls, "read_policy", None), Latest):
                     continue
-                records = as_list(input_cls.from_) + [
-                    record
-                    for join in as_list(input_cls.on)
-                    for record in (join.left_record, join.right_record)
-                ]
-                for record in records:
+                for record in input_cls.records():
                     dependency = record_to_model.get(record)
                     if dependency is not None and dependency != spec.name:
                         dependencies[spec.name].add(dependency)

@@ -34,6 +34,15 @@ class Arrival(Observation, Geometry):
 
 
 @dataclass(kw_only=True)
+class TripStep(Observation, Geometry):
+    diagnostic = True
+
+    entity = Trip
+
+    shape: SHAPE_TYPE = "POINT"
+
+
+@dataclass(kw_only=True)
 class VehicleBattery(Entity):
     id_field = "veh_id"
 

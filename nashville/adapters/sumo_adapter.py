@@ -1,6 +1,13 @@
 from adapter import Adapter
 from nashville.inputs.sumo import vehicle_charge
-from nashville.outputs.sumo import EV, Arrival, Departure, Trip, VehicleBattery
+from nashville.outputs.sumo import (
+    EV,
+    Arrival,
+    Departure,
+    Trip,
+    TripStep,
+    VehicleBattery,
+)
 import libsumo
 import math
 import warnings
@@ -15,7 +22,7 @@ def _clamp(value: float, min_value: float, max_value: float) -> float:
 
 class SumoAdapter(Adapter):
     input_types = [vehicle_charge]
-    output_types = [EV, Trip, Departure, Arrival, VehicleBattery]
+    output_types = [Arrival, Departure, EV, Trip, TripStep, VehicleBattery]
     constant_types = None
     _EV_TYPES = ["EV_car_std", "EV_car_long", "PHEV_car_std", "EV_SUT", "EV_MUT"]
 
@@ -136,12 +143,44 @@ class SumoAdapter(Adapter):
         except libsumo.TraCIException:
             return None
 
-    def read_outputs(self) -> list[EV | Trip | Departure | Arrival | VehicleBattery]:
+    def read_outputs(
+        self,
+    ) -> list[EV | Trip | Departure | Arrival | TripStep | VehicleBattery]:
         return [
             *self._get_departures(),
             *self._get_ev_batteries(),
             *self._get_arrivals(),
+            *self._get_trip_steps(),
         ]
+
+    def _get_departures(self) -> list[EV | Trip | Departure]:
+        """A Trip and its Departure per departed EV, and the driver's EV the
+        first time the driver departs."""
+        current_time = self.current_time()
+        outputs = []
+        for veh_id in self._get_ev_ids(state="departed"):
+            driver_id = self._driver_id(veh_id)
+            if driver_id not in self.drivers:
+                self.drivers.add(driver_id)
+                outputs.append(
+                    EV(
+                        driver_id=driver_id,
+                        veh_type=self._veh_type(veh_id),
+                        start_s=current_time,
+                    )
+                )
+            outputs.append(
+                Trip(veh_id=veh_id, driver_id=driver_id, start_s=current_time)
+            )
+            coords = self._coords(veh_id, "departed")
+            if coords is None:
+                warnings.warn(
+                    f"departed EV '{veh_id}' without position; departure skipped",
+                    RuntimeWarning,
+                )
+                continue
+            outputs.append(Departure(veh_id=veh_id, time_s=current_time, coords=coords))
+        return outputs
 
     def _get_ev_batteries(self) -> list[VehicleBattery]:
         batteries = []
@@ -203,7 +242,7 @@ class SumoAdapter(Adapter):
 
     def _build_arrival(self, veh_id: str) -> Arrival | None:
         charge = self._battery_charge_wh(veh_id)
-        coords = self._arrival_coords(veh_id)
+        coords = self._coords(veh_id, "arrived")
         if charge is None or coords is None:
             warnings.warn(
                 f"arrived EV '{veh_id}' without charge or arrival position; " "skipped",
@@ -218,43 +257,36 @@ class SumoAdapter(Adapter):
                 coords=coords,
             )
 
-    def _get_ev_ids(self, state: Literal["arrived", "departed"]) -> list[str]:
+    def _get_trip_steps(self) -> list[TripStep]:
+        current_time = self.current_time()
+        running = []
+        running_ev_ids = self._get_ev_ids(state="running")
+        for veh_id in running_ev_ids:
+            coords = self._coords(veh_id, "running")
+            if coords is None:
+                continue
+            running.append(TripStep(veh_id=veh_id, coords=coords, time_s=current_time))
+        return running
+
+    def _get_ev_ids(
+        self, state: Literal["arrived", "departed", "running"]
+    ) -> list[str]:
         if state == "arrived":
             veh_ids = libsumo.simulation.getArrivedIDList()
         elif state == "departed":
             veh_ids = libsumo.simulation.getDepartedIDList()
+        elif state == "running":
+            departed_ids = libsumo.simulation.getDepartedIDList()
+            veh_ids = [
+                veh_id
+                for veh_id in libsumo.vehicle.getIDList()
+                if veh_id not in departed_ids
+            ]
         else:
-            raise ValueError(f"state must be 'arrived' or 'departed', not {state}")
-        return [veh_id for veh_id in veh_ids if veh_id in self.evs]
-
-    def _get_departures(self) -> list[EV | Trip | Departure]:
-        """A Trip and its Departure per departed EV, and the driver's EV the
-        first time the driver departs."""
-        current_time = self.current_time()
-        outputs = []
-        for veh_id in self._get_ev_ids(state="departed"):
-            driver_id = self._driver_id(veh_id)
-            if driver_id not in self.drivers:
-                self.drivers.add(driver_id)
-                outputs.append(
-                    EV(
-                        driver_id=driver_id,
-                        veh_type=self._veh_type(veh_id),
-                        start_s=current_time,
-                    )
-                )
-            outputs.append(
-                Trip(veh_id=veh_id, driver_id=driver_id, start_s=current_time)
+            raise ValueError(
+                f"state must be 'arrived', 'departed' or 'running', not {state}"
             )
-            coords = self._departure_coords(veh_id)
-            if coords is None:
-                warnings.warn(
-                    f"departed EV '{veh_id}' without position; departure skipped",
-                    RuntimeWarning,
-                )
-                continue
-            outputs.append(Departure(veh_id=veh_id, time_s=current_time, coords=coords))
-        return outputs
+        return [veh_id for veh_id in veh_ids if veh_id in self.evs]
 
     def _driver_id(self, veh_id: str) -> str | None:
         try:
@@ -271,12 +303,21 @@ class SumoAdapter(Adapter):
             return veh_id
         return driver_id
 
-    def _departure_coords(self, veh_id: str) -> tuple[float, float] | None:
-        try:
-            x, y = libsumo.vehicle.getPosition(veh_id)
-            return libsumo.simulation.convertGeo(x, y)
-        except libsumo.TraCIException:
-            return None
+    def _coords(
+        self, veh_id: str, state: Literal["arrived", "departed", "running"]
+    ) -> tuple[float, float] | None:
+        if state == "arrived":
+            return self._arrival_coords(veh_id)
+        elif state in ["departed", "running"]:
+            try:
+                x, y = libsumo.vehicle.getPosition(veh_id)
+                return libsumo.simulation.convertGeo(x, y)
+            except libsumo.TraCIException:
+                return None
+        else:
+            raise ValueError(
+                f"state must be 'arrived', 'departed' or 'running', not {state}"
+            )
 
     def _arrival_coords(self, veh_id: str) -> tuple[float, float] | None:
         try:

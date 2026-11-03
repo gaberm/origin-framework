@@ -93,7 +93,6 @@ class ChargingAdapter(Adapter):
             outputs.append(
                 ChargingStep(
                     port_id=event["port_id"],
-                    station_id=self._charging_model.get_station_id(event["port_id"]),
                     driver_id=event["driver_id"],
                     load_kw=event["load_kw"],
                     time_s=event["time"],
@@ -112,7 +111,6 @@ class ChargingAdapter(Adapter):
             ChargingSession(
                 veh_id=session["veh_id"],
                 driver_id=session["driver_id"],
-                station_id=self._charging_model.get_station_id(session["port_id"]),
                 port_id=session["port_id"],
                 final_charge_wh=session["final_charge_kwh"] * 1000,
                 end_reason=session["end_reason"],

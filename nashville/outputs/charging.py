@@ -16,7 +16,7 @@ class Station(Entity, Geometry):
 
 @dataclass(kw_only=True)
 class Port(Entity):
-    id_field = ("port_id", "station_id")
+    id_field = "port_id"
 
     port_id: str
     station_id: str = ref(Station)
@@ -24,25 +24,23 @@ class Port(Entity):
 
 @dataclass(kw_only=True)
 class ChargingStep(Observation):
-    id_field = ("port_id", "station_id")
+    id_field = "port_id"
     diagnostic = True
 
     entity = Port
 
     port_id: str
-    station_id: str
     driver_id: str = ref(EV)
     load_kw: float
 
 
 @dataclass(kw_only=True)
 class ChargingSession(Observation):
-    id_field = ("port_id", "station_id")
+    id_field = "port_id"
 
     entity = Port
 
     port_id: str
-    station_id: str
     veh_id: str = ref(Trip)
     driver_id: str = ref(EV)
     final_charge_wh: float

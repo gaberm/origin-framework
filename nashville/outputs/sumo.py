@@ -25,12 +25,10 @@ class Trip(Entity):
 
 @dataclass(kw_only=True)
 class Arrival(Observation, Geometry):
-    id_field = "veh_id"
     observation_type = "end"
 
     entity = Trip
 
-    veh_id: str
     charge_wh: float
     shape: SHAPE_TYPE = "POINT"
 

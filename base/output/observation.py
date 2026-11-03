@@ -15,8 +15,9 @@ class Observation(Record, Identifier, Timestamp, abstract=True):
     `time_field` together, which are its primary key unless the class sets
     `primary_key` itself.
 
-    `entity` is the Entity class the observation is about. It is required,
-    and the observation's `id_field` must be the same as the entity's.
+    `entity` is the Entity class the observation is about. It is required.
+    The observation takes its `id_field` from the entity unless the class
+    sets it, and then it must be the same as the entity's.
 
     `observation_type` is "start", "update" (the default) or "end". Storing
     a "start" or "end" observation sets the entity's `start_s` or `end_s` to
@@ -26,12 +27,16 @@ class Observation(Record, Identifier, Timestamp, abstract=True):
     observation_type: ClassVar[OBSERVATION_TYPE] = "update"
 
     def __init_subclass__(cls, abstract: bool = False, **kwargs):
-        if not abstract and "primary_key" not in cls.__dict__:
-            cls.primary_key = (*as_list(cls.id_field), cls.time_field)
+        if not abstract:
+            cls._validate_entity()
+            if "id_field" not in cls.__dict__:
+                cls.id_field = cls.entity.id_field
+            if "primary_key" not in cls.__dict__:
+                cls.primary_key = (*as_list(cls.id_field), cls.time_field)
         super().__init_subclass__(abstract=abstract, **kwargs)
         if abstract:
             return
-        cls._validate_entity()
+        cls._validate_id_field()
         cls._validate_observation_type()
 
     @classmethod
@@ -47,6 +52,10 @@ class Observation(Record, Identifier, Timestamp, abstract=True):
             raise TypeError(
                 f"{cls.__name__}.entity must be an Entity subclass; got {entity!r}"
             )
+
+    @classmethod
+    def _validate_id_field(cls):
+        entity = cls.entity
         if cls.id_field != entity.id_field:
             raise ValueError(
                 f"{cls.__name__}.id_field must match {entity.__name__}.id_field "
@@ -75,9 +84,9 @@ class StartObservation(Observation, abstract=True):
             start_observation = Departure
             ...
 
-    The entity sets `entity` and `id_field`; the usual Observation setup then
-    adds the id and time fields and the primary key. Its `observation_type`
-    is "start".
+    The entity sets `entity`; the usual Observation setup then takes its
+    `id_field` and adds the id and time fields and the primary key. Its
+    `observation_type` is "start".
     """
 
     observation_type: ClassVar[OBSERVATION_TYPE] = "start"
@@ -99,7 +108,6 @@ class StartObservation(Observation, abstract=True):
                 f"{entity.__name__} makes it a dataclass"
             )
         cls.entity = entity
-        cls.id_field = entity.id_field
         # The setup its own __init_subclass__ skipped.
         Observation.__dict__["__init_subclass__"].__func__(cls)
         dataclass(kw_only=True)(cls)

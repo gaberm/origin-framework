@@ -57,6 +57,30 @@ def test_invalid_entity(bad_entity):
             veh_id: str
 
 
+def test_id_field_from_entity():
+    @dataclass(kw_only=True)
+    class Position(Observation):
+        entity = Vehicle
+
+        x: float
+
+    assert Position.id_field == ("veh_id",)
+    assert Position.primary_key == ("veh_id", "time_s")
+    assert "veh_id" in {field.name for field in fields(Position)}
+
+
+def test_id_field_from_composite_entity():
+    @dataclass(kw_only=True)
+    class Port(Entity):
+        id_field = ("port_id", "station_id")
+
+    @dataclass(kw_only=True)
+    class Opened(Observation):
+        entity = Port
+
+    assert Opened.primary_key == ("port_id", "station_id", "time_s")
+
+
 def test_id_field_mismatch():
     with pytest.raises(
         ValueError, match=r"BadObservation.id_field must match Vehicle.id_field"

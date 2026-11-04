@@ -6,6 +6,7 @@ from nashville.outputs.sumo import EV, Trip
 @dataclass(kw_only=True)
 class Station(Entity, Geometry):
     id_field = "station_id"
+    initialize_only = True
 
     station_id: str
     source_id: str
@@ -17,6 +18,7 @@ class Station(Entity, Geometry):
 @dataclass(kw_only=True)
 class Port(Entity):
     id_field = "port_id"
+    initialize_only = True
 
     port_id: str
     station_id: str = ref(Station)

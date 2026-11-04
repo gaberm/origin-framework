@@ -90,11 +90,15 @@ class Scheduler:
         return {name: tuple(sorted(deps)) for name, deps in dependencies.items()}
 
     def _map_record_to_model(self, model_specs: list[ModelSpec]) -> dict[type, str]:
-        """Map each output record type to the model that produces it."""
+        """Map each output record type to the model that produces it.
+
+        initialize_only entities are left out: they are all stored before
+        the first step, so reading them waits for no model."""
         return {
             record: spec.name
             for spec in model_specs
             for record in as_list(spec.adapter.output_types)
+            if not getattr(record, "initialize_only", False)
         }
 
     def _infer_dependencies(

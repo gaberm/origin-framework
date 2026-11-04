@@ -11,9 +11,6 @@ class MinimalAdapter(Adapter):
     def initialize(self):
         pass
 
-    def read_constants(self):
-        return []
-
     def write_inputs(self, inputs):
         pass
 

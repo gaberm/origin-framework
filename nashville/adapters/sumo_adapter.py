@@ -23,7 +23,6 @@ def _clamp(value: float, min_value: float, max_value: float) -> float:
 class SumoAdapter(Adapter):
     input_types = [vehicle_charge]
     output_types = [Arrival, Departure, EV, Trip, TripStep, VehicleBattery]
-    constant_types = None
     _EV_TYPES = ["EV_car_std", "EV_car_long", "PHEV_car_std", "EV_SUT", "EV_MUT"]
 
     def __init__(

@@ -47,32 +47,23 @@ class TestDeserialize:
 
 def test_record_types_deduplicates():
     original_output_types = model.output_types
-    original_constant_types = model.constant_types
     try:
         model.output_types = {
-            "transportation": Vehicle,
-            "charging": Battery,
-        }
-        model.constant_types = {
-            "transportation": Vehicle,
+            "transportation": [Vehicle, Battery],
             "charging": Battery,
         }
         assert model._record_types() == [Vehicle, Battery]
     finally:
         model.output_types = original_output_types
-        model.constant_types = original_constant_types
 
 
 def test_record_types_flattens_lists():
     original_output_types = model.output_types
-    original_constant_types = model.constant_types
     try:
         model.output_types = {"transportation": [Vehicle, Battery]}
-        model.constant_types = {}
         assert model._record_types() == [Vehicle, Battery]
     finally:
         model.output_types = original_output_types
-        model.constant_types = original_constant_types
 
 
 
@@ -88,14 +79,11 @@ def test_record_types_add_start_observations():
         veh_id: str
 
     original_output_types = model.output_types
-    original_constant_types = model.constant_types
     try:
         model.output_types = {"transportation": [Trip, Vehicle]}
-        model.constant_types = {}
         assert model._record_types() == [Trip, Departure, Vehicle]
     finally:
         model.output_types = original_output_types
-        model.constant_types = original_constant_types
 
 class TestValidateRegistration:
     def setup_method(self):
@@ -240,6 +228,30 @@ def test_store_records_writes_referenced_entities_first():
 
     stored = [call.args[0] for call in state_memory.insert_outputs.call_args_list]
     assert stored == [Station, Port, Load]
+
+
+def test_initialize_components_stores_returned_outputs():
+    state_memory = MagicMock()
+    client = MagicMock()
+    supervisor = SupervisoryModel(
+        model_specs=[],
+        state_memory=state_memory,
+        rabbitmq_client=client,
+        max_global_time=timedelta(0),
+    )
+    supervisor.display = MagicMock()
+    supervisor.model_names = ["charging", "sumo"]
+    supervisor.routing_keys = {"charging": "charging", "sumo": "sumo"}
+    supervisor.output_types = {"charging": Battery, "sumo": Vehicle}
+    replies = {
+        "charging": Response(success=True, payload=[battery_payload]),
+        "sumo": Response(success=True),
+    }
+    client.initialize.side_effect = lambda key, on_ack: on_ack(replies[key])
+
+    supervisor.initialize_components()
+
+    state_memory.insert_outputs.assert_called_once_with(Battery, [battery_payload])
 
 
 def test_wait_for_all_raises_on_timeout():

@@ -64,7 +64,9 @@ def _validate_target(target, context: str):
     if not (
         isinstance(target, type) and issubclass(target, Entity) and target is not Entity
     ):
-        raise TypeError(f"{context}: ref() must name an Entity subclass; got {target!r}")
+        raise TypeError(
+            f"{context}: ref() must name an Entity subclass; got {target!r}"
+        )
     if len(target.id_field) != 1:
         raise TypeError(
             f"{context}: {target.__name__} has the composite id {target.id_field}; "
@@ -88,27 +90,36 @@ def _validate_ref_type(hint, context: str):
 
 @dataclass(kw_only=True)
 class Entity(Record, Identifier, abstract=True):
-    """A record identified by its `id_field`, one field or several, which is
-    its primary key unless the class sets `primary_key` itself.
+    """Base class for records that identify something across a run.
 
-    The record is the entity's creation: `start_s` is when it was created.
-    `end_s` is when it ended. Storing an Observation of it whose
-    `observation_type` is "start" or "end" sets `start_s` or `end_s` to that
-    observation's time.
+    `id_field` names the field, or fields, that identify the entity. It is the
+    primary key unless the class sets `primary_key`.
 
-    `start_observation` is a StartObservation that holds the entity's
-    values at its `start_s`, e.g. `start_observation = Departure`. The entity
-    completes it into an Observation of itself when it is defined."""
+    `start_s` is when the entity was created and `end_s` when it ended. Storing
+    an Observation of it whose `observation_type` is "start" or "end" sets
+    `start_s` or `end_s` to that observation's time.
+
+    `start_observation` is a StartObservation holding the entity's values at
+    `start_s`, e.g. `start_observation = Departure`. The entity completes it
+    into an Observation of itself when the class is defined.
+
+    `initialize_only` marks entities a model returns only from `initialize`,
+    e.g. infrastructure that exists for the whole run. They are stored before
+    the first step, so reading them never makes a model wait for the one
+    producing them. They have no `start_s` or `end_s`. The default is False.
+    """
 
     start_s: float | timedelta | None
     end_s: float | timedelta | None = None
     start_observation: ClassVar[type[Record] | None] = None
+    initialize_only: ClassVar[bool] = False
 
     def __post_init__(self):
         parent_post_init = getattr(super(), "__post_init__", None)
         if parent_post_init is not None:
             parent_post_init()
         self._validate_start_end()
+        self._validate_initialize_only_times()
 
     def _validate_start_end(self):
         name = type(self).__name__
@@ -138,12 +149,36 @@ class Entity(Record, Identifier, abstract=True):
                 f"got start_s={self.start_s}, end_s={self.end_s}"
             )
 
+    def _validate_initialize_only_times(self):
+        # Stored at initialize, before there is a simulation time to have
+        # been created or ended at.
+        if not self.initialize_only:
+            return
+        for attr in ("start_s", "end_s"):
+            if getattr(self, attr) is not None:
+                raise ValueError(
+                    f"{type(self).__name__} is initialize_only, so it exists "
+                    f"for the whole run and {attr} must be None; "
+                    f"got {getattr(self, attr)}"
+                )
+
     def __init_subclass__(cls, abstract: bool = False, **kwargs):
         if not abstract and "primary_key" not in cls.__dict__:
             cls.primary_key = cls.id_field
         super().__init_subclass__(abstract=abstract, **kwargs)
-        if not abstract and "start_observation" in cls.__dict__:
+        if abstract:
+            return
+        cls._validate_initialize_only()
+        if "start_observation" in cls.__dict__:
             cls._complete_start_observation()
+
+    @classmethod
+    def _validate_initialize_only(cls):
+        if not isinstance(cls.initialize_only, bool):
+            raise TypeError(
+                f"{cls.__name__}.initialize_only must be a boolean; "
+                f"got {cls.initialize_only!r}"
+            )
 
     @classmethod
     def _complete_start_observation(cls):

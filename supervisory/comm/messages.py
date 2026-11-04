@@ -19,7 +19,6 @@ def task_queue(run_id: str, queue_name: str) -> str:
 
 class Operation(str, Enum):
     INITIALIZE = "initialize"
-    READ_CONSTANTS = "read_constants"
     WRITE_INPUTS = "write_inputs"
     READ_OUTPUTS = "read_outputs"
     ADVANCE = "advance"

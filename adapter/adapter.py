@@ -7,7 +7,6 @@ from base import Record, Input
 class Adapter(ABC):
     input_types: type[Input] | list[type[Input]]
     output_types: type[Record] | list[type[Record]]
-    constant_types: type[Record] | list[type[Record]] | None = None
 
     def __init__(self, name: str, run_id: str, timestep_length: timedelta, **kwargs):
         self.name = name
@@ -25,13 +24,12 @@ class Adapter(ABC):
         pass
 
     @abstractmethod
-    def initialize(self):
-        """Initialize the model."""
-        pass
+    def initialize(self) -> list[Record] | None:
+        """Initialize the model.
 
-    def read_constants(self) -> list[Record]:
-        """Read the model's time-invariant records."""
-        return []
+        May return records of `initialize_only` entities; any others are rejected.
+        """
+        pass
 
     @abstractmethod
     def read_outputs(self) -> list[Record]:
@@ -55,6 +53,6 @@ class Adapter(ABC):
     def terminate(self) -> list[Record] | None:
         """Terminate the model.
 
-        May return final outputs, e.g. state that only ends with the run. They
-        are stored like the outputs of `read_outputs`."""
+        May return final user-defined outputs, as `read_outputs` does.
+        """
         pass

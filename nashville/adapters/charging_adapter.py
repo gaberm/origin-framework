@@ -16,20 +16,20 @@ class ChargingAdapter(Adapter):
         arrived_phevs,
         departed_vehicles,
     ]
-    output_types = [ChargingStep, ChargingSession]
-    constant_types = [Station, Port]
+    output_types = [ChargingStep, ChargingSession, Station, Port]
 
     def __init__(self, name, run_id, timestep_length, **model_params):
         super().__init__(name=name, run_id=run_id, timestep_length=timestep_length)
         self._charging_model = ChargingModel(**model_params)
 
-    def initialize(self):
+    def initialize(self) -> list[Station | Port]:
         self._charging_model.load_data()
+        return self._infrastructure_records()
 
     def current_time(self) -> timedelta:
         return timedelta(seconds=self._charging_model.time)
 
-    def read_constants(self) -> list[Station | Port]:
+    def _infrastructure_records(self) -> list[Station | Port]:
         infrastructure = self._charging_model.infrastructure
         port_counts = {
             station_id: {"ac": 0, "dc": 0} for station_id in infrastructure.stations

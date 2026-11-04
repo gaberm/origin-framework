@@ -86,7 +86,6 @@ class AdapterWorker:
         self.name = spec.name
         self._handlers = {
             "initialize": self.initialize,
-            "read_constants": self.read_constants,
             "write_inputs": self.write_inputs,
             "read_outputs": self.read_outputs,
             "advance": self.advance,
@@ -149,19 +148,18 @@ class AdapterWorker:
             ch.stop_consuming()
 
     def initialize(self, payload) -> Response:
-        self.adapter.initialize()
-        return Response(success=True)
+        outputs = self.adapter.initialize()
+        if not outputs:
+            return Response(success=True)
+        self._require_initialize_only(outputs)
+        return Response(
+            success=True,
+            payload=self._serialize(outputs, self.adapter.output_types),
+        )
 
     def write_inputs(self, payload) -> Response:
         self.adapter.write_inputs(payload)
         return Response(success=True)
-
-    def read_constants(self, payload) -> Response:
-        constants = self.adapter.read_constants()
-        return Response(
-            success=True,
-            payload=self._serialize(constants, self.adapter.constant_types),
-        )
 
     def read_outputs(self, payload) -> Response:
         outputs = self.adapter.read_outputs()
@@ -169,6 +167,25 @@ class AdapterWorker:
             success=True,
             payload=self._serialize(outputs, self.adapter.output_types),
         )
+
+    def _require_initialize_only(self, records):
+        """Records from initialize must be flagged initialize_only, so the
+        scheduler doesn't make the models that read them wait. A missing
+        flag fails here, before the first step."""
+        records = records if isinstance(records, list) else [records]
+        unflagged_types = sorted(
+            {
+                type(record).__name__
+                for record in records
+                if not getattr(record, "initialize_only", False)
+            }
+        )
+        if unflagged_types:
+            raise ValueError(
+                f"{type(self.adapter).__name__}.initialize() returned "
+                f"{unflagged_types}, which aren't initialize_only entities; "
+                f"set initialize_only = True on them"
+            )
 
     @staticmethod
     def _serialize(records, record_types):

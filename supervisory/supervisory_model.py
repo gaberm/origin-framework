@@ -32,10 +32,6 @@ class SupervisoryModel:
         self.output_types = {
             spec.name: spec.adapter.output_types for spec in model_specs
         }
-        self.constant_types = {
-            spec.name: getattr(spec.adapter, "constant_types", None)
-            for spec in model_specs
-        }
         self.input_types = {spec.name: spec.adapter.input_types for spec in model_specs}
         self.scheduler = Scheduler(model_specs, max_global_time)
         self.state_memory = state_memory
@@ -90,18 +86,15 @@ class SupervisoryModel:
         self.state_memory.setup(self._record_types())
 
     def _record_types(self) -> list:
-        """Flattened, de-duplicated Record classes across outputs and constants,
-        with each entity's start observation after it."""
+        """Flattened, de-duplicated output Record classes, with each entity's
+        start observation after it."""
         types = []
-        for value in list(self.output_types.values()) + list(
-            self.constant_types.values()
-        ):
-            if value is not None:
-                for record_type in as_list(value):
-                    types.append(record_type)
-                    observation = getattr(record_type, "start_observation", None)
-                    if observation is not None:
-                        types.append(observation)
+        for value in self.output_types.values():
+            for record_type in as_list(value):
+                types.append(record_type)
+                observation = getattr(record_type, "start_observation", None)
+                if observation is not None:
+                    types.append(observation)
         return list(dict.fromkeys(types))
 
     def reset_state_memory(self, drop_tables: bool = False):
@@ -125,21 +118,14 @@ class SupervisoryModel:
         return responses
 
     def initialize_components(self):
-        self._broadcast(
+        """Initialize every model and store the outputs they return, e.g.
+        their initialize_only entities, before stepping."""
+        responses = self._broadcast(
             self.rabbitmq_client.initialize, "initialize_components", dashboard=True
         )
-
-    def read_constants(self):
-        """Collect each model's time-invariant records once, before stepping."""
-        responses = self._broadcast(
-            self.rabbitmq_client.read_constants, "read_constants"
-        )
-        for name in self.model_names:
-            constant_types = self.constant_types.get(name)
-            payload = responses[name].payload
-            if constant_types is None or not payload:
-                continue
-            self._store_records(constant_types, payload)
+        for name, response in responses.items():
+            if response.payload:
+                self._store_records(self.output_types[name], response.payload)
 
     def write_inputs(self, name: str):
         inputs = self.state_memory.load_inputs(
@@ -335,7 +321,6 @@ class SupervisoryModel:
         self.await_workers()
         self.setup_state_memory()
         self.initialize_components()
-        self.read_constants()
         with self.display.run_dashboard(self.scheduler.max_global_time) as dashboard:
             while (name := self.scheduler.select_next()) is not None:
                 self.write_inputs(name)

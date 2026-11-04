@@ -44,3 +44,41 @@ def test_negative_start_end(attr):
 def test_end_before_start():
     with pytest.raises(ValueError, match="Vehicle.end_s must not be before start_s"):
         Vehicle(veh_id="v1", start_s=10.0, end_s=5.0)
+
+
+@dataclass(kw_only=True)
+class Depot(Entity):
+    id_field = "depot_id"
+    initialize_only = True
+
+    depot_id: str
+
+
+def test_initialize_only_is_not_a_field():
+    from dataclasses import fields
+
+    assert "initialize_only" not in {field.name for field in fields(Depot)}
+    assert Vehicle.initialize_only is False
+
+
+def test_initialize_only_without_times():
+    depot = Depot(depot_id="d1", start_s=None)
+    assert (depot.start_s, depot.end_s) == (None, None)
+
+
+@pytest.mark.parametrize("attr", ["start_s", "end_s"])
+def test_initialize_only_rejects_times(attr):
+    kwargs = {"start_s": None, attr: 5.0}
+    with pytest.raises(ValueError, match=f"Depot is initialize_only.*{attr} must be None"):
+        Depot(depot_id="d1", **kwargs)
+
+
+def test_initialize_only_must_be_boolean():
+    with pytest.raises(TypeError, match="Hub.initialize_only must be a boolean"):
+
+        @dataclass(kw_only=True)
+        class Hub(Entity):
+            id_field = "hub_id"
+            initialize_only = "yes"
+
+            hub_id: str

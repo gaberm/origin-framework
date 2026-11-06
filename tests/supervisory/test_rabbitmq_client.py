@@ -73,12 +73,12 @@ class TestSendReplyRoundTrip:
 
 
 class TestCollectRegistrations:
-    def _make_handler_invoker(self, registrations):
+    def _make_handler_invoker(self, registrations, channel=None):
         """Returns a basic_consume side_effect that immediately delivers canned messages."""
 
         def fake_consume(queue, handler):
             for reg in registrations:
-                mock_ch = MagicMock()
+                mock_ch = channel or MagicMock()
                 mock_method = MagicMock()
                 mock_props = MagicMock()
                 handler(mock_ch, mock_method, mock_props, json.dumps(reg.to_dict()))
@@ -93,6 +93,27 @@ class TestCollectRegistrations:
         result = client.collect_registrations(lambda r: (True, None), expected=1)
 
         assert result == {"worker_a": reg}
+
+    def test_accepted_worker_gets_payload_rejected_does_not(self, client):
+        channel = MagicMock()
+        registrations = [
+            Registration(name="worker_a", routing_key="rk"),
+            Registration(name="unexpected", routing_key="rk"),
+        ]
+        client.channel.basic_consume.side_effect = self._make_handler_invoker(
+            registrations, channel
+        )
+
+        client.collect_registrations(
+            lambda r: (r.name == "worker_a", None),
+            expected=1,
+            accepted_payload={"start_time": None},
+        )
+
+        replies = [
+            json.loads(call.kwargs["body"]) for call in channel.basic_publish.call_args_list
+        ]
+        assert [reply["payload"] for reply in replies] == [{"start_time": None}, None]
 
     def test_rejected_registration_not_included(self, client):
         reg = Registration(name="unexpected", routing_key="rk")

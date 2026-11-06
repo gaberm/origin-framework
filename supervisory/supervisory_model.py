@@ -1,13 +1,13 @@
 from __future__ import annotations
 import dataclasses
 import time
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import TYPE_CHECKING
-from base import ModelSpec, Observation, as_list, refs
+from base import Entity, ModelSpec, Observation, Timestamp, as_list, refs
 from supervisory.comm.rabbitmq_client import RabbitMQClient, Response
 from supervisory.comm.messages import Registration
 from supervisory.console_display import ConsoleDisplay
-from supervisory.scheduling.scheduler import Scheduler
+from supervisory.scheduling.scheduler import TIME_TOLERANCE, Scheduler
 
 # Use TYPE_CHECKING to avoid circular imports during runtime
 if TYPE_CHECKING:
@@ -20,7 +20,8 @@ class SupervisoryModel:
         model_specs: list[ModelSpec],
         state_memory: StateMemory,
         rabbitmq_client: RabbitMQClient,
-        max_global_time: timedelta,
+        duration: timedelta,
+        start_time: datetime | None = None,
         registration_timeout: float | int = 120.0,
         response_timeout: float | int = 60.0,
         shutdown_timeout: float | int = 10.0,
@@ -33,7 +34,12 @@ class SupervisoryModel:
             spec.name: spec.adapter.output_types for spec in model_specs
         }
         self.input_types = {spec.name: spec.adapter.input_types for spec in model_specs}
-        self.scheduler = Scheduler(model_specs, max_global_time)
+        self.timings = {spec.name: spec.timing for spec in model_specs}
+        self.scheduler = Scheduler(model_specs, duration)
+        self._validate_start_time(start_time)
+        # The calendar time of the run's start, if the run has one. Workers
+        # get it when they register, so adapters can convert dates to run time.
+        self.start_time = start_time
         self.state_memory = state_memory
         self.rabbitmq_client = rabbitmq_client
         self.registration_timeout = registration_timeout
@@ -55,6 +61,14 @@ class SupervisoryModel:
                 f"Model names must be unique; duplicated names: {duplicate_names}"
             )
 
+    @staticmethod
+    def _validate_start_time(start_time: datetime | None):
+        if start_time is not None and not isinstance(start_time, datetime):
+            raise TypeError(
+                f"start_time must be a datetime.datetime, e.g. "
+                f"datetime(1794, 9, 10); got {type(start_time).__name__!r}"
+            )
+
     def await_workers(self):
         with self.display.wait_list(self.model_names, "Await Workers") as wait_list:
 
@@ -68,18 +82,27 @@ class SupervisoryModel:
                     self.registration_timeout,
                     on_registered=on_registered,
                     workers_started=self.workers_started,
+                    accepted_payload={
+                        "start_time": (
+                            None
+                            if self.start_time is None
+                            else self.start_time.isoformat()
+                        )
+                    },
                 )
             except TimeoutError as error:
                 missing = sorted(set(self.model_names) - set(error.args[0]))
                 raise RuntimeError(f"workers never registered: {missing}")
 
     def _validate_registration(self, registration: Registration):
-        if registration.name not in self.scheduler.timestep_lengths:
+        if registration.name not in self.timings:
             return False, f"unexpected worker '{registration.name}'"
-        if (registration.metadata or {}).get(
-            "timestep_length"
-        ) != self.scheduler.timestep_lengths[registration.name]:
-            return False, f"timestep mismatch for '{registration.name}'"
+        expected_timing = self.timings[registration.name]
+        if registration.metadata != expected_timing:
+            return False, (
+                f"timing mismatch for '{registration.name}': worker sent "
+                f"{registration.metadata}, supervisor expects {expected_timing}"
+            )
         return True, None
 
     def setup_state_memory(self):
@@ -157,11 +180,56 @@ class SupervisoryModel:
                 self.routing_keys[name], on_ack=ack
             ),
         )
-        self._store_records(self.output_types[name], response.payload)
+        self._store_step_outputs(name, response.payload)
+
+    def _store_step_outputs(self, name: str, payload):
+        """Store the outputs of the step the model just took, once their
+        times are checked."""
+        records = self._deserialize(self.output_types[name], payload)
+        self._check_record_times(name, records)
+        self._insert_records(records)
+
+    def _check_record_times(self, name: str, records: list):
+        """Check record times against the step the model just took."""
+        step_end = self.scheduler.model_times[name]
+        step_start = step_end - self.scheduler.timestep_lengths[name]
+        for record in records:
+            if isinstance(record, Timestamp):
+                self._check_not_before_step(name, record, step_start, step_end)
+            if isinstance(record, Entity):
+                self._check_not_after_step(name, record, step_end)
+
+    @staticmethod
+    def _check_not_before_step(name: str, record, step_start: float, step_end: float):
+        """A dependent model may already have read times before the step and
+        would miss the record. Later times, e.g. a forecast, wait for readers."""
+        time = getattr(record, record.time_field)
+        if time < step_start - TIME_TOLERANCE:
+            raise RuntimeError(
+                f"'{name}' returned {type(record).__name__} with "
+                f"{record.time_field}={time} s, before the step it just took "
+                f"[{step_start}, {step_end}] s"
+            )
+
+    @staticmethod
+    def _check_not_after_step(name: str, record, step_end: float):
+        """Entities may be reported after they start or end, e.g. a battery
+        once its trip is known, but not before."""
+        for time_field in ("start_s", "end_s"):
+            time = getattr(record, time_field)
+            if time is not None and time > step_end + TIME_TOLERANCE:
+                raise RuntimeError(
+                    f"'{name}' returned {type(record).__name__} with "
+                    f"{time_field}={time} s, after the end of the step it just "
+                    f"took ({step_end} s)"
+                )
 
     def _store_records(self, record_types, payload):
+        self._insert_records(self._deserialize(record_types, payload))
+
+    def _insert_records(self, records: list):
         by_type = {}
-        for record in self._deserialize(record_types, payload):
+        for record in records:
             by_type.setdefault(type(record), []).append(dataclasses.asdict(record))
         for record_type in self._storage_order(list(by_type)):
             self.state_memory.insert_outputs(record_type, by_type[record_type])
@@ -215,7 +283,7 @@ class SupervisoryModel:
             # connection closes.
             for name, response in responses.items():
                 if response.payload:
-                    self._store_records(self.output_types[name], response.payload)
+                    self._store_step_outputs(name, response.payload)
         except BaseException:
             self._shut_down_after_error()
             raise
@@ -321,7 +389,7 @@ class SupervisoryModel:
         self.await_workers()
         self.setup_state_memory()
         self.initialize_components()
-        with self.display.run_dashboard(self.scheduler.max_global_time) as dashboard:
+        with self.display.run_dashboard(self.scheduler.duration) as dashboard:
             while (name := self.scheduler.select_next()) is not None:
                 self.write_inputs(name)
                 self.advance(name)
@@ -329,5 +397,5 @@ class SupervisoryModel:
                 dashboard.update(
                     max(self.scheduler.model_times.values()), self.scheduler.model_times
                 )
-            dashboard.update(self.scheduler.max_global_time, self.scheduler.model_times)
+            dashboard.update(self.scheduler.duration, self.scheduler.model_times)
         self.display.print_final_model_times(self.scheduler.model_times)

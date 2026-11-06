@@ -1,5 +1,5 @@
 import pytest
-from datetime import timedelta
+from datetime import datetime, timedelta
 from adapter.adapter import Adapter
 from dataclasses import dataclass
 from base import Entity, Observation, StartObservation, ModelSpec, ref
@@ -13,7 +13,7 @@ model = SupervisoryModel(
     model_specs=[],
     state_memory=None,
     rabbitmq_client=None,
-    max_global_time=timedelta(0),
+    duration=timedelta(seconds=1),
 )
 
 vehicle_payload_1 = {"veh_id": "veh_1", "time_s": 1.0, "soc": 0.5}
@@ -86,14 +86,14 @@ def test_record_types_add_start_observations():
         model.output_types = original_output_types
 
 class TestValidateRegistration:
-    def setup_method(self):
-        model.scheduler.timestep_lengths = {"model_a": 1.0}
+    timing = {"timestep_length": 1.0, "active_from": 0.0, "active_until": None}
 
-    def test_accepts_known_worker_with_correct_timestep(self):
+    def setup_method(self):
+        model.timings = {"model_a": self.timing}
+
+    def test_accepts_known_worker_with_matching_timing(self):
         accepted, error = model._validate_registration(
-            Registration(
-                name="model_a", routing_key="rk", metadata={"timestep_length": 1.0}
-            )
+            Registration(name="model_a", routing_key="rk", metadata=self.timing)
         )
         assert accepted is True
         assert error is None
@@ -105,21 +105,52 @@ class TestValidateRegistration:
         assert accepted is False
         assert "model_b" in error
 
-    def test_rejects_timestep_mismatch(self):
+    @pytest.mark.parametrize(
+        "changed_timing",
+        [{"timestep_length": 2.0}, {"active_from": 60.0}, {"active_until": 3600.0}],
+        ids=["timestep", "active_from", "active_until"],
+    )
+    def test_rejects_timing_mismatch(self, changed_timing):
         accepted, error = model._validate_registration(
             Registration(
-                name="model_a", routing_key="rk", metadata={"timestep_length": 2.0}
+                name="model_a", routing_key="rk", metadata={**self.timing, **changed_timing}
             )
         )
         assert accepted is False
-        assert "model_a" in error
+        assert "timing mismatch for 'model_a'" in error
 
-    def test_rejects_missing_timestep_in_metadata(self):
+    def test_rejects_missing_timing_in_metadata(self):
         accepted, error = model._validate_registration(
             Registration(name="model_a", routing_key="rk", metadata=None)
         )
         assert accepted is False
         assert "model_a" in error
+
+
+class TestStartTime:
+    def test_sent_to_workers_when_they_register(self):
+        client = MagicMock()
+        supervisor = SupervisoryModel(
+            model_specs=[],
+            state_memory=None,
+            rabbitmq_client=client,
+            duration=timedelta(hours=1),
+            start_time=datetime(2026, 1, 18, 18),
+        )
+        supervisor.display = MagicMock()
+        supervisor.await_workers()
+        payload = client.collect_registrations.call_args.kwargs["accepted_payload"]
+        assert payload == {"start_time": "2026-01-18T18:00:00"}
+
+    def test_bare_string_rejected(self):
+        with pytest.raises(TypeError, match="start_time must be a datetime.datetime"):
+            SupervisoryModel(
+                model_specs=[],
+                state_memory=None,
+                rabbitmq_client=None,
+                duration=timedelta(hours=1),
+                start_time="2026-01-18",
+            )
 
 
 def test_wait_for_all_raises_on_error():
@@ -148,10 +179,12 @@ def test_terminate_stores_final_outputs_before_closing():
         model_specs=[],
         state_memory=state_memory,
         rabbitmq_client=MagicMock(),
-        max_global_time=timedelta(0),
+        duration=timedelta(seconds=1),
     )
     supervisor.display = MagicMock()
     supervisor.output_types = {"model_a": Vehicle, "model_b": Vehicle}
+    supervisor.scheduler.model_times = {"model_a": 1.0, "model_b": 1.0}
+    supervisor.scheduler.timestep_lengths = {"model_a": 1.0, "model_b": 1.0}
     supervisor._broadcast = MagicMock(
         return_value={
             "model_a": Response(success=True, payload=[vehicle_payload_1]),
@@ -162,6 +195,60 @@ def test_terminate_stores_final_outputs_before_closing():
     supervisor.terminate()
 
     assert calls == [("insert", Vehicle, [vehicle_payload_1]), ("close",)]
+
+
+class TestRecordTimes:
+    @dataclass(kw_only=True)
+    class Car(Entity):
+        id_field = "veh_id"
+        veh_id: str
+
+    def _supervisor(self):
+        state_memory = MagicMock()
+        supervisor = SupervisoryModel(
+            model_specs=[],
+            state_memory=state_memory,
+            rabbitmq_client=MagicMock(),
+            duration=timedelta(seconds=1),
+        )
+        supervisor.output_types = {"model_a": [Vehicle, self.Car]}
+        # model_a just stepped from 10 s to 20 s.
+        supervisor.scheduler.model_times = {"model_a": 20.0}
+        supervisor.scheduler.timestep_lengths = {"model_a": 10.0}
+        return supervisor
+
+    @pytest.mark.parametrize(
+        "time_s", [10.0, 15.0, 20.0, 25.0], ids=["start", "middle", "end", "future"]
+    )
+    def test_stores_records_from_step_on(self, time_s):
+        supervisor = self._supervisor()
+        supervisor._store_step_outputs(
+            "model_a", [{"_type": "Vehicle", **vehicle_payload_1, "time_s": time_s}]
+        )
+        supervisor.state_memory.insert_outputs.assert_called_once()
+
+    def test_rejects_timestamp_before_step(self):
+        supervisor = self._supervisor()
+        with pytest.raises(RuntimeError, match=r"time_s=5.0 s, before the step it just took \[10.0, 20.0\] s"):
+            supervisor._store_step_outputs(
+                "model_a", [{"_type": "Vehicle", **vehicle_payload_1, "time_s": 5.0}]
+            )
+        supervisor.state_memory.insert_outputs.assert_not_called()
+
+    def test_stores_entity_that_started_before_step(self):
+        supervisor = self._supervisor()
+        supervisor._store_step_outputs(
+            "model_a", [{"_type": "Car", "veh_id": "veh_1", "start_s": 0.0, "end_s": 20.0}]
+        )
+        supervisor.state_memory.insert_outputs.assert_called_once()
+
+    @pytest.mark.parametrize("time_field", ["start_s", "end_s"])
+    def test_rejects_entity_time_after_step(self, time_field):
+        supervisor = self._supervisor()
+        car = {"_type": "Car", "veh_id": "veh_1", "start_s": 0.0, "end_s": None}
+        car[time_field] = 25.0
+        with pytest.raises(RuntimeError, match=f"{time_field}=25.0 s, after the end of the step"):
+            supervisor._store_step_outputs("model_a", [car])
 
 
 def test_store_records_writes_entities_before_observations():
@@ -182,7 +269,7 @@ def test_store_records_writes_entities_before_observations():
         model_specs=[],
         state_memory=state_memory,
         rabbitmq_client=MagicMock(),
-        max_global_time=timedelta(0),
+        duration=timedelta(seconds=1),
     )
     trip_end = {"_type": "TripEnd", "veh_id": "veh_1", "time_s": 5.0}
     trip = {"_type": "Trip", "veh_id": "veh_1", "start_s": 0.0, "end_s": None}
@@ -216,7 +303,7 @@ def test_store_records_writes_referenced_entities_first():
         model_specs=[],
         state_memory=state_memory,
         rabbitmq_client=MagicMock(),
-        max_global_time=timedelta(0),
+        duration=timedelta(seconds=1),
     )
     payload = [
         {"_type": "Load", "port_id": "p1", "time_s": 5.0},
@@ -237,7 +324,7 @@ def test_initialize_components_stores_returned_outputs():
         model_specs=[],
         state_memory=state_memory,
         rabbitmq_client=client,
-        max_global_time=timedelta(0),
+        duration=timedelta(seconds=1),
     )
     supervisor.display = MagicMock()
     supervisor.model_names = ["charging", "sumo"]
@@ -282,7 +369,7 @@ def test_advance_checks_reported_time():
         ],
         state_memory=None,
         rabbitmq_client=MagicMock(),
-        max_global_time=timedelta(minutes=1),
+        duration=timedelta(minutes=1),
     )
     supervisor._send_and_wait = MagicMock(return_value=Response(success=True, payload=10.0))
     supervisor.advance("model_a")
@@ -300,7 +387,7 @@ class TestShutdownAfterError:
             model_specs=[],
             state_memory=state_memory or MagicMock(),
             rabbitmq_client=client,
-            max_global_time=timedelta(0),
+            duration=timedelta(seconds=1),
             shutdown_timeout=0.0,
         )
         supervisor.display = MagicMock()

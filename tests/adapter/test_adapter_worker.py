@@ -1,11 +1,21 @@
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 import numpy as np
 import pytest
 from unittest.mock import MagicMock, patch
 from adapter.adapter_worker import AdapterWorker
 from supervisory.comm.messages import Message, Response, Operation
+from dataclasses import dataclass
+from base import Entity
 from _records import Vehicle, Battery
+
+
+@dataclass(kw_only=True)
+class Depot(Entity):
+    id_field = "depot_id"
+    initialize_only = True
+
+    depot_id: str
 
 
 def _spec(**params):
@@ -14,8 +24,13 @@ def _spec(**params):
     spec.routing_key = "test_rk"
     spec.queue_name = "test_queue"
     spec.timestep_length = timedelta(seconds=1)
+    spec.active_from = timedelta(hours=2)
+    spec.timing = {"timestep_length": 1.0, "active_from": 7200.0, "active_until": None}
     spec.params = params
     spec.adapter.return_value.timestep_length = spec.timestep_length
+    # After initialize() the model is where its first step starts.
+    spec.adapter.return_value.current_time.return_value = spec.active_from
+    spec.adapter.return_value.start_time = None
     return spec
 
 
@@ -46,6 +61,7 @@ class TestRunScopedMessaging:
             sumo_config="main.sumocfg",
         )
         assert worker.adapter is spec.adapter.return_value
+        assert worker.adapter.active_from == timedelta(hours=2)
 
     def test_queue_and_exchange_are_scoped_to_run(self, worker):
         worker.channel.queue_declare.assert_called_once_with(
@@ -84,8 +100,12 @@ class TestRunScopedMessaging:
         )
         publish = worker.channel.basic_publish.call_args.kwargs
         assert publish["routing_key"] == "run_test.worker_registration"
-        # The timestep is sent in seconds.
-        assert json.loads(publish["body"])["metadata"] == {"timestep_length": 1.0}
+        # The timing is sent in seconds.
+        assert json.loads(publish["body"])["metadata"] == {
+            "timestep_length": 1.0,
+            "active_from": 7200.0,
+            "active_until": None,
+        }
 
 
 class TestReadOutputs:
@@ -117,6 +137,65 @@ class TestReadOutputs:
                 {"_type": "Battery", "veh_id": "veh_1", "capacity": 100},
             ],
         )
+
+
+class TestInitialize:
+    def test_without_outputs(self, worker):
+        worker.adapter.initialize.return_value = None
+
+        assert worker.initialize(None) == Response(success=True)
+
+    def test_returns_initialize_only_outputs(self, worker):
+        worker.adapter.output_types = [Vehicle, Depot]
+        worker.adapter.initialize.return_value = [
+            Depot(depot_id="d1", start_s=None)
+        ]
+
+        response = worker.initialize(None)
+
+        assert response == Response(
+            success=True,
+            payload=[
+                {"_type": "Depot", "depot_id": "d1", "start_s": None, "end_s": None}
+            ],
+        )
+
+
+    def test_rejects_unflagged_records(self, worker):
+        worker.adapter.output_types = [Vehicle, Depot]
+        worker.adapter.initialize.return_value = [
+            Depot(depot_id="d1", start_s=None),
+            Vehicle(veh_id="veh_1", soc=0.5, time_s=0.0),
+        ]
+
+        with pytest.raises(
+            ValueError,
+            match=r"initialize\(\) returned \['Vehicle'\], which aren't initialize_only",
+        ):
+            worker.initialize(None)
+
+
+class TestStartsAtActiveFrom:
+    def test_names_run_times_when_run_has_no_start_time(self, worker):
+        worker.adapter.current_time.return_value = timedelta(0)
+
+        with pytest.raises(
+            ValueError,
+            match=r"is at 0:00:00 after initialize\(\), but its first step "
+            r"starts at 2:00:00 \(ModelSpec.active_from\)$",
+        ):
+            worker.initialize(None)
+
+    def test_names_calendar_times_when_run_has_start_time(self, worker):
+        worker.adapter.current_time.return_value = timedelta(hours=20)
+        worker.adapter.start_time = datetime(2026, 1, 18)
+
+        with pytest.raises(
+            ValueError,
+            match=r"is at 2026-01-18 20:00:00 after initialize\(\), but its "
+            r"first step starts at 2026-01-18 02:00:00 \(ModelSpec.active_from\)$",
+        ):
+            worker.initialize(None)
 
 
 class TestTerminate:
@@ -151,6 +230,7 @@ class TestOnMessage:
         return self._call_raw(worker, json.dumps(Message(operation).to_dict()))
 
     def test_dispatches_known_command(self, worker):
+        worker.adapter.initialize.return_value = None
         reply = self._call(worker, Operation.INITIALIZE)
         assert reply == Response(success=True)
 
@@ -238,16 +318,32 @@ class TestRegister:
         worker.channel.basic_consume.side_effect = fake_consume
 
     def test_accepted(self, worker):
-        self._setup_reply(worker, Response(success=True), "fixed-corr")
+        worker.adapter.start_time = None
+        self._setup_reply(
+            worker, Response(success=True, payload={"start_time": None}), "fixed-corr"
+        )
         with patch("adapter.adapter_worker.uuid.uuid4", return_value="fixed-corr"):
             worker.register()  # should not raise
+        assert worker.adapter.start_time is None
+
+    def test_accepted_sets_run_start_time(self, worker):
+        self._setup_reply(
+            worker,
+            Response(success=True, payload={"start_time": "2026-01-18T18:00:00+00:00"}),
+            "fixed-corr",
+        )
+        with patch("adapter.adapter_worker.uuid.uuid4", return_value="fixed-corr"):
+            worker.register()
+        assert worker.adapter.start_time == datetime.fromisoformat(
+            "2026-01-18T18:00:00+00:00"
+        )
 
     def test_rejected_raises(self, worker):
         self._setup_reply(
-            worker, Response(success=False, error="timestep mismatch"), "fixed-corr"
+            worker, Response(success=False, error="timing mismatch"), "fixed-corr"
         )
         with patch("adapter.adapter_worker.uuid.uuid4", return_value="fixed-corr"):
-            with pytest.raises(RuntimeError, match="timestep mismatch"):
+            with pytest.raises(RuntimeError, match="timing mismatch"):
                 worker.register()
 
     def test_timeout_raises(self, worker):

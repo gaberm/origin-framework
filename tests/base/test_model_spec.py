@@ -82,3 +82,34 @@ def test_timestep_seconds():
         name="model", adapter=MinimalAdapter, timestep_length=timedelta(minutes=1)
     )
     assert spec.timestep_seconds == 60.0
+
+
+def test_active_window_defaults_to_whole_run():
+    spec = ModelSpec(name="model", adapter=MinimalAdapter, timestep_length=timedelta(seconds=1))
+    assert spec.active_from == timedelta(0)
+    assert spec.active_until is None
+    assert spec.timing == {"timestep_length": 1.0, "active_from": 0.0, "active_until": None}
+
+
+@pytest.mark.parametrize(
+    "active_window, error, match",
+    [
+        ({"active_from": 60}, TypeError, "active_from must be a datetime.timedelta"),
+        ({"active_until": 60}, TypeError, "active_until must be a datetime.timedelta"),
+        ({"active_from": timedelta(seconds=-1)}, ValueError, "must not be negative"),
+        (
+            {"active_from": timedelta(hours=2), "active_until": timedelta(hours=2)},
+            ValueError,
+            "must be after active_from",
+        ),
+    ],
+    ids=["start-number", "end-number", "negative-start", "end-not-after-start"],
+)
+def test_invalid_active_window_rejected(active_window, error, match):
+    with pytest.raises(error, match=match):
+        ModelSpec(
+            name="model",
+            adapter=MinimalAdapter,
+            timestep_length=timedelta(seconds=1),
+            **active_window,
+        )

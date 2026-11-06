@@ -3,11 +3,12 @@ import json
 import time
 import traceback
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 import numpy as np
 import pika
 from base import ModelSpec
 from supervisory.comm.connection import connect
+from supervisory.scheduling.scheduler import TIME_TOLERANCE
 from supervisory.comm.messages import (
     DEFAULT_HEARTBEAT_SECONDS,
     Message,
@@ -29,13 +30,18 @@ def _to_builtin(value):
     raise TypeError(f"Object of type {type(value).__name__} is not JSON serializable")
 
 
-def _to_seconds(value, what: str) -> float:
-    """Adapters use timedeltas; messages carry seconds."""
+def _require_timedelta(value, what: str) -> timedelta:
+    """Adapters must report times as timedeltas."""
     if not isinstance(value, timedelta):
         raise TypeError(
             f"{what} must be a datetime.timedelta; got {type(value).__name__!r}"
         )
-    return value.total_seconds()
+    return value
+
+
+def _to_seconds(value, what: str) -> float:
+    """Adapters use timedeltas; messages carry seconds."""
+    return _require_timedelta(value, what).total_seconds()
 
 
 class AdapterWorker:
@@ -65,6 +71,8 @@ class AdapterWorker:
             timestep_length=spec.timestep_length,
             **spec.params,
         )
+        self.adapter.active_from = spec.active_from
+        self.timing = spec.timing
         self.registration_timeout = registration_timeout
         self.run_id = run_id
         self.queue_name = task_queue(run_id, spec.queue_name)
@@ -108,9 +116,7 @@ class AdapterWorker:
         reg = Registration(
             name=self.name,
             routing_key=self.routing_key,
-            metadata={
-                "timestep_length": self.adapter.timestep_length.total_seconds()
-            },
+            metadata=self.timing,
         )
         self.channel.basic_publish(
             exchange="",
@@ -125,6 +131,9 @@ class AdapterWorker:
             self.connection.process_data_events(time_limit=1)
         if not result["resp"].success:
             raise RuntimeError(f"registration rejected: {result['resp'].error}")
+        start_time = result["resp"].payload["start_time"]
+        if start_time is not None:
+            self.adapter.start_time = datetime.fromisoformat(start_time)
 
     def _on_message(self, ch, method, properties, body):
         command = None
@@ -149,6 +158,7 @@ class AdapterWorker:
 
     def initialize(self, payload) -> Response:
         outputs = self.adapter.initialize()
+        self._require_at_active_from()
         if not outputs:
             return Response(success=True)
         self._require_initialize_only(outputs)
@@ -168,22 +178,43 @@ class AdapterWorker:
             payload=self._serialize(outputs, self.adapter.output_types),
         )
 
+    def _require_at_active_from(self):
+        """After initialize() the model must be where its first step starts,
+        or every step after it would be off, e.g. when its data starts at a
+        different date than the run."""
+        adapter_name = type(self.adapter).__name__
+        current_time = _require_timedelta(
+            self.adapter.current_time(), f"{adapter_name}.current_time()"
+        )
+        active_from = self.adapter.active_from
+        if abs((current_time - active_from).total_seconds()) <= TIME_TOLERANCE:
+            return
+
+        start_time = self.adapter.start_time
+        if start_time:
+            current_time = start_time + current_time
+            active_from = start_time + active_from
+        raise ValueError(
+            f"{adapter_name} is at {current_time} after initialize(), but its "
+            f"first step starts at {active_from} (ModelSpec.active_from)"
+        )
+
     def _require_initialize_only(self, records):
         """Records from initialize must be flagged initialize_only, so the
         scheduler doesn't make the models that read them wait. A missing
         flag fails here, before the first step."""
         records = records if isinstance(records, list) else [records]
-        unflagged_types = sorted(
+        unflagged_record_types = sorted(
             {
                 type(record).__name__
                 for record in records
                 if not getattr(record, "initialize_only", False)
             }
         )
-        if unflagged_types:
+        if unflagged_record_types:
             raise ValueError(
                 f"{type(self.adapter).__name__}.initialize() returned "
-                f"{unflagged_types}, which aren't initialize_only entities; "
+                f"{unflagged_record_types}, which aren't initialize_only entities; "
                 f"set initialize_only = True on them"
             )
 

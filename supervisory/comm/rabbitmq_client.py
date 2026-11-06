@@ -48,9 +48,12 @@ class RabbitMQClient:
         timeout: float = 30.0,
         on_registered=None,
         workers_started=None,
+        accepted_payload=None,
     ):
         """Block until `expected` distinct workers register and pass `validate`.
         validate(reg) -> (accepted: bool, error: str | None).
+        accepted_payload, if given, is sent to each accepted worker in its
+        reply, e.g. settings of the run the worker needs.
         on_registered(name), if given, is called each time a worker registers
         successfully, so callers can show live per-worker progress.
         workers_started(), if given, is polled while waiting; `timeout` only
@@ -70,11 +73,14 @@ class RabbitMQClient:
                 registered[reg.name] = reg
                 if on_registered is not None:
                     on_registered(reg.name)
+            reply = Response(
+                success=ok, payload=accepted_payload if ok else None, error=error
+            )
             ch.basic_publish(
                 exchange="",
                 routing_key=props.reply_to,
                 properties=pika.BasicProperties(correlation_id=props.correlation_id),
-                body=json.dumps(Response(success=ok, error=error).to_dict()),
+                body=json.dumps(reply.to_dict()),
             )
             ch.basic_ack(method.delivery_tag)
 

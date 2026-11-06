@@ -7,32 +7,64 @@ from supervisory.scheduling.time_window import TimeWindow
 
 _EPS = 1e-9
 # Seconds a reported model time may differ from the expected window end.
-_TIME_TOLERANCE = 1e-6
+TIME_TOLERANCE = 1e-6
 
 
 class Scheduler:
-    def __init__(self, model_specs: list[ModelSpec], max_global_time: timedelta):
-        if not isinstance(max_global_time, timedelta):
-            raise TypeError(
-                f"max_global_time must be a datetime.timedelta, e.g. "
-                f"timedelta(hours=24); got {type(max_global_time).__name__!r}"
-            )
-        # All times below are in seconds.
-        self.max_global_time = max_global_time.total_seconds()
+    def __init__(self, model_specs: list[ModelSpec], duration: timedelta):
+        self._validate_duration(duration)
+        # All times below are in seconds from the start of the run.
+        self.duration = duration.total_seconds()
         self.model_names = [spec.name for spec in model_specs]
         self.timestep_lengths = {
             spec.name: spec.timestep_seconds for spec in model_specs
         }
-        self.model_times = {spec.name: 0.0 for spec in model_specs}
+        self.active_from = {
+            spec.name: spec.active_from.total_seconds() for spec in model_specs
+        }
+        self.final_times = {
+            spec.name: self._final_time(spec, duration) for spec in model_specs
+        }
+        self.model_times = dict(self.active_from)
         self.dependencies = self._derive_dependencies(model_specs)
         self._rank = self._compute_topo_ranks()
+
+    @staticmethod
+    def _validate_duration(duration: timedelta):
+        if not isinstance(duration, timedelta):
+            raise TypeError(
+                f"duration must be a datetime.timedelta, e.g. "
+                f"timedelta(hours=24); got {type(duration).__name__!r}"
+            )
+        if duration <= timedelta(0):
+            raise ValueError(f"duration must be positive; got {duration}")
+
+    @staticmethod
+    def _final_time(spec: ModelSpec, duration: timedelta) -> float:
+        """Time of the model's last whole step's end, by its active_until or the run's end."""
+        active_until = duration if spec.active_until is None else spec.active_until
+        if active_until > duration:
+            raise ValueError(
+                f"'{spec.name}'.active_until {active_until} is after the end of the "
+                f"run ({duration})"
+            )
+        start = spec.active_from.total_seconds()
+        step_count = math.floor(
+            (active_until.total_seconds() - start + _EPS) / spec.timestep_seconds
+        )
+        if step_count < 1:
+            raise ValueError(
+                f"'{spec.name}' has no whole timestep of {spec.timestep_length} "
+                f"between its active_from {spec.active_from} and {active_until}"
+            )
+        return start + step_count * spec.timestep_seconds
 
     def select_next(self) -> str | None:
         """Furthest-behind eligible model; ties broken by topological rank."""
         pending_models = [
             name
             for name in self.model_names
-            if self.time_window_end(name) <= self.max_global_time + _EPS
+            if self.model_times[name] < self.final_times[name] - _EPS
         ]
         if not pending_models:
             return None
@@ -57,7 +89,7 @@ class Scheduler:
     def complete_step(self, name: str, reported_time) -> None:
         expected = self.time_window_end(name)
         if not isinstance(reported_time, Real) or not math.isclose(
-            reported_time, expected, rel_tol=0, abs_tol=_TIME_TOLERANCE
+            reported_time, expected, rel_tol=0, abs_tol=TIME_TOLERANCE
         ):
             raise RuntimeError(
                 f"'{name}' reported time {reported_time!r} s after advancing; "
@@ -72,14 +104,18 @@ class Scheduler:
         """A model may advance only once every dependency has produced through its window end."""
         window_end = self.time_window_end(name)
         for dependency in self.dependencies.get(name, ()):
-            dependency_timestep = self.timestep_lengths[dependency]
-            required_time = (
-                math.floor((window_end - _EPS) / dependency_timestep)
-                * dependency_timestep
-            )
+            required_time = self._required_time(dependency, window_end)
             if self.model_times[dependency] < required_time - _EPS:
                 return False
         return True
+
+    def _required_time(self, dependency: str, window_end: float) -> float:
+        """The dependency's last step boundary before window_end. Its steps
+        start at its active_from, and it never gets past its final time."""
+        start = self.active_from[dependency]
+        timestep = self.timestep_lengths[dependency]
+        boundary = start + math.floor((window_end - start - _EPS) / timestep) * timestep
+        return min(boundary, self.final_times[dependency])
 
     def _derive_dependencies(
         self, model_specs: list[ModelSpec]

@@ -15,6 +15,7 @@ from .input.input import Input, Latest, Window
 from .input.join import KeyJoin, SpatialJoin
 from .output.entity import Entity, ref, refs
 from .output.geometry import SHAPE_TYPE, Geometry
+from .output.grid import Cell, CellObservation, grid_cells, grid_observations
 from .output.identifier import Identifier
 from .output.observation import StartObservation, Observation
 from .output.record import Record
@@ -24,6 +25,8 @@ from .utils import as_list
 
 __all__ = [
     "SHAPE_TYPE",
+    "Cell",
+    "CellObservation",
     "Condition",
     "Entity",
     "Equal",
@@ -49,6 +52,8 @@ __all__ = [
     "Timestamp",
     "Window",
     "as_list",
+    "grid_cells",
+    "grid_observations",
     "ref",
     "refs",
 ]

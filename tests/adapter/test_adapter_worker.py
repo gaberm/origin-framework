@@ -176,7 +176,7 @@ class TestInitialize:
 
 
 class TestStartsAtActiveFrom:
-    def test_names_run_times_when_run_has_no_start_time(self, worker):
+    def test_names_simulation_times_when_run_has_no_start_time(self, worker):
         worker.adapter.current_time.return_value = timedelta(0)
 
         with pytest.raises(
@@ -186,7 +186,7 @@ class TestStartsAtActiveFrom:
         ):
             worker.initialize(None)
 
-    def test_names_calendar_times_when_run_has_start_time(self, worker):
+    def test_names_physical_times_when_run_has_start_time(self, worker):
         worker.adapter.current_time.return_value = timedelta(hours=20)
         worker.adapter.start_time = datetime(2026, 1, 18)
 

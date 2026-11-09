@@ -1,11 +1,10 @@
 from __future__ import annotations
-import dataclasses
-import time
 from datetime import timedelta, datetime
 from typing import TYPE_CHECKING
-from base import Entity, ModelSpec, Observation, Timestamp, as_list, refs
-from supervisory.comm.rabbitmq_client import RabbitMQClient, Response
-from supervisory.comm.messages import Registration
+from adapter import DataAdapter
+from base import Entity, Record, ModelSpec, Timestamp, as_list
+from supervisory.comm.rabbitmq_client import RabbitMQClient
+from supervisory.comm.messages import Operation, Registration
 from supervisory.console_display import ConsoleDisplay
 from supervisory.scheduling.scheduler import TIME_TOLERANCE, Scheduler
 
@@ -21,6 +20,7 @@ class SupervisoryModel:
         state_memory: StateMemory,
         rabbitmq_client: RabbitMQClient,
         duration: timedelta,
+        data_adapter: list[DataAdapter] = [],
         start_time: datetime | None = None,
         registration_timeout: float | int = 120.0,
         response_timeout: float | int = 60.0,
@@ -37,8 +37,9 @@ class SupervisoryModel:
         self.timings = {spec.name: spec.timing for spec in model_specs}
         self.scheduler = Scheduler(model_specs, duration)
         self._validate_start_time(start_time)
-        # The calendar time of the run's start, if the run has one. Workers
-        # get it when they register, so adapters can convert dates to run time.
+        # The physical time of the run's start, if the run has one. Workers
+        # get it when they register, so adapters can convert dates to simulation time.
+        self.data_adapter = data_adapter
         self.start_time = start_time
         self.state_memory = state_memory
         self.rabbitmq_client = rabbitmq_client
@@ -52,7 +53,7 @@ class SupervisoryModel:
         self.display = ConsoleDisplay()
 
     def _validate_model_names(self):
-        """Model names must be unique, because they are used as routing keys by RabbitMQ."""
+        """Model names must be unique, because RabbitMQ uses them as routing keys."""
         duplicate_names = sorted(
             {name for name in self.model_names if self.model_names.count(name) > 1}
         )
@@ -124,70 +125,49 @@ class SupervisoryModel:
         self.display.warning("Resetting state memory tables.")
         self.state_memory.reset_tables(drop_tables=drop_tables)
 
-    def _broadcast(self, send_fn, operation: str, dashboard: bool = False) -> dict:
-        """Send an RPC to every worker and wait for all responses."""
-        responses = {}
-        for name, routing_key in self.routing_keys.items():
-
-            def on_ack(response, n=name):
-                responses[n] = response
-
-            send_fn(routing_key, on_ack=on_ack)
-        expected = list(self.routing_keys)
-        if dashboard:
-            self._wait_for_all_with_dashboard(responses, expected, operation)
-        else:
-            self._wait_for_all(responses, expected, operation)
-        return responses
+    def _call_worker(self, name: str, operation: Operation, payload=None):
+        """Send one command to a model's worker and return its reply's payload."""
+        return self.rabbitmq_client.call(
+            self.routing_keys[name], operation, payload, timeout=self.response_timeout
+        )
 
     def initialize_components(self):
         """Initialize every model and store the outputs they return, e.g.
         their initialize_only entities, before stepping."""
-        responses = self._broadcast(
-            self.rabbitmq_client.initialize, "initialize_components", dashboard=True
-        )
-        for name, response in responses.items():
-            if response.payload:
-                self._store_records(self.output_types[name], response.payload)
+        with self.display.wait_list(
+            self.model_names, "Initialize Components"
+        ) as wait_list:
+            replies = self.rabbitmq_client.call_all(
+                self.routing_keys,
+                Operation.INITIALIZE,
+                timeout=self.response_timeout,
+                on_reply=wait_list.mark_done,
+            )
+        for name, record_dicts in replies.items():
+            if record_dicts:
+                self.state_memory.insert_records(
+                    self._unpack_records(self.output_types[name], record_dicts)
+                )
+
+    def load_data(self):
+        records = []
+        for adapter in self.data_adapter:
+            records += adapter.load_data()
+        self.state_memory.insert_records(records)
 
     def write_inputs(self, name: str):
         inputs = self.state_memory.load_inputs(
             self.input_types[name], self.scheduler.time_window(name)
         )
-        self._send_and_wait(
-            name,
-            "write_inputs",
-            lambda ack: self.rabbitmq_client.write_input(
-                self.routing_keys[name], inputs, on_ack=ack
-            ),
-        )
+        self._call_worker(name, Operation.WRITE_INPUTS, inputs)
 
     def advance(self, name: str):
-        response = self._send_and_wait(
-            name,
-            "advance",
-            lambda ack: self.rabbitmq_client.advance(
-                self.routing_keys[name], on_ack=ack
-            ),
-        )
-        self.scheduler.complete_step(name, response.payload)
+        self.scheduler.complete_step(name, self._call_worker(name, Operation.ADVANCE))
 
-    def read_outputs(self, name: str):
-        response = self._send_and_wait(
-            name,
-            "read_outputs",
-            lambda ack: self.rabbitmq_client.read_outputs(
-                self.routing_keys[name], on_ack=ack
-            ),
-        )
-        self._store_step_outputs(name, response.payload)
-
-    def _store_step_outputs(self, name: str, payload):
-        """Store the outputs of the step the model just took, once their
-        times are checked."""
-        records = self._deserialize(self.output_types[name], payload)
+    def read_outputs(self, name: str, record_dicts: list[dict]):
+        records = self._unpack_records(self.output_types[name], record_dicts)
         self._check_record_times(name, records)
-        self._insert_records(records)
+        self.state_memory.insert_records(records)
 
     def _check_record_times(self, name: str, records: list):
         """Check record times against the step the model just took."""
@@ -224,155 +204,37 @@ class SupervisoryModel:
                     f"took ({step_end} s)"
                 )
 
-    def _store_records(self, record_types, payload):
-        self._insert_records(self._deserialize(record_types, payload))
-
-    def _insert_records(self, records: list):
-        by_type = {}
-        for record in records:
-            by_type.setdefault(type(record), []).append(dataclasses.asdict(record))
-        for record_type in self._storage_order(list(by_type)):
-            self.state_memory.insert_outputs(record_type, by_type[record_type])
-
-    @staticmethod
-    def _storage_order(record_types: list[type]) -> list[type]:
-        """Each record after the entities it references, and observations
-        after all entities, so foreign keys and start or end observations
-        find their entity. Keeps the given order otherwise."""
-        ordered = []
-
-        def add(record_type, visiting):
-            if record_type in ordered or record_type in visiting:
-                return
-            for target in refs(record_type).values():
-                if target in record_types:
-                    add(target, visiting | {record_type})
-            ordered.append(record_type)
-
-        entities = [
-            record_type
-            for record_type in record_types
-            if not issubclass(record_type, Observation)
-        ]
-        for record_type in entities:
-            add(record_type, frozenset())
-        observations = [
-            record_type
-            for record_type in record_types
-            if issubclass(record_type, Observation)
-        ]
-        return ordered + observations
-
-    def _deserialize(self, output_cls, payload) -> list:
-        if isinstance(output_cls, list):
-            type_map = {record_cls.__name__: record_cls for record_cls in output_cls}
+    def _unpack_records(
+        self, record_types: type[Record] | list[type[Record]], record_dicts: list[dict]
+    ) -> list[Record]:
+        """Turn the dicts a worker sent through the broker back into records."""
+        if isinstance(record_types, list):
+            type_map = {
+                record_type.__name__: record_type for record_type in record_types
+            }
             return [
-                type_map[row["_type"]](
-                    **{key: val for key, val in row.items() if key != "_type"}
+                type_map[record_dict["_type"]](
+                    **{key: val for key, val in record_dict.items() if key != "_type"}
                 )
-                for row in payload
+                for record_dict in record_dicts
             ]
-        if isinstance(payload, list):
-            return [output_cls(**row) for row in payload]
-        return [output_cls.from_dict(payload)]
+        return [record_types(**record_dict) for record_dict in record_dicts]
 
     def terminate(self):
         try:
-            responses = self._broadcast(self.rabbitmq_client.terminate, "terminate")
+            replies = self.rabbitmq_client.call_all(
+                self.routing_keys, Operation.TERMINATE, timeout=self.response_timeout
+            )
             # Models may hand back final outputs; store them before the
             # connection closes.
-            for name, response in responses.items():
-                if response.payload:
-                    self._store_step_outputs(name, response.payload)
+            for name, record_dicts in replies.items():
+                if record_dicts:
+                    self.read_outputs(name, record_dicts)
         except BaseException:
             self._shut_down_after_error()
             raise
         self.state_memory.close_conn()
         self.display.end_run()
-
-    def _shut_down_after_error(self):
-        responses = {}
-        try:
-            for name, routing_key in self.routing_keys.items():
-
-                def on_ack(response, n=name):
-                    responses[n] = response
-
-                self.rabbitmq_client.terminate(routing_key, on_ack=on_ack)
-            deadline = time.time() + self.shutdown_timeout
-            while len(responses) < len(self.routing_keys) and time.time() < deadline:
-                self.rabbitmq_client.connection.process_data_events(time_limit=1)
-            missing = sorted(set(self.routing_keys) - set(responses))
-            if missing:
-                self.display.warning(f"Workers did not confirm termination: {missing}")
-        except Exception as error:
-            self.display.warning(f"Could not terminate workers: {error!r}")
-        try:
-            self.state_memory.close_conn()
-        except Exception as error:
-            self.display.warning(f"Could not close state memory cleanly: {error!r}")
-
-    def _send_and_wait(self, name: str, operation: str, send):
-        """Issue one RPC to a single worker and block until its response."""
-        responses: dict = {}
-
-        def on_ack(response):
-            responses[name] = response
-
-        send(on_ack)
-        self._wait_for_all(responses, [name], operation)
-        return responses[name]
-
-    def _wait_for_all(
-        self,
-        responses: dict[str, Response],
-        expected: list[str],
-        operation: str,
-        timeout: float | None = None,
-    ):
-        deadline = time.time() + (self.response_timeout if timeout is None else timeout)
-        while len(responses) < len(expected):
-            if time.time() > deadline:
-                missing = sorted(set(expected) - set(responses))
-                raise TimeoutError(
-                    f"{operation} timed out; no response from: {missing}"
-                )
-            self.rabbitmq_client.connection.process_data_events(time_limit=1)
-        self._check_responses(responses, expected, operation)
-
-    def _wait_for_all_with_dashboard(
-        self,
-        responses: dict[str, Response],
-        expected: list[str],
-        operation: str,
-    ):
-        """Like _wait_for_all, but shows a live spinner per model, updated in
-        place as each model's response comes in."""
-        title = operation.replace("_", " ").title()
-        deadline = time.time() + self.response_timeout
-        with self.display.wait_list(expected, title) as wait_list:
-            while len(responses) < len(expected):
-                if time.time() > deadline:
-                    missing = sorted(set(expected) - set(responses))
-                    raise TimeoutError(
-                        f"{operation} timed out; no response from: {missing}"
-                    )
-                self.rabbitmq_client.connection.process_data_events(time_limit=1)
-                for name in responses:
-                    wait_list.mark_done(name)
-        self._check_responses(responses, expected, operation)
-
-    def _check_responses(
-        self,
-        responses: dict[str, Response],
-        expected: list[str],
-        operation: str,
-    ):
-        for name in expected:
-            if not responses[name].success:
-                raise RuntimeError(
-                    f"{operation} failed for '{name}': {responses[name].error}"
-                )
 
     def run(self):
         self.display.start_run()
@@ -384,16 +246,31 @@ class SupervisoryModel:
             raise
         self.terminate()
 
+    def _shut_down_after_error(self):
+        try:
+            self.rabbitmq_client.call_all(
+                self.routing_keys, Operation.TERMINATE, timeout=self.shutdown_timeout
+            )
+        except TimeoutError as error:
+            self.display.warning(f"Workers did not confirm termination: {error}")
+        except Exception as error:
+            self.display.warning(f"Could not terminate workers: {error!r}")
+        try:
+            self.state_memory.close_conn()
+        except Exception as error:
+            self.display.warning(f"Could not close state memory cleanly: {error!r}")
+
     def _run_steps(self):
         self.display.print_dependencies(self.scheduler.dependencies)
         self.await_workers()
         self.setup_state_memory()
+        self.load_data()
         self.initialize_components()
         with self.display.run_dashboard(self.scheduler.duration) as dashboard:
             while (name := self.scheduler.select_next()) is not None:
                 self.write_inputs(name)
                 self.advance(name)
-                self.read_outputs(name)
+                self.read_outputs(name, self._call_worker(name, Operation.READ_OUTPUTS))
                 dashboard.update(
                     max(self.scheduler.model_times.values()), self.scheduler.model_times
                 )

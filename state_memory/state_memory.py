@@ -1,10 +1,11 @@
+import dataclasses
 import io
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Sequence
 import psycopg2.pool
-from base import Input, Observation, Record
+from base import Input, Observation, Record, refs
 from base.output.geometry import Geometry, SHAPE_TYPE
 from state_memory.validation import validate_run_id
 from supervisory.scheduling.time_window import TimeWindow
@@ -36,6 +37,35 @@ def _array_literal(values: list) -> str:
     return "{" + ",".join(items) + "}"
 
 
+def _storage_order(record_types: list[type]) -> list[type]:
+    """Each record after the entities it references, and observations
+    after all entities, so foreign keys and start or end observations
+    find their entity. Keeps the given order otherwise."""
+    ordered = []
+
+    def add(record_type, visiting):
+        if record_type in ordered or record_type in visiting:
+            return
+        for target in refs(record_type).values():
+            if target in record_types:
+                add(target, visiting | {record_type})
+        ordered.append(record_type)
+
+    entities = [
+        record_type
+        for record_type in record_types
+        if not issubclass(record_type, Observation)
+    ]
+    for record_type in entities:
+        add(record_type, frozenset())
+    observations = [
+        record_type
+        for record_type in record_types
+        if issubclass(record_type, Observation)
+    ]
+    return ordered + observations
+
+
 class StateMemory:
     def __init__(self, db_url: str, run_id: str = None):
         self.run_id = run_id or _generate_run_id()
@@ -61,10 +91,17 @@ class StateMemory:
     def setup(self, entity_classes: list[type[Record]]):
         self._schema.setup(entity_classes)
 
-    def insert_outputs(self, entity_cls: type[Record], rows: list[dict]):
+    def insert_records(self, records: list[Record]):
+        """Store records of any types, each type after the ones it needs in
+        the database."""
+        rows_by_type = {}
+        for record in records:
+            rows_by_type.setdefault(type(record), []).append(dataclasses.asdict(record))
+        for record_type in _storage_order(list(rows_by_type)):
+            self._insert_rows(record_type, rows_by_type[record_type])
+
+    def _insert_rows(self, entity_cls: type[Record], rows: list[dict]):
         self._raise_failed_background_writes()
-        if not rows:
-            return
         is_geometry = issubclass(entity_cls, Geometry)
         if is_geometry:
             rows = [with_location(row) for row in rows]

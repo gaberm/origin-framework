@@ -2,9 +2,9 @@ import pytest
 from datetime import datetime, timedelta
 from adapter.adapter import Adapter
 from dataclasses import dataclass
-from base import Entity, Observation, StartObservation, ModelSpec, ref
+from base import Entity, StartObservation, ModelSpec
 from supervisory.supervisory_model import SupervisoryModel
-from supervisory.comm.messages import Registration
+from supervisory.comm.messages import Operation, Registration
 from _records import Vehicle, Battery
 from unittest.mock import MagicMock
 from supervisory.comm.messages import Response
@@ -16,27 +16,27 @@ model = SupervisoryModel(
     duration=timedelta(seconds=1),
 )
 
-vehicle_payload_1 = {"veh_id": "veh_1", "time_s": 1.0, "soc": 0.5}
-vehicle_payload_2 = {"veh_id": "veh_2", "time_s": 2.0, "soc": 0.7}
-battery_payload = {"veh_id": "veh_1", "capacity": 100}
+vehicle_dict_1 = {"veh_id": "veh_1", "time_s": 1.0, "soc": 0.5}
+vehicle_dict_2 = {"veh_id": "veh_2", "time_s": 2.0, "soc": 0.7}
+battery_dict = {"veh_id": "veh_1", "capacity": 100}
 
 
 class TestDeserialize:
     def test_single_record(self):
-        outputs = model._deserialize(Vehicle, [vehicle_payload_1])
+        outputs = model._unpack_records(Vehicle, [vehicle_dict_1])
         assert outputs[0] == Vehicle(veh_id="veh_1", soc=0.5, time_s=1.0)
 
-    def test_multiple_payloads(self):
-        outputs = model._deserialize(Vehicle, [vehicle_payload_1, vehicle_payload_2])
+    def test_multiple_records(self):
+        outputs = model._unpack_records(Vehicle, [vehicle_dict_1, vehicle_dict_2])
         assert outputs == [
             Vehicle(veh_id="veh_1", soc=0.5, time_s=1.0),
             Vehicle(veh_id="veh_2", soc=0.7, time_s=2.0),
         ]
 
     def test_multiple_record_types(self):
-        tagged_vehicle = {"_type": "Vehicle", **vehicle_payload_1}
-        tagged_battery = {"_type": "Battery", **battery_payload}
-        outputs = model._deserialize(
+        tagged_vehicle = {"_type": "Vehicle", **vehicle_dict_1}
+        tagged_battery = {"_type": "Battery", **battery_dict}
+        outputs = model._unpack_records(
             [Vehicle, Battery], [tagged_vehicle, tagged_battery]
         )
         assert outputs == [
@@ -66,7 +66,6 @@ def test_record_types_flattens_lists():
         model.output_types = original_output_types
 
 
-
 def test_record_types_add_start_observations():
     class Departure(StartObservation):
         charge_wh: float
@@ -84,6 +83,7 @@ def test_record_types_add_start_observations():
         assert model._record_types() == [Trip, Departure, Vehicle]
     finally:
         model.output_types = original_output_types
+
 
 class TestValidateRegistration:
     timing = {"timestep_length": 1.0, "active_from": 0.0, "active_until": None}
@@ -113,7 +113,9 @@ class TestValidateRegistration:
     def test_rejects_timing_mismatch(self, changed_timing):
         accepted, error = model._validate_registration(
             Registration(
-                name="model_a", routing_key="rk", metadata={**self.timing, **changed_timing}
+                name="model_a",
+                routing_key="rk",
+                metadata={**self.timing, **changed_timing},
             )
         )
         assert accepted is False
@@ -153,26 +155,11 @@ class TestStartTime:
             )
 
 
-def test_wait_for_all_raises_on_error():
-    failed_response = Response(success=False, error="error")
-    with pytest.raises(RuntimeError, match=f"failed for"):
-        model._wait_for_all(
-            {"model_a": failed_response}, ["model_a"], "advance", timeout=0.0
-        )
-
-
-def test_wait_for_all_succesful_response():
-    successful_response = Response(success=True)
-    model._wait_for_all(
-        {"model_a": successful_response}, ["model_a"], "advance", timeout=0.0
-    )
-
-
 def test_terminate_stores_final_outputs_before_closing():
     calls = []
     state_memory = MagicMock()
-    state_memory.insert_outputs.side_effect = lambda cls, rows: calls.append(
-        ("insert", cls, rows)
+    state_memory.insert_records.side_effect = lambda records: calls.append(
+        ("insert", records)
     )
     state_memory.close_conn.side_effect = lambda: calls.append(("close",))
     supervisor = SupervisoryModel(
@@ -185,16 +172,14 @@ def test_terminate_stores_final_outputs_before_closing():
     supervisor.output_types = {"model_a": Vehicle, "model_b": Vehicle}
     supervisor.scheduler.model_times = {"model_a": 1.0, "model_b": 1.0}
     supervisor.scheduler.timestep_lengths = {"model_a": 1.0, "model_b": 1.0}
-    supervisor._broadcast = MagicMock(
-        return_value={
-            "model_a": Response(success=True, payload=[vehicle_payload_1]),
-            "model_b": Response(success=True),
-        }
-    )
+    supervisor.rabbitmq_client.call_all.return_value = {
+        "model_a": [vehicle_dict_1],
+        "model_b": None,
+    }
 
     supervisor.terminate()
 
-    assert calls == [("insert", Vehicle, [vehicle_payload_1]), ("close",)]
+    assert calls == [("insert", [Vehicle(**vehicle_dict_1)]), ("close",)]
 
 
 class TestRecordTimes:
@@ -222,99 +207,39 @@ class TestRecordTimes:
     )
     def test_stores_records_from_step_on(self, time_s):
         supervisor = self._supervisor()
-        supervisor._store_step_outputs(
-            "model_a", [{"_type": "Vehicle", **vehicle_payload_1, "time_s": time_s}]
+        supervisor.read_outputs(
+            "model_a", [{"_type": "Vehicle", **vehicle_dict_1, "time_s": time_s}]
         )
-        supervisor.state_memory.insert_outputs.assert_called_once()
+        supervisor.state_memory.insert_records.assert_called_once()
 
     def test_rejects_timestamp_before_step(self):
         supervisor = self._supervisor()
-        with pytest.raises(RuntimeError, match=r"time_s=5.0 s, before the step it just took \[10.0, 20.0\] s"):
-            supervisor._store_step_outputs(
-                "model_a", [{"_type": "Vehicle", **vehicle_payload_1, "time_s": 5.0}]
+        with pytest.raises(
+            RuntimeError,
+            match=r"time_s=5.0 s, before the step it just took \[10.0, 20.0\] s",
+        ):
+            supervisor.read_outputs(
+                "model_a", [{"_type": "Vehicle", **vehicle_dict_1, "time_s": 5.0}]
             )
-        supervisor.state_memory.insert_outputs.assert_not_called()
+        supervisor.state_memory.insert_records.assert_not_called()
 
     def test_stores_entity_that_started_before_step(self):
         supervisor = self._supervisor()
-        supervisor._store_step_outputs(
-            "model_a", [{"_type": "Car", "veh_id": "veh_1", "start_s": 0.0, "end_s": 20.0}]
+        supervisor.read_outputs(
+            "model_a",
+            [{"_type": "Car", "veh_id": "veh_1", "start_s": 0.0, "end_s": 20.0}],
         )
-        supervisor.state_memory.insert_outputs.assert_called_once()
+        supervisor.state_memory.insert_records.assert_called_once()
 
     @pytest.mark.parametrize("time_field", ["start_s", "end_s"])
     def test_rejects_entity_time_after_step(self, time_field):
         supervisor = self._supervisor()
         car = {"_type": "Car", "veh_id": "veh_1", "start_s": 0.0, "end_s": None}
         car[time_field] = 25.0
-        with pytest.raises(RuntimeError, match=f"{time_field}=25.0 s, after the end of the step"):
-            supervisor._store_step_outputs("model_a", [car])
-
-
-def test_store_records_writes_entities_before_observations():
-    @dataclass(kw_only=True)
-    class Trip(Entity):
-        id_field = "veh_id"
-        veh_id: str
-
-    @dataclass(kw_only=True)
-    class TripEnd(Observation):
-        id_field = "veh_id"
-        observation_type = "end"
-        entity = Trip
-        veh_id: str
-
-    state_memory = MagicMock()
-    supervisor = SupervisoryModel(
-        model_specs=[],
-        state_memory=state_memory,
-        rabbitmq_client=MagicMock(),
-        duration=timedelta(seconds=1),
-    )
-    trip_end = {"_type": "TripEnd", "veh_id": "veh_1", "time_s": 5.0}
-    trip = {"_type": "Trip", "veh_id": "veh_1", "start_s": 0.0, "end_s": None}
-
-    supervisor._store_records([TripEnd, Trip], [trip_end, trip])
-
-    stored = [call.args[0] for call in state_memory.insert_outputs.call_args_list]
-    assert stored == [Trip, TripEnd]
-
-
-def test_store_records_writes_referenced_entities_first():
-    @dataclass(kw_only=True)
-    class Station(Entity):
-        id_field = "station_id"
-        station_id: str
-
-    @dataclass(kw_only=True)
-    class Port(Entity):
-        id_field = "port_id"
-        port_id: str
-        station_id: str = ref(Station)
-
-    @dataclass(kw_only=True)
-    class Load(Observation):
-        id_field = "port_id"
-        entity = Port
-        port_id: str
-
-    state_memory = MagicMock()
-    supervisor = SupervisoryModel(
-        model_specs=[],
-        state_memory=state_memory,
-        rabbitmq_client=MagicMock(),
-        duration=timedelta(seconds=1),
-    )
-    payload = [
-        {"_type": "Load", "port_id": "p1", "time_s": 5.0},
-        {"_type": "Port", "port_id": "p1", "station_id": "s1", "start_s": None},
-        {"_type": "Station", "station_id": "s1", "start_s": None},
-    ]
-
-    supervisor._store_records([Load, Port, Station], payload)
-
-    stored = [call.args[0] for call in state_memory.insert_outputs.call_args_list]
-    assert stored == [Station, Port, Load]
+        with pytest.raises(
+            RuntimeError, match=f"{time_field}=25.0 s, after the end of the step"
+        ):
+            supervisor.read_outputs("model_a", [car])
 
 
 def test_initialize_components_stores_returned_outputs():
@@ -330,25 +255,11 @@ def test_initialize_components_stores_returned_outputs():
     supervisor.model_names = ["charging", "sumo"]
     supervisor.routing_keys = {"charging": "charging", "sumo": "sumo"}
     supervisor.output_types = {"charging": Battery, "sumo": Vehicle}
-    replies = {
-        "charging": Response(success=True, payload=[battery_payload]),
-        "sumo": Response(success=True),
-    }
-    client.initialize.side_effect = lambda key, on_ack: on_ack(replies[key])
+    client.call_all.return_value = {"charging": [battery_dict], "sumo": None}
 
     supervisor.initialize_components()
 
-    state_memory.insert_outputs.assert_called_once_with(Battery, [battery_payload])
-
-
-def test_wait_for_all_raises_on_timeout():
-    mock_client = MagicMock()
-    model.rabbitmq_client = mock_client
-    try:
-        with pytest.raises(TimeoutError, match="model_a"):
-            model._wait_for_all({}, ["model_a"], "advance", timeout=0.0)
-    finally:
-        model.rabbitmq_client = None
+    state_memory.insert_records.assert_called_once_with([Battery(**battery_dict)])
 
 
 def test_advance_checks_reported_time():
@@ -365,13 +276,17 @@ def test_advance_checks_reported_time():
 
     supervisor = SupervisoryModel(
         model_specs=[
-            ModelSpec(name="model_a", adapter=StepAdapter, timestep_length=timedelta(seconds=10))
+            ModelSpec(
+                name="model_a",
+                adapter=StepAdapter,
+                timestep_length=timedelta(seconds=10),
+            )
         ],
         state_memory=None,
         rabbitmq_client=MagicMock(),
         duration=timedelta(minutes=1),
     )
-    supervisor._send_and_wait = MagicMock(return_value=Response(success=True, payload=10.0))
+    supervisor.rabbitmq_client.call.return_value = 10.0
     supervisor.advance("model_a")
     assert supervisor.scheduler.model_times["model_a"] == 10.0
 
@@ -393,9 +308,7 @@ class TestShutdownAfterError:
         supervisor.display = MagicMock()
         supervisor.routing_keys = {"model_a": "model_a", "model_b": "model_b"}
         # Workers confirm termination right away.
-        client.terminate.side_effect = lambda key, on_ack: on_ack(
-            Response(success=True)
-        )
+        client.call_all.return_value = {"model_a": None, "model_b": None}
         return supervisor
 
     def test_failed_run_stops_workers_and_closes(self):
@@ -406,8 +319,11 @@ class TestShutdownAfterError:
         with pytest.raises(TimeoutError, match="advance timed out"):
             supervisor.run()
 
-        terminated = [c.args[0] for c in supervisor.rabbitmq_client.terminate.call_args_list]
-        assert terminated == ["model_a", "model_b"]
+        supervisor.rabbitmq_client.call_all.assert_called_once_with(
+            {"model_a": "model_a", "model_b": "model_b"},
+            Operation.TERMINATE,
+            timeout=0.0,
+        )
         supervisor.state_memory.close_conn.assert_called_once()
         supervisor.terminate.assert_not_called()
 
@@ -416,14 +332,14 @@ class TestShutdownAfterError:
         supervisor._run_steps = MagicMock(side_effect=KeyboardInterrupt)
         with pytest.raises(KeyboardInterrupt):
             supervisor.run()
-        assert supervisor.rabbitmq_client.terminate.call_count == 2
+        supervisor.rabbitmq_client.call_all.assert_called_once()
         supervisor.state_memory.close_conn.assert_called_once()
 
     def test_cleanup_problems_do_not_hide_original_error(self):
         state_memory = MagicMock()
         state_memory.close_conn.side_effect = RuntimeError("pool broken")
         supervisor = self._supervisor(state_memory)
-        supervisor.rabbitmq_client.terminate.side_effect = ConnectionError("broker gone")
+        supervisor.rabbitmq_client.call_all.side_effect = ConnectionError("broker gone")
         supervisor._run_steps = MagicMock(side_effect=ValueError("bad input"))
 
         with pytest.raises(ValueError, match="bad input"):
@@ -434,7 +350,9 @@ class TestShutdownAfterError:
 
     def test_unconfirmed_termination_is_reported(self):
         supervisor = self._supervisor()
-        supervisor.rabbitmq_client.terminate.side_effect = None  # never confirms
+        supervisor.rabbitmq_client.call_all.side_effect = TimeoutError(
+            "terminate timed out; no response from: ['model_a', 'model_b']"
+        )
         supervisor._run_steps = MagicMock(side_effect=ValueError("bad input"))
         with pytest.raises(ValueError):
             supervisor.run()
@@ -443,7 +361,9 @@ class TestShutdownAfterError:
 
     def test_failed_terminate_still_closes(self):
         supervisor = self._supervisor()
-        supervisor._broadcast = MagicMock(side_effect=RuntimeError("terminate failed"))
+        supervisor.rabbitmq_client.call_all.side_effect = RuntimeError(
+            "terminate failed"
+        )
         with pytest.raises(RuntimeError, match="terminate failed"):
             supervisor.terminate()
         supervisor.state_memory.close_conn.assert_called_once()

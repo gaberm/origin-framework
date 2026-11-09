@@ -164,7 +164,7 @@ class AdapterWorker:
         self._require_initialize_only(outputs)
         return Response(
             success=True,
-            payload=self._serialize(outputs, self.adapter.output_types),
+            payload=self._pack_records(outputs, self.adapter.output_types),
         )
 
     def write_inputs(self, payload) -> Response:
@@ -175,7 +175,7 @@ class AdapterWorker:
         outputs = self.adapter.read_outputs()
         return Response(
             success=True,
-            payload=self._serialize(outputs, self.adapter.output_types),
+            payload=self._pack_records(outputs, self.adapter.output_types),
         )
 
     def _require_at_active_from(self):
@@ -219,11 +219,9 @@ class AdapterWorker:
             )
 
     @staticmethod
-    def _serialize(records, record_types):
+    def _pack_records(records, record_types) -> list[dict]:
         """Records as dicts, tagged with their `_type` when the adapter
         declares several record types, so the supervisor can tell them apart."""
-        if not isinstance(records, list):
-            return records.to_dict()
         is_multi_type = isinstance(record_types, list)
         return [
             (
@@ -248,7 +246,7 @@ class AdapterWorker:
             return Response(success=True)
         return Response(
             success=True,
-            payload=self._serialize(outputs, self.adapter.output_types),
+            payload=self._pack_records(outputs, self.adapter.output_types),
         )
 
     def run(self):

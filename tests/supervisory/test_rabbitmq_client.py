@@ -72,6 +72,93 @@ class TestSendReplyRoundTrip:
         assert len(client.pending) == 1
 
 
+class TestCall:
+    """Workers reply while the client waits, i.e. on process_data_events."""
+
+    def _reply_while_waiting(self, client, responses_by_worker):
+        def deliver_replies(time_limit):
+            for call in client.channel.basic_publish.call_args_list:
+                worker = call.kwargs["routing_key"]
+                correlation_id = call.kwargs["properties"].correlation_id
+                if worker in responses_by_worker and correlation_id in client.pending:
+                    client._on_reply(
+                        None,
+                        None,
+                        MagicMock(correlation_id=correlation_id),
+                        json.dumps(responses_by_worker[worker].to_dict()),
+                    )
+
+        client.connection.process_data_events.side_effect = deliver_replies
+
+    def test_call_returns_reply_payload(self, client):
+        self._reply_while_waiting(client, {"sumo": Response(success=True, payload=10.0)})
+
+        assert client.call("sumo", Operation.ADVANCE, timeout=1.0) == 10.0
+        message = json.loads(client.channel.basic_publish.call_args.kwargs["body"])
+        assert message == {"command": "advance", "payload": None}
+
+    def test_call_all_sends_to_every_worker_before_waiting(self, client):
+        self._reply_while_waiting(
+            client, {"sumo": Response(success=True), "charging": Response(success=True)}
+        )
+        deliver_replies = client.connection.process_data_events.side_effect
+        sent_before_waiting = []
+
+        def count_sent_then_reply(time_limit):
+            sent_before_waiting.append(client.channel.basic_publish.call_count)
+            deliver_replies(time_limit)
+
+        client.connection.process_data_events.side_effect = count_sent_then_reply
+
+        client.call_all(
+            {"sumo": "sumo", "charging": "charging"}, Operation.INITIALIZE, timeout=1.0
+        )
+
+        assert sent_before_waiting[0] == 2
+
+    def test_call_all_returns_payloads_by_worker_name(self, client):
+        self._reply_while_waiting(
+            client,
+            {
+                "sumo_key": Response(success=True, payload=[{"id": 1}]),
+                "charging_key": Response(success=True),
+            },
+        )
+        replied = []
+
+        payloads = client.call_all(
+            {"sumo": "sumo_key", "charging": "charging_key"},
+            Operation.INITIALIZE,
+            timeout=1.0,
+            on_reply=replied.append,
+        )
+
+        assert payloads == {"sumo": [{"id": 1}], "charging": None}
+        assert sorted(replied) == ["charging", "sumo"]
+
+    def test_failed_reply_raises(self, client):
+        self._reply_while_waiting(
+            client, {"sumo": Response(success=False, error="ValueError: bad input")}
+        )
+
+        with pytest.raises(
+            RuntimeError, match="advance failed for 'sumo': ValueError: bad input"
+        ):
+            client.call("sumo", Operation.ADVANCE, timeout=1.0)
+
+    def test_missing_reply_times_out_naming_worker(self, client):
+        self._reply_while_waiting(client, {"sumo": Response(success=True)})
+
+        with pytest.raises(
+            TimeoutError, match=r"terminate timed out; no response from: \['charging'\]"
+        ):
+            client.call_all(
+                {"sumo": "sumo", "charging": "charging"},
+                Operation.TERMINATE,
+                timeout=0.05,
+            )
+
+
 class TestCollectRegistrations:
     def _make_handler_invoker(self, registrations, channel=None):
         """Returns a basic_consume side_effect that immediately delivers canned messages."""

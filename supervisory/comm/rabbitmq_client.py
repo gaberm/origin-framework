@@ -97,20 +97,63 @@ class RabbitMQClient:
             self.channel.basic_cancel(tag)
         return registered
 
-    def initialize(self, worker: str, on_ack):
-        self._send(worker, Message(Operation.INITIALIZE), on_ack)
+    def call(
+        self, routing_key: str, operation: Operation, payload: Any = None, *, timeout: float
+    ) -> Any:
+        """Send one command to a worker, wait for its reply and return the
+        reply's payload. Raises like call_all."""
+        return self.call_all(
+            {routing_key: routing_key}, operation, payload, timeout=timeout
+        )[routing_key]
 
-    def write_input(self, worker: str, input_data: Any, on_ack):
-        self._send(worker, Message(Operation.WRITE_INPUTS, payload=input_data), on_ack)
+    def call_all(
+        self,
+        routing_keys: dict[str, str],
+        operation: Operation,
+        payload: Any = None,
+        *,
+        timeout: float,
+        on_reply=None,
+    ) -> dict[str, Any]:
+        """Send one command to several workers at once, wait for all replies
+        and return each reply's payload by worker name.
+        routing_keys maps each worker's name to its routing key.
+        on_reply(name), if given, is called as each reply comes in, so
+        callers can show live per-worker progress.
+        Raises TimeoutError naming the workers that didn't reply in time, and
+        RuntimeError if a worker replied that the command failed."""
+        responses: dict[str, Response] = {}
+        for name, routing_key in routing_keys.items():
 
-    def read_outputs(self, worker: str, on_ack):
-        self._send(worker, Message(Operation.READ_OUTPUTS), on_ack)
+            def on_ack(response, name=name):
+                responses[name] = response
+                if on_reply is not None:
+                    on_reply(name)
 
-    def advance(self, worker: str, on_ack):
-        self._send(worker, Message(Operation.ADVANCE), on_ack)
+            self._send(routing_key, Message(operation, payload=payload), on_ack)
+        self._wait_for_replies(responses, list(routing_keys), operation, timeout)
+        return {name: response.payload for name, response in responses.items()}
 
-    def terminate(self, worker: str, on_ack):
-        self._send(worker, Message(Operation.TERMINATE), on_ack)
+    def _wait_for_replies(
+        self,
+        responses: dict[str, Response],
+        names: list[str],
+        operation: Operation,
+        timeout: float,
+    ):
+        deadline = time.time() + timeout
+        while len(responses) < len(names):
+            if time.time() > deadline:
+                missing = sorted(set(names) - set(responses))
+                raise TimeoutError(
+                    f"{operation.value} timed out; no response from: {missing}"
+                )
+            self.connection.process_data_events(time_limit=1)
+        for name in names:
+            if not responses[name].success:
+                raise RuntimeError(
+                    f"{operation.value} failed for '{name}': {responses[name].error}"
+                )
 
     def _send(self, worker: str, message: Message, on_ack):
         correlation_id = str(uuid.uuid4())

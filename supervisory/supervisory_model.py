@@ -1,12 +1,11 @@
 from __future__ import annotations
 from datetime import timedelta, datetime
 from typing import TYPE_CHECKING
-from adapter import DataAdapter
-from base import Entity, Record, ModelSpec, Timestamp, as_list
-from supervisory.comm.rabbitmq_client import RabbitMQClient
-from supervisory.comm.messages import Operation, Registration
+from adapter import DataAdapter, ModelSpec
+from base import TIME_TOLERANCE, Entity, Timestamp, as_list
+from comm import Operation, RabbitMQClient, Registration, payloads_to_records
 from supervisory.console_display import ConsoleDisplay
-from supervisory.scheduling.scheduler import TIME_TOLERANCE, Scheduler
+from supervisory.scheduling.scheduler import Scheduler
 
 # Use TYPE_CHECKING to avoid circular imports during runtime
 if TYPE_CHECKING:
@@ -25,32 +24,28 @@ class SupervisoryModel:
         registration_timeout: float | int = 120.0,
         response_timeout: float | int = 60.0,
         shutdown_timeout: float | int = 10.0,
-        workers_started=None,
     ):
         self.model_names = [spec.name for spec in model_specs]
-        self._validate_model_names()
         self.routing_keys = {spec.name: spec.routing_key for spec in model_specs}
         self.output_types = {
             spec.name: spec.adapter.output_types for spec in model_specs
         }
         self.input_types = {spec.name: spec.adapter.input_types for spec in model_specs}
         self.timings = {spec.name: spec.timing for spec in model_specs}
+
         self.scheduler = Scheduler(model_specs, duration)
-        self._validate_start_time(start_time)
-        # The physical time of the run's start, if the run has one. Workers
-        # get it when they register, so adapters can convert dates to simulation time.
-        self.data_adapter = data_adapter
-        self.start_time = start_time
         self.state_memory = state_memory
         self.rabbitmq_client = rabbitmq_client
+
+        self.data_adapter = data_adapter
+        self.start_time = start_time
         self.registration_timeout = registration_timeout
         self.response_timeout = response_timeout
-        # How long a failed run waits for workers to confirm termination.
         self.shutdown_timeout = shutdown_timeout
-        # Optional check that the workers' processes are running; the
-        # registration timeout only starts then (see collect_registrations).
-        self.workers_started = workers_started
         self.display = ConsoleDisplay()
+
+        self._validate_model_names()
+        self._validate_start_time()
 
     def _validate_model_names(self):
         """Model names must be unique, because RabbitMQ uses them as routing keys."""
@@ -62,12 +57,11 @@ class SupervisoryModel:
                 f"Model names must be unique; duplicated names: {duplicate_names}"
             )
 
-    @staticmethod
-    def _validate_start_time(start_time: datetime | None):
-        if start_time is not None and not isinstance(start_time, datetime):
+    def _validate_start_time(self):
+        if self.start_time is not None and not isinstance(self.start_time, datetime):
             raise TypeError(
                 f"start_time must be a datetime.datetime, e.g. "
-                f"datetime(1794, 9, 10); got {type(start_time).__name__!r}"
+                f"datetime(1794, 9, 10); got {type(self.start_time).__name__!r}"
             )
 
     def await_workers(self):
@@ -82,7 +76,6 @@ class SupervisoryModel:
                     len(self.model_names),
                     self.registration_timeout,
                     on_registered=on_registered,
-                    workers_started=self.workers_started,
                     accepted_payload={
                         "start_time": (
                             None
@@ -143,15 +136,57 @@ class SupervisoryModel:
                 timeout=self.response_timeout,
                 on_reply=wait_list.mark_done,
             )
-        for name, record_dicts in replies.items():
-            if record_dicts:
-                self.state_memory.insert_records(
-                    self._unpack_records(self.output_types[name], record_dicts)
-                )
+        for name, reply in replies.items():
+            self._check_at_active_from(name, reply["current_time"])
+            records = payloads_to_records(reply["records"], self.output_types[name])
+            self._check_initialize_only(name, records)
+            if records:
+                self.state_memory.insert_records(records)
+
+    def _check_at_active_from(self, name: str, current_time: float):
+        """After initialize() the model must be where its first step starts,
+        or every step after it would be off, e.g. when its data starts at a
+        different date than the run."""
+        active_from = self.scheduler.active_from[name]
+        if abs(current_time - active_from) <= TIME_TOLERANCE:
+            return
+
+        current_time = timedelta(seconds=current_time)
+        active_from = timedelta(seconds=active_from)
+        if self.start_time:
+            current_time = self.start_time + current_time
+            active_from = self.start_time + active_from
+        raise RuntimeError(
+            f"'{name}' is at {current_time} after initialize(), but its first "
+            f"step starts at {active_from} (ModelSpec.active_from)"
+        )
+
+    @staticmethod
+    def _check_initialize_only(name: str, records: list):
+        """Records from initialize must be flagged initialize_only, so the
+        scheduler doesn't make the models that read them wait. A missing
+        flag fails here, before the first step."""
+        unflagged_record_types = sorted(
+            {
+                type(record).__name__
+                for record in records
+                if not getattr(record, "initialize_only", False)
+            }
+        )
+        if unflagged_record_types:
+            raise RuntimeError(
+                f"'{name}' returned {unflagged_record_types} from initialize(), "
+                f"which aren't initialize_only entities; set initialize_only = "
+                f"True on them"
+            )
 
     def load_data(self):
         records = []
         for adapter in self.data_adapter:
+            # As workers get it when they register (see
+            # AdapterWorker.register_with_supervisor), so the adapter can
+            # convert its data's times to simulation time.
+            adapter.start_time = self.start_time
             records += adapter.load_data()
         self.state_memory.insert_records(records)
 
@@ -165,7 +200,7 @@ class SupervisoryModel:
         self.scheduler.complete_step(name, self._call_worker(name, Operation.ADVANCE))
 
     def read_outputs(self, name: str, record_dicts: list[dict]):
-        records = self._unpack_records(self.output_types[name], record_dicts)
+        records = payloads_to_records(record_dicts, self.output_types[name])
         self._check_record_times(name, records)
         self.state_memory.insert_records(records)
 
@@ -203,22 +238,6 @@ class SupervisoryModel:
                     f"{time_field}={time} s, after the end of the step it just "
                     f"took ({step_end} s)"
                 )
-
-    def _unpack_records(
-        self, record_types: type[Record] | list[type[Record]], record_dicts: list[dict]
-    ) -> list[Record]:
-        """Turn the dicts a worker sent through the broker back into records."""
-        if isinstance(record_types, list):
-            type_map = {
-                record_type.__name__: record_type for record_type in record_types
-            }
-            return [
-                type_map[record_dict["_type"]](
-                    **{key: val for key, val in record_dict.items() if key != "_type"}
-                )
-                for record_dict in record_dicts
-            ]
-        return [record_types(**record_dict) for record_dict in record_dicts]
 
     def terminate(self):
         try:

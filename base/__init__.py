@@ -20,11 +20,12 @@ from .output.identifier import Identifier
 from .output.observation import StartObservation, Observation
 from .output.record import Record
 from .output.timestamp import Timestamp
-from .spec.model_spec import ModelSpec
-from .utils import as_list
+from .time_window import TIME_TOLERANCE, TimeWindow
+from .utils import as_list, validate_run_id
 
 __all__ = [
     "SHAPE_TYPE",
+    "TIME_TOLERANCE",
     "Cell",
     "CellObservation",
     "Condition",
@@ -43,12 +44,12 @@ __all__ = [
     "Latest",
     "Less",
     "LessEqual",
-    "ModelSpec",
     "NotEqual",
     "NotIn",
     "Observation",
     "Record",
     "SpatialJoin",
+    "TimeWindow",
     "Timestamp",
     "Window",
     "as_list",
@@ -56,4 +57,5 @@ __all__ = [
     "grid_observations",
     "ref",
     "refs",
+    "validate_run_id",
 ]

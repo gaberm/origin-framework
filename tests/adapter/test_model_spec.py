@@ -1,7 +1,7 @@
 import pytest
 from datetime import timedelta
 from adapter.adapter import Adapter
-from base import ModelSpec
+from adapter import ModelSpec
 
 
 class MinimalAdapter(Adapter):
@@ -73,7 +73,6 @@ def test_valid_model_spec():
     spec = ModelSpec(name="model", adapter=MinimalAdapter, timestep_length=timedelta(seconds=1))
     assert spec.name == "model"
     assert spec.routing_key == "model"
-    assert spec.queue_name == "model_queue"
     assert spec.dependencies is None
 
 

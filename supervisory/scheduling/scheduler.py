@@ -1,13 +1,11 @@
 import math
 from datetime import timedelta
 from numbers import Real
-from base import Latest, ModelSpec
+from adapter import ModelSpec
+from base import TIME_TOLERANCE, Latest, TimeWindow
 from base.utils import as_list
-from supervisory.scheduling.time_window import TimeWindow
 
 _EPS = 1e-9
-# Seconds a reported model time may differ from the expected window end.
-TIME_TOLERANCE = 1e-6
 
 
 class Scheduler:

@@ -1,8 +1,7 @@
 from contextlib import contextmanager
 from typing import Sequence
-from base import Entity, Input, KeyJoin, Latest, SpatialJoin
+from base import Entity, Input, KeyJoin, Latest, SpatialJoin, TimeWindow
 from base.utils import as_list
-from supervisory.scheduling.time_window import TimeWindow
 
 _SQL_JOIN_KEYWORDS = {
     "inner": "JOIN",

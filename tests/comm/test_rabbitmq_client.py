@@ -1,13 +1,13 @@
 import json
 import pytest
 from unittest.mock import MagicMock, patch
-from supervisory.comm.rabbitmq_client import RabbitMQClient
-from supervisory.comm.messages import Message, Response, Registration, Operation
+from comm.rabbitmq_client import RabbitMQClient
+from comm.messages import Message, Response, Registration, Operation
 
 
 @pytest.fixture
 def client():
-    with patch("supervisory.comm.rabbitmq_client.pika.BlockingConnection"):
+    with patch("comm.rabbitmq_client.pika.BlockingConnection"):
         return RabbitMQClient(run_id="run_test")
 
 
@@ -223,39 +223,12 @@ class TestCollectRegistrations:
 
 
 def test_heartbeat_is_set_explicitly():
-    from supervisory.comm.messages import DEFAULT_HEARTBEAT_SECONDS
+    from comm.connection import DEFAULT_HEARTBEAT_SECONDS
 
-    with patch("supervisory.comm.rabbitmq_client.pika.BlockingConnection"), patch(
-        "supervisory.comm.rabbitmq_client.pika.ConnectionParameters"
+    with patch("comm.rabbitmq_client.pika.BlockingConnection"), patch(
+        "comm.rabbitmq_client.pika.ConnectionParameters"
     ) as parameters:
         RabbitMQClient(run_id="run_test")
         RabbitMQClient(run_id="run_test", heartbeat=30)
     heartbeats = [call.kwargs["heartbeat"] for call in parameters.call_args_list]
     assert heartbeats == [DEFAULT_HEARTBEAT_SECONDS, 30]
-
-
-class TestRegistrationTimeoutStartsWithWorkers:
-    def test_timeout_not_counted_before_workers_start(self, client):
-        client.channel.basic_consume.return_value = "tag"
-        started = iter([False, False, False, True])
-        with pytest.raises(TimeoutError):
-            client.collect_registrations(
-                lambda r: (True, None),
-                expected=1,
-                timeout=0.0,
-                workers_started=lambda: next(started),
-            )
-        # Waited (processing events) through every round before the start.
-        assert client.connection.process_data_events.call_count >= 3
-
-    def test_check_can_abort(self, client):
-        client.channel.basic_consume.return_value = "tag"
-
-        def job_failed():
-            raise RuntimeError("worker job ended")
-
-        with pytest.raises(RuntimeError, match="worker job ended"):
-            client.collect_registrations(
-                lambda r: (True, None), expected=1, workers_started=job_failed
-            )
-        client.channel.basic_cancel.assert_called_once_with("tag")

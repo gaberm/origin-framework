@@ -1,10 +1,11 @@
 import pytest
 from datetime import timedelta
 from dataclasses import dataclass
-from base import Entity, Record, Input, Fields, ModelSpec, KeyJoin, Latest
+from adapter import ModelSpec
+from base import Entity, Record, Input, Fields, KeyJoin, Latest
 from adapter.adapter import Adapter
 from supervisory.scheduling.scheduler import Scheduler
-from supervisory.scheduling.time_window import TimeWindow
+from base import TimeWindow
 
 
 @dataclass(kw_only=True)

@@ -1,8 +1,6 @@
-from .comm.messages import Operation, Message, Response, Registration
-from .comm.rabbitmq_client import RabbitMQClient
+from comm import Operation, Message, RabbitMQClient, Response, Registration
 from .console_display import ConsoleDisplay
 from .scheduling.scheduler import Scheduler
-from .scheduling.time_window import TimeWindow
 from .supervisory_model import SupervisoryModel
 
 __all__ = [
@@ -13,6 +11,5 @@ __all__ = [
     "RabbitMQClient",
     "ConsoleDisplay",
     "Scheduler",
-    "TimeWindow",
     "SupervisoryModel",
 ]

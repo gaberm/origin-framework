@@ -3,12 +3,12 @@ import pika
 import pytest
 from unittest.mock import patch
 from pika.adapters.utils.connection_workflow import AMQPConnectorSocketConnectError
-from supervisory.comm.connection import BrokerConnectionError, connect
+from comm.connection import BrokerConnectionError, connect
 
 
 def _connect_failing_with(error):
     with patch(
-        "supervisory.comm.connection.pika.BlockingConnection", side_effect=error
+        "comm.connection.pika.BlockingConnection", side_effect=error
     ):
         with pytest.raises(BrokerConnectionError) as raised:
             connect("broker-host", 55672, "user", "password", heartbeat=600)

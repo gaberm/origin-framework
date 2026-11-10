@@ -3,9 +3,8 @@ import uuid
 import pika
 import json
 from typing import Any
-from .connection import connect
+from .connection import DEFAULT_HEARTBEAT_SECONDS, connect
 from .messages import (
-    DEFAULT_HEARTBEAT_SECONDS,
     Operation,
     Message,
     Response,
@@ -47,7 +46,6 @@ class RabbitMQClient:
         expected: int,
         timeout: float = 30.0,
         on_registered=None,
-        workers_started=None,
         accepted_payload=None,
     ):
         """Block until `expected` distinct workers register and pass `validate`.
@@ -56,11 +54,9 @@ class RabbitMQClient:
         reply, e.g. settings of the run the worker needs.
         on_registered(name), if given, is called each time a worker registers
         successfully, so callers can show live per-worker progress.
-        workers_started(), if given, is polled while waiting; `timeout` only
-        starts once it returns True, e.g. when queued batch jobs are running.
-        It may raise to give up, e.g. when a job ended without registering.
         Returns {name: Registration}; raises TimeoutError(partial) on timeout."""
-        # Must match the worker's declaration (see AdapterWorker.register).
+        # Must match the worker's declaration (see
+        # AdapterWorker.register_with_supervisor).
         self.channel.queue_declare(
             queue=registration_queue(self.run_id), durable=True, auto_delete=True
         )
@@ -85,12 +81,10 @@ class RabbitMQClient:
             ch.basic_ack(method.delivery_tag)
 
         tag = self.channel.basic_consume(registration_queue(self.run_id), handler)
-        deadline = None
+        deadline = time.time() + timeout
         try:
             while len(registered) < expected:
-                if deadline is None and (workers_started is None or workers_started()):
-                    deadline = time.time() + timeout
-                if deadline is not None and time.time() > deadline:
+                if time.time() > deadline:
                     raise TimeoutError(registered)
                 self.connection.process_data_events(time_limit=1)
         finally:

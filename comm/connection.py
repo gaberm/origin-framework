@@ -1,12 +1,18 @@
 import pika
 
+DEFAULT_HEARTBEAT_SECONDS = 600
+
 
 class BrokerConnectionError(ConnectionError):
     """The RabbitMQ broker could not be reached or refused the login."""
 
 
 def connect(
-    host: str, port: int, username: str, password: str, heartbeat: int
+    host: str,
+    port: int,
+    username: str,
+    password: str,
+    heartbeat: int = DEFAULT_HEARTBEAT_SECONDS,
 ) -> pika.BlockingConnection:
     """Open a blocking connection to the broker.
 

@@ -1,5 +1,8 @@
 from dataclasses import dataclass
 
+# Seconds a reported model time may differ from the expected window end.
+TIME_TOLERANCE = 1e-6
+
 
 @dataclass(frozen=True)
 class TimeWindow:

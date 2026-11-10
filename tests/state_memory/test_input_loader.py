@@ -1,7 +1,7 @@
 import pytest
 from base import Input, Fields, Filter, Equal, In, NotIn, KeyJoin, SpatialJoin, Latest
 from state_memory.input_loader import InputLoader
-from supervisory.scheduling.time_window import TimeWindow
+from base import TimeWindow
 from _records import Trip, Vehicle, Battery, VehicleLocation, Zone, RUN_ID
 
 

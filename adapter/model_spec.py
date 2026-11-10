@@ -1,10 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import timedelta
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from adapter.adapter import Adapter
+from .adapter import Adapter
 
 
 @dataclass(frozen=True)
@@ -59,10 +56,6 @@ class ModelSpec:
     def routing_key(self) -> str:
         return self.name
 
-    @property
-    def queue_name(self) -> str:
-        return f"{self.name}_queue"
-
     def __post_init__(self):
         self._validate_name()
         self._validate_adapter()
@@ -77,8 +70,6 @@ class ModelSpec:
             )
 
     def _validate_adapter(self):
-        from adapter.adapter import Adapter
-
         if not (isinstance(self.adapter, type) and issubclass(self.adapter, Adapter)):
             raise TypeError(
                 f"ModelSpec.adapter must be an Adapter subclass; got {type(self.adapter).__name__!r}"

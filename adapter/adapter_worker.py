@@ -112,7 +112,6 @@ class AdapterWorker:
             self.adapter.start_time = datetime.fromisoformat(start_time)
 
     def _request_registration(self) -> Response:
-        """Send the registration and wait for the supervisor's reply."""
         correlation_id = str(uuid.uuid4())
         reply_queue, responses = self._collect_replies(correlation_id)
         self._publish_registration(reply_queue, correlation_id)
@@ -159,6 +158,11 @@ class AdapterWorker:
         return responses[0]
 
     def _on_message(self, ch, method, properties, body):
+        """Run one command from the supervisor on the adapter and reply.
+
+        A command that fails does not stop the worker; the error is sent back
+        as a failed Response. The worker stops after a successful terminate.
+        """
         command = None
         try:
             message = Message.from_dict(json.loads(body))
@@ -180,8 +184,6 @@ class AdapterWorker:
             ch.stop_consuming()
 
     def initialize(self, payload) -> Response:
-        """Reply with the records the model returned and the time it is at,
-        so the supervisor can check both."""
         outputs = self.adapter.initialize()
         return Response(
             success=True,
@@ -226,6 +228,8 @@ class AdapterWorker:
         )
 
     def run(self):
+        """Register with the supervisor, then run its commands until it
+        terminates the worker. Blocks until then."""
         print(f"[{self.__class__.__name__}] Waiting for commands...")
         self.register_with_supervisor()
         self.channel.basic_consume(

@@ -6,6 +6,13 @@ from .simulation_clock import SimulationClock
 
 
 class Adapter(SimulationClock, ABC):
+    """Connects a model to the supervisor. One Adapter per model.
+
+    `input_types` are the inputs the model reads.
+
+    `output_types` are the records the model writes.
+    """
+
     input_types: type[Input] | list[type[Input]]
     output_types: type[Record] | list[type[Record]]
 
@@ -49,7 +56,8 @@ class Adapter(SimulationClock, ABC):
     def write_inputs(self, inputs: dict[str, list[dict]]):
         """Write user-defined inputs to the model.
 
-        `inputs` is keyed by each inputs `key` (its class name by default)
+        `inputs` is keyed by each input's `name`, e.g.
+        {"EV": [{"veh_id": 1, "soc": 0.5}, ...]} for Input(name="EV", ...).
         """
         pass
 

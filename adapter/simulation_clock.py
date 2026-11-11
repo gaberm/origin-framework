@@ -8,8 +8,9 @@ class SimulationClock:
     start_time: datetime | None = None
 
     def to_simulation_time(self, time: datetime) -> timedelta:
-        """Convert a physical time to simulation time, e.g. datetime(1794, 9, 10, 6)
-        to timedelta(hours=6) in a run with start_time datetime(1794, 9, 10)."""
+        """For example, datetime(1794, 9, 10, 6) is timedelta(hours=6) in a run with
+        start_time datetime(1794, 9, 10)."""
+
         if self.start_time is None:
             raise RuntimeError(
                 f"{type(self).__name__} converts physical time {time} to simulation "

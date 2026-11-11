@@ -9,11 +9,18 @@ class Adapter(SimulationClock, ABC):
     input_types: type[Input] | list[type[Input]]
     output_types: type[Record] | list[type[Record]]
 
-    def __init__(self, name: str, run_id: str, timestep_length: timedelta, **kwargs):
+    def __init__(
+        self,
+        name: str,
+        run_id: str,
+        timestep_length: timedelta,
+        active_from: timedelta,
+        **kwargs,
+    ):
         self.name = name
         self.run_id = run_id
         self.timestep_length = timestep_length
-        self.active_from = timedelta(0)
+        self.active_from = active_from
         self.start_time: datetime | None = None
 
     @abstractmethod

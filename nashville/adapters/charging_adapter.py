@@ -18,8 +18,13 @@ class ChargingAdapter(Adapter):
     ]
     output_types = [ChargingStep, ChargingSession, Station, Port]
 
-    def __init__(self, name, run_id, timestep_length, **model_params):
-        super().__init__(name=name, run_id=run_id, timestep_length=timestep_length)
+    def __init__(self, name, run_id, timestep_length, active_from, **model_params):
+        super().__init__(
+            name=name,
+            run_id=run_id,
+            timestep_length=timestep_length,
+            active_from=active_from,
+        )
         self._charging_model = ChargingModel(**model_params)
 
     def initialize(self) -> list[Station | Port]:

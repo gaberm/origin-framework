@@ -30,9 +30,15 @@ class SumoAdapter(Adapter):
         name: str,
         run_id: str,
         timestep_length: timedelta,
+        active_from: timedelta,
         sumo_config: str,
     ):
-        super().__init__(name=name, run_id=run_id, timestep_length=timestep_length)
+        super().__init__(
+            name=name,
+            run_id=run_id,
+            timestep_length=timestep_length,
+            active_from=active_from,
+        )
         self.sumo_config = sumo_config
         self.batteries = {}
         self.charging_tables = {}
@@ -310,9 +316,12 @@ class SumoAdapter(Adapter):
         elif state in ["departed", "running"]:
             try:
                 x, y = libsumo.vehicle.getPosition(veh_id)
-                return libsumo.simulation.convertGeo(x, y)
             except libsumo.TraCIException:
                 return None
+            # A vehicle off the road (e.g. while teleporting) has no position.
+            if libsumo.constants.INVALID_DOUBLE_VALUE in (x, y):
+                return None
+            return libsumo.simulation.convertGeo(x, y)
         else:
             raise ValueError(
                 f"state must be 'arrived', 'departed' or 'running', not {state}"

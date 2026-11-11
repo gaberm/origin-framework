@@ -32,7 +32,7 @@ class ChargingAdapter(Adapter):
         return self._infrastructure_records()
 
     def current_time(self) -> timedelta:
-        return timedelta(seconds=self._charging_model.time)
+        return timedelta(seconds=self._charging_model.time_s)
 
     def _infrastructure_records(self) -> list[Station | Port]:
         infrastructure = self._charging_model.infrastructure

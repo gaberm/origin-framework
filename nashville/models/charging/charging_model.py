@@ -1,55 +1,82 @@
 import json
 import random
 import warnings
-import numpy as np
 from dataclasses import dataclass
 from pathlib import Path
+import numpy as np
 
-_DATA_DIR = Path(__file__).parent / "data"
 _SOC_TOLERANCE = 1e-9
+_DEFAULT_STATIONS_FILE = Path(__file__).parent / "data" / "ev_stations.json"
 
 
 @dataclass(frozen=True)
 class ChargingCurve:
-    """How fast a car charges, as a function of its state of charge."""
+    """A car's SUMO charge curve and the SOC limit at its port.
 
-    random.seed(42)
-    efficiency: float = 0.95
-    # Charging stops at these limits. Whether the car then leaves its port is
-    # up to ChargingModel's `leave_at_soc_limit`.
-    dc_soc_limit: float = 0.9  # DC fast chargers
-    ac_soc_limit: float = 0.9  # Level 1 and 2 chargers
+    `soc_levels` are the SOC breakpoints and `rates_kw` the rate the car
+    accepts at each, e.g. (0, 0.8, 1) and (150, 150, 25) for 150 kW up to 80%
+    SOC, tapering to 25 kW at 100%. Charging stops at `soc_limit`, e.g. 0.9.
+    """
 
-    def soc_limit(self, level: str) -> float:
-        if level == "dc_fast":
-            return self.dc_soc_limit
-        return self.ac_soc_limit
+    soc_levels: tuple[float, ...]
+    rates_kw: tuple[float, ...]
+    soc_limit: float
 
-    def step(
+    def charge_step(
         self,
-        soc: np.ndarray,
-        port_power_kw: np.ndarray,
-        vehicle_rate_kw: np.ndarray,
-        capacity_kwh: np.ndarray,
-        soc_limit: np.ndarray,
+        soc: float,
+        port_power_kw: float,
+        capacity_kwh: float,
+        efficiency: float,
         duration_s: float,
-    ) -> tuple[np.ndarray, np.ndarray]:
-        """Return the new state of charge and the power drawn in kW.
-
-        `vehicle_rate_kw` is what the car accepts at its current SOC, read from
-        its SUMO charge curve. As in SUMO, the station's efficiency applies to
-        the port's power, and whichever of the two is lower reaches the
-        battery."""
+    ) -> tuple[float, float]:
+        """Return the new SOC and the power drawn from the port in kW."""
         hours = duration_s / 3600
-        rate_kw = np.minimum(vehicle_rate_kw, port_power_kw * self.efficiency)
-        charge_added_kwh = np.minimum(
+        # Interpolated between the breakpoints, as SUMO does.
+        curve_rate_kw = float(np.interp(soc, self.soc_levels, self.rates_kw))
+        rate_kw = min(curve_rate_kw, port_power_kw * efficiency)
+        charge_added_kwh = min(
             rate_kw * hours,
-            capacity_kwh * np.maximum(soc_limit - soc, 0.0),
+            capacity_kwh * max(self.soc_limit - soc, 0.0),
         )
-        # Report only the power actually drawn: less in the step that reaches
-        # the limit, 0 kW for a car that is already there.
-        load_kw = charge_added_kwh / (hours * self.efficiency)
+        load_kw = charge_added_kwh / (hours * efficiency)
         return soc + charge_added_kwh / capacity_kwh, load_kw
+
+
+# eq=False: sessions compare and hash by identity, so two sessions with equal
+# fields stay distinct.
+@dataclass(slots=True, eq=False)
+class ChargingSession:
+    """A car's occupancy of a port, whether charging or just blocking it."""
+
+    port_id: str
+    started_at: float  # seconds
+    veh_id: str
+    driver_id: str
+    soc: float
+    capacity_kwh: float
+    curve: ChargingCurve
+
+    def charge(
+        self, port_power_kw: float, efficiency: float, duration_s: float
+    ) -> float:
+        """Charge the car and return the power drawn from the port in kW."""
+        self.soc, load_kw = self.curve.charge_step(
+            self.soc, port_power_kw, self.capacity_kwh, efficiency, duration_s
+        )
+        return load_kw
+
+    def completed_record(self, finished_at: float, end_reason: str) -> dict:
+        return {
+            "port_id": self.port_id,
+            "started_at": self.started_at,
+            "finished_at": finished_at,
+            "veh_id": self.veh_id,
+            "driver_id": self.driver_id,
+            "final_soc": self.soc,
+            "final_charge_kwh": self.soc * self.capacity_kwh,
+            "end_reason": end_reason,
+        }
 
 
 class ChargingInfrastructure:
@@ -58,63 +85,65 @@ class ChargingInfrastructure:
     def __init__(self, stations: dict[str, dict], ports: dict[str, dict]):
         self.stations = stations
         self.ports = ports
-        self._ports_by_station: dict[str, list[str]] = {
-            station_id: [] for station_id in stations
-        }
+        self._ports_by_station: dict[str, list[str]] = {}
         for port_id, port in ports.items():
-            self._ports_by_station[port["station_id"]].append(port_id)
+            self._ports_by_station.setdefault(port["station_id"], []).append(port_id)
 
     @classmethod
-    def from_json(cls, path: Path) -> "ChargingInfrastructure":
-        with open(path, "r") as f:
-            data = json.load(f)
+    def from_json(cls, path: str | Path) -> "ChargingInfrastructure":
+        with open(path, "r") as stations_file:
+            station_records = json.load(stations_file)
         stations = {}
         ports = {}
-        for station in data:
+        for station in station_records:
             stations[station["id"]] = {
                 "source": station["source"],
                 "source_id": station["source_id"],
                 "longitude": station["longitude"],
                 "latitude": station["latitude"],
             }
-            for port_data in station["ports"]:
-                ports[port_data["port"]] = {
+            for port in station["ports"]:
+                ports[port["port"]] = {
                     "station_id": station["id"],
-                    "level": port_data["level"],
-                    "power_kw": port_data["power_kw"],
+                    "level": port["level"],
+                    "power_kw": port["power_kw"],
                 }
         return cls(stations, ports)
 
-    def ports_at(self, station_id: str) -> list[str]:
+    def port_ids_at_station(self, station_id: str) -> list[str]:
         return self._ports_by_station.get(station_id, [])
-
-    def station_id(self, port_id: str) -> str:
-        return self.ports[port_id]["station_id"]
 
     def get_ports(
         self,
         *,
-        port_id: str | list[str] | None = None,
-        station_id: str | list[str] | None = None,
-        level: str | list[str] | None = None,
+        port_ids: str | list[str] | None = None,
+        station_ids: str | list[str] | None = None,
+        levels: str | list[str] | None = None,
     ) -> list[dict]:
-        records = [{"port_id": k, **v} for k, v in self.ports.items()]
+        records = [{"port_id": port_id, **port} for port_id, port in self.ports.items()]
         return self._filter(
-            records, port_id=port_id, station_id=station_id, level=level
+            records, port_id=port_ids, station_id=station_ids, level=levels
         )
 
     def get_stations(
         self,
         *,
-        station_id: str | list[str] | None = None,
+        station_ids: str | list[str] | None = None,
     ) -> list[dict]:
-        records = [{"station_id": k, **v} for k, v in self.stations.items()]
-        return self._filter(records, station_id=station_id)
+        records = [
+            {"station_id": station_id, **station}
+            for station_id, station in self.stations.items()
+        ]
+        return self._filter(records, station_id=station_ids)
 
     @staticmethod
     def _filter(records: list[dict], **criteria) -> list[dict]:
-        """Keep records matching every criterion; a criterion is a single
-        value or a list of accepted values, and None matches everything."""
+        """Keep the records that match every given criterion.
+
+        A criterion is a single value or a list of accepted values, e.g.
+        `station_id="s1"` or `station_id=["s1", "s2"]`. Criteria left at
+        None are not filtered on.
+        """
         allowed = {
             key: set(value) if isinstance(value, (list, tuple, set)) else {value}
             for key, value in criteria.items()
@@ -128,23 +157,53 @@ class ChargingInfrastructure:
 
 
 class ChargingModel:
-    def __init__(self, leave_at_soc_limit: bool = True, **curve_params):
-        """`leave_at_soc_limit` ends a session once the car reaches its SOC
-        limit, freeing the port; otherwise the car keeps blocking the port until
-        it leaves. `curve_params` are passed to `ChargingCurve`."""
+    """Computes the charge cars gain and the power they draw per time step.
+
+    Cars charge at the rate of their SUMO charge curve or the port's power,
+    whichever is lower, and stop at the port's SOC limit.
+    """
+
+    def __init__(
+        self,
+        stations_file: str | Path = _DEFAULT_STATIONS_FILE,
+        leave_at_soc_limit: bool = True,
+        raise_if_unavailable: bool = False,
+        seed: int = 42,
+        efficiency: float = 0.95,
+        dc_soc_limit: float = 0.9,
+        ac_soc_limit: float = 0.9,
+    ):
+        """`stations_file` is the stations JSON (see ChargingInfrastructure.from_json).
+
+        `leave_at_soc_limit` decides whether cars free the port (True) or keep
+        occupying it (False) once they reach their SOC limit.
+
+        `raise_if_unavailable` decides whether a car sent to a station with no
+        free port raises an error (True) or is skipped with a warning (False).
+
+        `seed` is the random seed for the choice of port.
+
+        `efficiency` is the share of port power reaching the battery.
+
+        `dc_soc_limit` is the SOC limit on DC fast chargers.
+
+        `ac_soc_limit` is the SOC limit on level 1 and 2 chargers."""
+        self.stations_file = stations_file
         self.leave_at_soc_limit = leave_at_soc_limit
-        self.curve = ChargingCurve(**curve_params)
+        self.raise_if_unavailable = raise_if_unavailable
+        self._random = random.Random(seed)
+        self.efficiency = efficiency
+        self.dc_soc_limit = dc_soc_limit
+        self.ac_soc_limit = ac_soc_limit
+
         self.infrastructure: ChargingInfrastructure | None = None
-        self.time = 0.0  # seconds
-        self.active_sessions = []
-        self.latest_completed_session = []
-        # Power drawn per session in the latest step only.
+        self.time_s = 0.0
+        self.active_sessions: list[ChargingSession] = []
+        self.latest_completed_sessions: list[dict] = []
         self._latest_power_logs: list[dict] = []
 
     def load_data(self):
-        self.infrastructure = ChargingInfrastructure.from_json(
-            _DATA_DIR / "ev_stations.json"
-        )
+        self.infrastructure = ChargingInfrastructure.from_json(self.stations_file)
 
     def add_vehicle(
         self,
@@ -156,183 +215,137 @@ class ChargingModel:
         charge_curve_kw: list[float],
         port_id: str | None = None,
         station_id: str | None = None,
-        raise_if_unavailable: bool = False,
     ):
         """`charge_level_table` and `charge_curve_kw` are the vehicle's SUMO
         charge curve: the SOC breakpoints and the rate it accepts at each."""
+        self._validate_port_or_station(port_id, station_id)
+        self._validate_charge_curve(veh_id, charge_level_table, charge_curve_kw)
+        if port_id is None:
+            port_id = self._random_available_port(station_id)
+            if not self._check_port_available(port_id, station_id):
+                return
+        self.active_sessions.append(
+            ChargingSession(
+                port_id=port_id,
+                started_at=self.time_s,
+                veh_id=veh_id,
+                driver_id=driver_id,
+                soc=soc,
+                capacity_kwh=capacity_kwh,
+                curve=ChargingCurve(
+                    soc_levels=tuple(charge_level_table),
+                    rates_kw=tuple(charge_curve_kw),
+                    soc_limit=self._soc_limit(port_id),
+                ),
+            )
+        )
+
+    @staticmethod
+    def _validate_port_or_station(port_id: str | None, station_id: str | None):
         if port_id is None and station_id is None:
             raise ValueError("must provide either port_id or station_id")
+
+    @staticmethod
+    def _validate_charge_curve(
+        veh_id: str, charge_level_table: list[float], charge_curve_kw: list[float]
+    ):
         if not charge_level_table or len(charge_level_table) != len(charge_curve_kw):
             raise ValueError(
                 f"vehicle '{veh_id}' has a charge curve of "
                 f"{len(charge_level_table)} SOC breakpoints and "
                 f"{len(charge_curve_kw)} rates; they must match and be non-empty"
             )
-        if port_id is None:
-            port_id = self._random_available_port(station_id, raise_if_unavailable)
-            if port_id is None:
-                return
-        self.active_sessions.append(
-            {
-                "port_id": port_id,
-                "started_at": self.time,
-                "veh_id": veh_id,
-                "driver_id": driver_id,
-                "soc": soc,
-                "capacity_kwh": capacity_kwh,
-                # Hashable, so sessions can be grouped by curve in a dict.
-                "charge_curve": (tuple(charge_level_table), tuple(charge_curve_kw)),
-                "soc_limit": self.curve.soc_limit(
-                    self.infrastructure.ports[port_id]["level"]
-                ),
-            }
-        )
 
-    def _random_available_port(
-        self, station_id: str, raise_if_unavailable: bool
-    ) -> str | None:
-        occupied_ports = {session["port_id"] for session in self.active_sessions}
+    def _check_port_available(self, port_id: str | None, station_id: str) -> bool:
+        """Return whether a port was found at the station; if not, raise or
+        warn depending on `raise_if_unavailable`."""
+        if port_id is not None:
+            return True
+        if self.raise_if_unavailable:
+            raise ValueError(f"no available port at station '{station_id}'")
+        # The time makes each warning unique, so Python's default filter
+        # shows every full station rather than only its first.
+        warnings.warn(
+            f"no available port at station '{station_id}' at time {self.time_s:g} s",
+            RuntimeWarning,
+        )
+        return False
+
+    def _soc_limit(self, port_id: str) -> float:
+        if self.infrastructure.ports[port_id]["level"] == "dc_fast":
+            return self.dc_soc_limit
+        return self.ac_soc_limit
+
+    def _random_available_port(self, station_id: str) -> str | None:
+        occupied_ports = {session.port_id for session in self.active_sessions}
         available_ports = [
             port_id
-            for port_id in self.infrastructure.ports_at(station_id)
+            for port_id in self.infrastructure.port_ids_at_station(station_id)
             if port_id not in occupied_ports
         ]
         if not available_ports:
-            if raise_if_unavailable:
-                raise ValueError(f"no available port at station '{station_id}'")
-            # The time makes each warning unique, so Python's default filter
-            # shows every full station rather than only its first.
-            warnings.warn(
-                f"no available port at station '{station_id}' "
-                f"at time {self.time:g} s",
-                RuntimeWarning,
-            )
             return None
-        return random.choice(available_ports)
+        return self._random.choice(available_ports)
 
     def remove_vehicle(self, driver_id: str, end_reason: str = "removed"):
         """End all open sessions of the driver."""
         ending = [
             session
             for session in self.active_sessions
-            if session["driver_id"] == driver_id
+            if session.driver_id == driver_id
         ]
-        if not ending:
-            return
         self._complete_sessions(ending, end_reason=end_reason)
 
-    def _complete_sessions(self, sessions: list[dict], end_reason: str):
-        """Move `sessions` from the open to the completed sessions."""
+    def _complete_sessions(self, sessions: list[ChargingSession], end_reason: str):
         for session in sessions:
-            self.latest_completed_session.append(
-                {
-                    "port_id": session["port_id"],
-                    "started_at": session["started_at"],
-                    "finished_at": self.time,
-                    "veh_id": session["veh_id"],
-                    "driver_id": session["driver_id"],
-                    "final_soc": session["soc"],
-                    "final_charge_kwh": session["soc"] * session["capacity_kwh"],
-                    "end_reason": end_reason,
-                }
+            self.latest_completed_sessions.append(
+                session.completed_record(self.time_s, end_reason)
             )
         # Rebuilt rather than removed one by one, which would skip sessions
         # when `sessions` is `active_sessions` itself.
-        ended = {id(session) for session in sessions}
+        ended = set(sessions)
         self.active_sessions = [
-            session for session in self.active_sessions if id(session) not in ended
+            session for session in self.active_sessions if session not in ended
         ]
 
     def advance_time(self, duration_s: float):
-        """Charge all active sessions for `duration_s` seconds as one step."""
-        self.time += duration_s
+        self.time_s += duration_s
         self._latest_power_logs = []
-        if not self.active_sessions:
-            return
-
-        soc, port_power_kw, max_capacity_kwh, soc_limit = self._get_session_arrays()
-        soc, load_kw = self.curve.step(
-            soc,
-            port_power_kw,
-            self._vehicle_rate_kw(soc),
-            max_capacity_kwh,
-            soc_limit,
-            duration_s,
-        )
-        self._record_power_logs(load_kw)
-        self._update_soc(soc)
+        for session in self.active_sessions:
+            port = self.infrastructure.ports[session.port_id]
+            load_kw = session.charge(port["power_kw"], self.efficiency, duration_s)
+            self._latest_power_logs.append(
+                {
+                    "time": self.time_s,
+                    "veh_id": session.veh_id,
+                    "driver_id": session.driver_id,
+                    "port_id": session.port_id,
+                    "load_kw": load_kw,
+                }
+            )
         if self.leave_at_soc_limit:
             self._complete_sessions_at_limit()
 
     def _complete_sessions_at_limit(self):
-        # The step lands on the limit up to float rounding, hence the tolerance.
+        # A step lands on the limit up to float rounding, hence the tolerance.
         at_limit = [
             session
             for session in self.active_sessions
-            if session["soc"] >= session["soc_limit"] - _SOC_TOLERANCE
+            if session.soc >= session.curve.soc_limit - _SOC_TOLERANCE
         ]
-        if at_limit:
-            self._complete_sessions(at_limit, end_reason="limit_reached")
-
-    def _get_session_arrays(self) -> tuple[np.ndarray, ...]:
-        ports = self.infrastructure.ports
-        return (
-            np.array([session["soc"] for session in self.active_sessions]),
-            np.array(
-                [
-                    ports[session["port_id"]]["power_kw"]
-                    for session in self.active_sessions
-                ]
-            ),
-            np.array([session["capacity_kwh"] for session in self.active_sessions]),
-            np.array([session["soc_limit"] for session in self.active_sessions]),
-        )
-
-    def _vehicle_rate_kw(self, soc: np.ndarray) -> np.ndarray:
-        """What each car accepts at its current SOC, interpolated from its
-        charge curve as SUMO does. Sessions are grouped by curve, so this costs
-        one np.interp call per vehicle type rather than one per session."""
-        sessions_by_curve: dict[tuple, list[int]] = {}
-        for index, session in enumerate(self.active_sessions):
-            sessions_by_curve.setdefault(session["charge_curve"], []).append(index)
-        rate_kw = np.empty(len(self.active_sessions))
-        for (levels, rates), indices in sessions_by_curve.items():
-            indices = np.array(indices)
-            rate_kw[indices] = np.interp(soc[indices], levels, rates)
-        return rate_kw
-
-    def _record_power_logs(self, load_kw: np.ndarray):
-        self._latest_power_logs = [
-            {
-                "time": self.time,
-                "veh_id": session["veh_id"],
-                "driver_id": session["driver_id"],
-                "port_id": session["port_id"],
-                "load_kw": float(load),
-            }
-            for session, load in zip(self.active_sessions, load_kw)
-        ]
-
-    def _update_soc(self, soc: np.ndarray):
-        for session, new_soc in zip(self.active_sessions, soc):
-            session["soc"] = float(new_soc)
+        self._complete_sessions(at_limit, end_reason="limit_reached")
 
     def get_latest_power_logs(self) -> list[dict]:
         """Power drawn per session in the latest step."""
         return self._latest_power_logs
 
     def get_latest_completed_sessions(self) -> list[dict]:
-        sessions = self.latest_completed_session
-        self.latest_completed_session = []
+        sessions = self.latest_completed_sessions
+        self.latest_completed_sessions = []
         return sessions
-
-    def get_station_id(self, port_id: str) -> str:
-        return self.infrastructure.station_id(port_id)
 
     def terminate(self) -> list[dict]:
         """End every open session and return all completed sessions not yet
         collected."""
-        # dict rather than set: keeps the output order reproducible.
-        for driver_id in dict.fromkeys(s["driver_id"] for s in self.active_sessions):
-            self.remove_vehicle(driver_id, end_reason="terminated")
+        self._complete_sessions(self.active_sessions, end_reason="terminated")
         return self.get_latest_completed_sessions()

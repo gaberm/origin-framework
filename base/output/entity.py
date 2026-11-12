@@ -1,12 +1,12 @@
 import sys
 import types
-from functools import cache
-from typing import Any, ClassVar, Union, get_args, get_origin, get_type_hints
 from dataclasses import dataclass, field, fields
 from datetime import timedelta
-from numbers import Real
+from functools import cache
+from typing import Any, ClassVar, Union, get_args, get_origin, get_type_hints
 from base.output.identifier import Identifier
 from base.output.record import Record
+from base.utils import to_seconds
 
 
 def ref(target: "type[Entity] | str") -> Any:
@@ -68,12 +68,12 @@ def _validate_target(target, context: str):
             f"{context}: ref() must name an Entity subclass; got {target!r}"
         )
     if len(target.id_field) != 1:
-        raise TypeError(
+        raise ValueError(
             f"{context}: {target.__name__} has the composite id {target.id_field}; "
             f"ref() holds one id"
         )
     if tuple(target.primary_key) != target.id_field:
-        raise TypeError(
+        raise ValueError(
             f"{context}: {target.__name__}'s primary key {target.primary_key} "
             f"isn't its id {target.id_field}, so it can't be referenced"
         )
@@ -115,37 +115,26 @@ class Entity(Record, Identifier, abstract=True):
     initialize_only: ClassVar[bool] = False
 
     def __post_init__(self):
-        parent_post_init = getattr(super(), "__post_init__", None)
-        if parent_post_init is not None:
-            parent_post_init()
+        super().__post_init__()
+        self._normalize_start_end()
         self._validate_start_end()
         self._validate_initialize_only_times()
 
-    def _validate_start_end(self):
-        name = type(self).__name__
+    def _normalize_start_end(self):
         for attr in ("start_s", "end_s"):
             time = getattr(self, attr)
-            if time is None:
-                continue
-            if not isinstance(time, timedelta) and (
-                isinstance(time, bool) or not isinstance(time, Real)
-            ):
-                raise TypeError(
-                    f"{name}.{attr} must be a number of seconds, a timedelta "
-                    f"or None; got {type(time).__name__!r}"
-                )
-            if isinstance(time, timedelta):
-                time = time.total_seconds()
-            if time < 0:
-                raise ValueError(f"{name}.{attr} must be non-negative")
-            setattr(self, attr, float(time))
+            if time is not None:
+                name = f"{type(self).__name__}.{attr}"
+                setattr(self, attr, to_seconds(time, name))
+
+    def _validate_start_end(self):
         if (
             self.start_s is not None
             and self.end_s is not None
             and self.end_s < self.start_s
         ):
             raise ValueError(
-                f"{name}.end_s must not be before start_s; "
+                f"{type(self).__name__}.end_s must not be before start_s; "
                 f"got start_s={self.start_s}, end_s={self.end_s}"
             )
 
@@ -182,13 +171,16 @@ class Entity(Record, Identifier, abstract=True):
 
     @classmethod
     def _complete_start_observation(cls):
-        # Checks for _complete rather than the StartObservation class, which
-        # would have to be imported from observation.py, which imports this
-        # module.
-        complete = getattr(cls.start_observation, "_complete", None)
-        if complete is None:
+        # Imported here because observation.py imports this module.
+        from base.output.observation import StartObservation
+
+        start_observation = cls.start_observation
+        if not (
+            isinstance(start_observation, type)
+            and issubclass(start_observation, StartObservation)
+        ):
             raise TypeError(
                 f"{cls.__name__}.start_observation must be a "
-                f"StartObservation subclass; got {cls.start_observation!r}"
+                f"StartObservation subclass; got {start_observation!r}"
             )
-        complete(cls)
+        start_observation.complete(cls)

@@ -172,7 +172,7 @@ def test_start_observation_belongs_to_one_entity():
 
         veh_id: str
 
-    with pytest.raises(TypeError, match="already the start observation of Trip"):
+    with pytest.raises(ValueError, match="already the start observation of Trip"):
 
         @dataclass(kw_only=True)
         class OtherTrip(Entity):
@@ -206,7 +206,7 @@ def test_start_observation_without_dataclass():
     class Departure(StartObservation):
         charge_wh: float
 
-    with pytest.raises(TypeError, match="must be declared without @dataclass"):
+    with pytest.raises(ValueError, match="must be declared without @dataclass"):
 
         @dataclass(kw_only=True)
         class Trip(Entity):

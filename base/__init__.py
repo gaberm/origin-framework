@@ -17,11 +17,17 @@ from .output.entity import Entity, ref, refs
 from .output.geometry import SHAPE_TYPE, Geometry
 from .output.grid import Cell, CellObservation, grid_cells, grid_observations
 from .output.identifier import Identifier
-from .output.observation import StartObservation, Observation
+from .output.observation import Observation, StartObservation
 from .output.record import Record
 from .output.timestamp import Timestamp
 from .time_window import TIME_TOLERANCE, TimeWindow
-from .utils import as_list, validate_run_id
+from .utils import (
+    as_list,
+    declare_field,
+    declared_field_names,
+    to_seconds,
+    validate_run_id,
+)
 
 __all__ = [
     "SHAPE_TYPE",
@@ -37,7 +43,6 @@ __all__ = [
     "Greater",
     "GreaterEqual",
     "Identifier",
-    "StartObservation",
     "In",
     "Input",
     "KeyJoin",
@@ -49,13 +54,17 @@ __all__ = [
     "Observation",
     "Record",
     "SpatialJoin",
+    "StartObservation",
     "TimeWindow",
     "Timestamp",
     "Window",
     "as_list",
+    "declare_field",
+    "declared_field_names",
     "grid_cells",
     "grid_observations",
     "ref",
     "refs",
+    "to_seconds",
     "validate_run_id",
 ]

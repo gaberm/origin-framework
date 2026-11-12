@@ -84,8 +84,10 @@ class InputLoader:
         filter_values: list,
     ) -> tuple[str, list]:
         by = input_spec.read_policy.by
-        where = " AND ".join([f"{time_field} < %s"] + filter_clauses)
-        values = [time_range.end] + filter_values
+        where = " AND ".join(
+            [f"{time_field} >= %s AND {time_field} < %s"] + filter_clauses
+        )
+        values = [time_range.start_s, time_range.end_s] + filter_values
         select = fields if by in fields else [by, *fields]
         order_by = ", ".join([by, f"{time_field} DESC", *self._row_key(input_spec)])
         query = (
@@ -108,7 +110,7 @@ class InputLoader:
         where = " AND ".join(
             [f"{time_field} >= %s AND {time_field} < %s"] + filter_clauses
         )
-        values = [time_range.start, time_range.end] + filter_values
+        values = [time_range.start_s, time_range.end_s] + filter_values
         # A fixed row order, so results don't depend on how Postgres happens
         # to return rows with equal times. The joined keys order a row's
         # matches when a join fans out.
@@ -142,7 +144,7 @@ class InputLoader:
             ]
             + filter_clauses
         )
-        values = [time_range.end, time_range.start] + filter_values
+        values = [time_range.end_s, time_range.start_s] + filter_values
         order_by = [*self._row_key(input_spec), *self._joined_keys(input_spec)]
         query = (
             f"SELECT {', '.join(fields)} "

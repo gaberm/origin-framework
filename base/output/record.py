@@ -2,13 +2,14 @@ from dataclasses import dataclass
 from typing import ClassVar, Literal
 from base.output.abstractable import Abstractable
 from base.output.timestamp import Timestamp
+from base.utils import declared_field_names
 
 
 @dataclass(kw_only=True)
 class Record(Abstractable):
     """Base class for model outputs; each subclass is stored in its own table.
 
-    `table_name` is the name of that table. It defaults to the class name
+    `table_name` is the name of that table. It defaults to the class name.
 
     `primary_key` names the fields that identify a record. It is required.
 
@@ -35,11 +36,13 @@ class Record(Abstractable):
     diagnostic: ClassVar[bool] = False
 
     def __init_subclass__(cls, abstract: bool = False, **kwargs):
+        if not abstract:
+            cls._keys_to_tuples()
         super().__init_subclass__(abstract=abstract, **kwargs)
         if abstract:
             return
         cls._default_table_name()
-        cls._validate_primary_key_and_indexed()
+        cls._validate_keys()
         cls._index_time_field()
         cls._validate_on_conflict()
         cls._validate_diagnostic()
@@ -50,17 +53,16 @@ class Record(Abstractable):
             cls.table_name = cls.__name__
 
     @classmethod
-    def _validate_primary_key_and_indexed(cls):
-        field_names = {
-            name
-            for parent in cls.__mro__
-            for name in getattr(parent, "__annotations__", {})
-        }
+    def _keys_to_tuples(cls):
         for attr in ("primary_key", "indexed"):
             value = getattr(cls, attr, ())
-            value = (value,) if isinstance(value, str) else tuple(value)
-            setattr(cls, attr, value)
-            for key in value:
+            setattr(cls, attr, (value,) if isinstance(value, str) else tuple(value))
+
+    @classmethod
+    def _validate_keys(cls):
+        field_names = declared_field_names(cls)
+        for attr in ("primary_key", "indexed"):
+            for key in getattr(cls, attr):
                 if key not in field_names:
                     raise ValueError(
                         f"{cls.__name__}: {attr} field '{key}' is not declared"

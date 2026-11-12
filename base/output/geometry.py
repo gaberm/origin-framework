@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from numbers import Real
 from typing import Literal, get_args
+from base.output.abstractable import Abstractable
 
 SHAPE_TYPE = Literal["POINT", "LINESTRING", "POLYGON"]
 
 
 @dataclass(kw_only=True)
-class Geometry:
+class Geometry(Abstractable):
     """Base class for records that have a location.
 
     `shape` is "POINT", "LINESTRING" or "POLYGON".
@@ -27,9 +28,7 @@ class Geometry:
     epsg_code: int = 4326
 
     def __post_init__(self):
-        parent_post_init = getattr(super(), "__post_init__", None)
-        if parent_post_init is not None:
-            parent_post_init()
+        super().__post_init__()
         self._validate_shape()
         self._validate_coords()
 
@@ -44,14 +43,18 @@ class Geometry:
             if len(self.coords) != 2 or not all(
                 isinstance(coord, Real) for coord in self.coords
             ):
-                raise ValueError("POINT coords must be a (float, float) pair")
+                raise ValueError(
+                    f"{type(self).__name__}.coords must be a (float, float) pair "
+                    f"for a POINT"
+                )
         else:
             min_points = 2 if self.shape == "LINESTRING" else 3
             if len(self.coords) < min_points or not all(
                 self._is_coord_pair(coord) for coord in self.coords
             ):
                 raise ValueError(
-                    f"{self.shape} coords must be a list of (float, float) pairs."
+                    f"{type(self).__name__}.coords must be a list of at least "
+                    f"{min_points} (float, float) pairs for a {self.shape}"
                 )
 
     @staticmethod

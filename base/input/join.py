@@ -3,11 +3,12 @@ from dataclasses import fields as dataclass_fields
 from numbers import Real
 from base.input.filter import Filter, validate_where
 from base.output.entity import refs
-from base.output.record import Record
 from base.output.geometry import Geometry
+from base.output.record import Record
 from base.utils import as_list
 
-_VALID_JOIN_MODES = ("inner", "left", "right", "full")
+_JOIN_TYPES = ("inner", "left", "right", "full")
+_PREDICATES = ("exact", "nearest")
 
 
 class KeyJoin:
@@ -30,8 +31,6 @@ class KeyJoin:
         "right_field",
         "join_type",
     )
-
-    VALID_MODES = _VALID_JOIN_MODES
 
     def __init__(
         self,
@@ -76,23 +75,20 @@ class KeyJoin:
     def _validate(self):
         context = f"KeyJoin({self.left_record.__name__} → {self.right_record.__name__})"
         if self.left_record is self.right_record:
-            raise TypeError(f"{context}: left and right records must be different")
+            raise ValueError(f"{context}: left and right records must be different")
         for record, field in (
             (self.left_record, self.left_field),
             (self.right_record, self.right_field),
         ):
             valid_fields = {field.name for field in dataclass_fields(record)}
             if field not in valid_fields:
-                raise AttributeError(
+                raise ValueError(
                     f"{context}: {record.__name__} has no field {field!r}. Valid: {sorted(valid_fields)}"
                 )
-        if self.join_type not in self.VALID_MODES:
+        if self.join_type not in _JOIN_TYPES:
             raise ValueError(
-                f"{context}: join_type must be one of {self.VALID_MODES}, got {self.join_type!r}"
+                f"{context}: join_type must be one of {_JOIN_TYPES}; got {self.join_type!r}"
             )
-
-
-_VALID_PREDICATES = ("exact", "nearest")
 
 
 class SpatialJoin:
@@ -124,9 +120,6 @@ class SpatialJoin:
         "where",
     )
 
-    VALID_MODES = _VALID_JOIN_MODES
-    VALID_PREDICATES = _VALID_PREDICATES
-
     def __init__(
         self,
         left: type[Record],
@@ -134,7 +127,7 @@ class SpatialJoin:
         join_type: str = "inner",
         predicate: str = "nearest",
         max_distance: float | None = None,
-        where: Filter | list[Filter] = None,
+        where: Filter | list[Filter] | None = None,
     ):
         self.left_record = left
         self.right_record = right
@@ -151,21 +144,21 @@ class SpatialJoin:
 
     def _validate_records(self, context: str):
         if self.left_record is self.right_record:
-            raise TypeError(f"{context}: left and right records must be different")
+            raise ValueError(f"{context}: left and right records must be different")
         for record in (self.left_record, self.right_record):
             if not issubclass(record, Geometry):
                 raise TypeError(
-                    f"{context}: SpatialJoin requires Geometry records, got {record.__name__} which is not a Geometry record"
+                    f"{context}: left and right must be Geometry records; got {record.__name__}"
                 )
 
     def _validate_parameters(self, context: str):
-        if self.join_type not in self.VALID_MODES:
+        if self.join_type not in _JOIN_TYPES:
             raise ValueError(
-                f"{context}: join_type must be one of {self.VALID_MODES}, got {self.join_type!r}"
+                f"{context}: join_type must be one of {_JOIN_TYPES}; got {self.join_type!r}"
             )
-        if self.predicate not in self.VALID_PREDICATES:
+        if self.predicate not in _PREDICATES:
             raise ValueError(
-                f"{context}: predicate must be one of {self.VALID_PREDICATES}, got {self.predicate!r}"
+                f"{context}: predicate must be one of {_PREDICATES}; got {self.predicate!r}"
             )
         if self.predicate == "nearest" and self.join_type in ("right", "full"):
             raise ValueError(
@@ -183,5 +176,5 @@ class SpatialJoin:
                 or not 0 < self.max_distance < float("inf")
             ):
                 raise ValueError(
-                    f"{context}: max_distance must be a positive number of metres, got {self.max_distance!r}"
+                    f"{context}: max_distance must be a positive number of metres; got {self.max_distance!r}"
                 )

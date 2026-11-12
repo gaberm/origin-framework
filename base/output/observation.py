@@ -4,7 +4,6 @@ from base.output.entity import Entity
 from base.output.identifier import Identifier
 from base.output.record import Record
 from base.output.timestamp import Timestamp
-from base.utils import as_list
 
 OBSERVATION_TYPE = Literal["start", "update", "end"]
 
@@ -31,8 +30,9 @@ class Observation(Record, Identifier, Timestamp, abstract=True):
             cls._validate_entity()
             if "id_field" not in cls.__dict__:
                 cls.id_field = cls.entity.id_field
+            cls._normalize_id_field()
             if "primary_key" not in cls.__dict__:
-                cls.primary_key = (*as_list(cls.id_field), cls.time_field)
+                cls.primary_key = (*cls.id_field, cls.time_field)
         super().__init_subclass__(abstract=abstract, **kwargs)
         if abstract:
             return
@@ -92,22 +92,23 @@ class StartObservation(Observation, abstract=True):
     observation_type: ClassVar[OBSERVATION_TYPE] = "start"
 
     def __init_subclass__(cls, **kwargs):
-        # Set up only once an entity names it, in _complete.
+        # Set up only once an entity names it, in complete.
         super().__init_subclass__(abstract=True, **kwargs)
 
     @classmethod
-    def _complete(cls, entity: Type[Entity]):
+    def complete(cls, entity: Type[Entity]):
+        """Set the observation up as the start observation of `entity`."""
         if "entity" in cls.__dict__:
-            raise TypeError(
+            raise ValueError(
                 f"{cls.__name__} is already the start observation of "
                 f"{cls.entity.__name__}"
             )
         if "__dataclass_fields__" in cls.__dict__:
-            raise TypeError(
+            raise ValueError(
                 f"{cls.__name__} must be declared without @dataclass; "
                 f"{entity.__name__} makes it a dataclass"
             )
         cls.entity = entity
         # The setup its own __init_subclass__ skipped.
-        Observation.__dict__["__init_subclass__"].__func__(cls)
+        super().__init_subclass__()
         dataclass(kw_only=True)(cls)

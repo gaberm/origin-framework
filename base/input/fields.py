@@ -17,7 +17,7 @@ class Fields:
 
     def __init__(self, *args):
         if not args:
-            raise TypeError("Fields(...) requires at least one field name")
+            raise ValueError("Fields: needs at least one field name")
         self.selected_fields = {}
         if self._is_explicit(args):
             for arg in args:
@@ -29,7 +29,7 @@ class Fields:
                 else args
             )
             if not field_names:
-                raise TypeError("Fields(...) requires at least one field name")
+                raise ValueError("Fields: needs at least one field name")
             self._validate_fields(field_names)
             self.selected_fields = {None: tuple(field_names)}
 
@@ -43,26 +43,34 @@ class Fields:
 
     def _parse_field(self, arg) -> tuple:
         if not (isinstance(arg, tuple) and arg and isinstance(arg[0], type)):
-            raise TypeError(f"Fields: expected (Entity, field, ...) tuple, got {arg!r}")
-        entity, *field_names = arg
+            raise TypeError(
+                f"Fields: expected a (record, field, ...) tuple; got {arg!r}"
+            )
+        record, *field_names = arg
         if not field_names:
-            raise TypeError(f"Fields: no field names given for {entity.__name__}")
-        valid_fields = {
-            dataclass_field.name for dataclass_field in dataclass_fields(entity)
-        }
-        self._validate_fields(field_names, valid_fields)
-        return {entity.table_name: tuple(field_names)}
+            raise ValueError(
+                f"Fields: needs at least one field name for {record.__name__}"
+            )
+        self._validate_fields(field_names, record)
+        return {record.table_name: tuple(field_names)}
 
     @staticmethod
-    def _validate_fields(field_names, valid_fields: set[str] = None) -> None:
+    def _validate_fields(field_names, record: type | None = None) -> None:
+        """Field names must be strings and, if `record` is given, fields of it."""
+        valid_fields = (
+            None
+            if record is None
+            else {dataclass_field.name for dataclass_field in dataclass_fields(record)}
+        )
         for field_name in field_names:
             if not isinstance(field_name, str):
                 raise TypeError(
-                    f"Fields: expected string field name, got {field_name!r}"
+                    f"Fields: field names must be strings; got {field_name!r}"
                 )
             if valid_fields is not None and field_name not in valid_fields:
-                raise AttributeError(
-                    f"Fields: no field {field_name!r}. Valid: {sorted(valid_fields)}"
+                raise ValueError(
+                    f"Fields: {record.__name__} has no field {field_name!r}. "
+                    f"Valid: {sorted(valid_fields)}"
                 )
 
     def __repr__(self) -> str:

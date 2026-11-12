@@ -77,7 +77,7 @@ def test_target_with_composite_id():
         session_id: str
         port_id: str = ref(Port)
 
-    with pytest.raises(TypeError, match="Port has the composite id"):
+    with pytest.raises(ValueError, match="Port has the composite id"):
         refs(Session)
 
 
@@ -94,7 +94,7 @@ def test_target_whose_primary_key_isnt_its_id():
         leg_id: str
         tour_id: str = ref(Tour)
 
-    with pytest.raises(TypeError, match="Tour's primary key"):
+    with pytest.raises(ValueError, match="Tour's primary key"):
         refs(Leg)
 
 

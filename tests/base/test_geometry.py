@@ -10,35 +10,35 @@ def test_invalid_shape():
 
 def test_point_too_short():
     with pytest.raises(
-        ValueError, match="POINT coords must be a \\(float, float\\) pair"
+        ValueError, match="coords must be a \\(float, float\\) pair for a POINT"
     ):
         _ = Geometry(shape="POINT", coords=(0.0,))
 
 
 def test_point_wrong_type():
     with pytest.raises(
-        ValueError, match="POINT coords must be a \\(float, float\\) pair"
+        ValueError, match="coords must be a \\(float, float\\) pair for a POINT"
     ):
         _ = Geometry(shape="POINT", coords=("a", "b"))
 
 
 def test_linestring_too_short():
     with pytest.raises(
-        ValueError, match="LINESTRING coords must be a list of \\(float, float\\) pairs"
+        ValueError, match="\\(float, float\\) pairs for a LINESTRING"
     ):
         _ = Geometry(shape="LINESTRING", coords=[(0.0, 0.0)])
 
 
 def test_polygon_too_short():
     with pytest.raises(
-        ValueError, match="POLYGON coords must be a list of \\(float, float\\) pairs"
+        ValueError, match="\\(float, float\\) pairs for a POLYGON"
     ):
         _ = Geometry(shape="POLYGON", coords=[(0.0, 0.0), (1.0, 1.0)])
 
 
 def test_pair_wrong_type():
     with pytest.raises(
-        ValueError, match="LINESTRING coords must be a list of \\(float, float\\) pairs"
+        ValueError, match="\\(float, float\\) pairs for a LINESTRING"
     ):
         _ = Geometry(shape="LINESTRING", coords=[("a", "b"), (1.0, 1.0)])
 

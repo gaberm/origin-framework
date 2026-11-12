@@ -1,11 +1,44 @@
-import dataclasses
 import re
+from datetime import timedelta
+from numbers import Real
 from typing import Any
-from base.output.record import Record
 
 
 def as_list(value: Any) -> list[Any]:
-    return value if isinstance(value, (list, tuple)) else [value]
+    return list(value) if isinstance(value, (list, tuple)) else [value]
+
+
+def to_seconds(time: float | timedelta, time_name: str) -> float:
+    """Checks that a time is non-negative and converts a timedelta to seconds."""
+    if isinstance(time, timedelta):
+        time = time.total_seconds()
+    elif isinstance(time, bool) or not isinstance(time, Real):
+        raise TypeError(
+            f"{time_name} must be a number of seconds or a timedelta; "
+            f"got {type(time).__name__!r}"
+        )
+    if time < 0:
+        raise ValueError(f"{time_name} must be non-negative")
+    return float(time)
+
+
+def declared_field_names(cls: type) -> set[str]:
+    """The names annotated on `cls` or any of its parents."""
+    return {
+        name
+        for parent in cls.__mro__
+        for name in parent.__dict__.get("__annotations__", {})
+    }
+
+
+def declare_field(cls: type, name: str, field_type: Any) -> None:
+    """Annotate `name` on `cls`, so that @dataclass makes it a field, unless
+    `cls` or a parent already declares it."""
+    if name in declared_field_names(cls):
+        return
+    if "__annotations__" not in cls.__dict__:
+        cls.__annotations__ = {}
+    cls.__annotations__[name] = field_type
 
 
 def validate_run_id(run_id: str) -> None:
@@ -18,32 +51,3 @@ def validate_run_id(run_id: str) -> None:
             f"Use lowercase letters, digits, and underscores only, "
             f"start with a letter or underscore, and keep it to at most 63 characters."
         )
-
-
-def records_to_dicts(records: list[Record]) -> list[dict]:
-    """Records as dicts for the broker, each tagged with its `_type`."""
-    return [
-        {"_type": type(record).__name__, **dataclasses.asdict(record)}
-        for record in records
-    ]
-
-
-def dicts_to_records(
-    record_dicts: list[dict], record_types: type[Record] | list[type[Record]]
-) -> list[Record]:
-    """Rebuild records from records_to_dicts output. Only the declared
-    `record_types` are accepted."""
-    types_by_name = {
-        record_type.__name__: record_type for record_type in as_list(record_types)
-    }
-    records = []
-    for record_dict in record_dicts:
-        fields = dict(record_dict)
-        type_name = fields.pop("_type")
-        if type_name not in types_by_name:
-            raise ValueError(
-                f"received a {type_name} record, but the model declares "
-                f"{sorted(types_by_name)}"
-            )
-        records.append(types_by_name[type_name](**fields))
-    return records

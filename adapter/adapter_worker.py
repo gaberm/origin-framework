@@ -18,6 +18,7 @@ from comm import (
     connect,
     records_to_payloads,
 )
+from .adapter import Adapter
 from .model_spec import ModelSpec
 
 
@@ -53,14 +54,14 @@ class AdapterWorker:
         spec: ModelSpec,
         run_id: str,
         registration_timeout: float = 30.0,
-        heartbeat: int = DEFAULT_HEARTBEAT_SECONDS,
+        heartbeat_s: int = DEFAULT_HEARTBEAT_SECONDS,
     ):
         validate_run_id(run_id)
 
         self.run_id = run_id
-        self.name = spec.name
+        self.name = spec.model_name
         self.routing_key = spec.routing_key
-        self.timing = spec.timing
+        self.timing = spec.timing_summary
         self.registration_timeout = registration_timeout
 
         self.adapter = self._build_adapter(spec, run_id)
@@ -72,14 +73,14 @@ class AdapterWorker:
             "terminate": self.terminate,
         }
 
-        self.queue_name = task_queue(run_id, spec.name)
-        self.connection = connect(host, port, username, password, heartbeat)
+        self.queue_name = task_queue(run_id, spec.model_name)
+        self.connection = connect(host, port, username, password, heartbeat_s)
         self.channel = self._open_task_channel()
 
     @staticmethod
-    def _build_adapter(spec: ModelSpec, run_id: str):
+    def _build_adapter(spec: ModelSpec, run_id: str) -> Adapter:
         adapter = spec.adapter(
-            name=spec.name,
+            model_name=spec.model_name,
             run_id=run_id,
             timestep_length=spec.timestep_length,
             active_from=spec.active_from,
@@ -97,6 +98,8 @@ class AdapterWorker:
         channel.queue_bind(
             queue=self.queue_name, exchange=exchange, routing_key=self.routing_key
         )
+        # One command at a time: the broker holds back the next one until
+        # the worker has replied to and acked the current one.
         channel.basic_qos(prefetch_count=1)
         return channel
 
@@ -113,11 +116,11 @@ class AdapterWorker:
 
     def _request_registration(self) -> Response:
         correlation_id = str(uuid.uuid4())
-        reply_queue, responses = self._collect_replies(correlation_id)
+        reply_queue, responses = self._open_reply_queue(correlation_id)
         self._publish_registration(reply_queue, correlation_id)
         return self._wait_for_reply(responses)
 
-    def _collect_replies(self, correlation_id: str) -> tuple[str, list[Response]]:
+    def _open_reply_queue(self, correlation_id: str) -> tuple[str, list[Response]]:
         """Open a private queue for the supervisor's reply to the registration.
 
         Returns the queue's name and a list that fills with the replies
@@ -157,7 +160,7 @@ class AdapterWorker:
             self.connection.process_data_events(time_limit=1)
         return responses[0]
 
-    def _on_message(self, ch, method, properties, body):
+    def _on_message(self, channel, method, properties, body):
         """Run one command from the supervisor on the adapter and reply.
 
         A command that fails does not stop the worker; the error is sent back
@@ -173,15 +176,15 @@ class AdapterWorker:
             traceback.print_exc()
             reply = Response(success=False, error=f"{type(error).__name__}: {error}")
             reply_body = json.dumps(reply.to_dict())
-        ch.basic_publish(
+        channel.basic_publish(
             exchange="",
             routing_key=properties.reply_to,
             properties=pika.BasicProperties(correlation_id=properties.correlation_id),
             body=reply_body,
         )
-        ch.basic_ack(delivery_tag=method.delivery_tag)
+        channel.basic_ack(delivery_tag=method.delivery_tag)
         if command == Operation.TERMINATE and reply.success:
-            ch.stop_consuming()
+            channel.stop_consuming()
 
     def initialize(self, payload) -> Response:
         outputs = self.adapter.initialize()
@@ -209,13 +212,13 @@ class AdapterWorker:
         return Response(success=True, payload=self._current_time_s())
 
     def _current_time_s(self) -> float:
-        # The supervisory model keeps time as float seconds.
         current_time = self.adapter.current_time()
         if not isinstance(current_time, timedelta):
             raise TypeError(
                 f"{type(self.adapter).__name__}.current_time() must be a "
                 f"datetime.timedelta; got {type(current_time).__name__!r}"
             )
+        # The SupervisoryModel keeps time as float seconds.
         return current_time.total_seconds()
 
     def terminate(self, payload) -> Response:
@@ -230,7 +233,6 @@ class AdapterWorker:
     def run(self):
         """Register with the supervisor, then run its commands until it
         terminates the worker. Blocks until then."""
-        print(f"[{self.__class__.__name__}] Waiting for commands...")
         self.register_with_supervisor()
         self.channel.basic_consume(
             queue=self.queue_name, on_message_callback=self._on_message
@@ -239,7 +241,7 @@ class AdapterWorker:
 
     @staticmethod
     def _numpy_to_builtin(value):
-        # Fallback if adapter returns numpy values
+        """Fallback if adapter returns numpy values."""
         if isinstance(value, np.generic):
             return value.item()
         if isinstance(value, np.ndarray):

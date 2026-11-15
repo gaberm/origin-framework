@@ -9,7 +9,7 @@ class ModelSpec:
     """Describes one model in a simulation; used by the supervisory model to
     schedule it.
 
-    `name` is a unique name for the model and is used internally.
+    `model_name` is a unique name for the model.
 
     `adapter` is the Adapter subclass that wraps the model.
 
@@ -19,33 +19,37 @@ class ModelSpec:
     `params` are extra keyword arguments for the adapter's __init__, e.g.
     {"config": "path/to/config.json"}.
 
-    `dependencies` names the models this model waits for before each step.
-    By default they are inferred from the adapter's inputs; set it to
-    override them, or to () to wait for none.
+    `dependencies` names the models this model's inputs depend on, e.g.
+    ("model_1",). By default they are inferred from the adapter's inputs
+    and only have to be set to resolve a deadlock. For example, if
+    model_1 <-> model_2, dependencies have to be set so that one model no
+    longer waits for the other, e.g. () for model_1. Then model_1 goes first
+    and receives model_2's records with a delay of up to one timestep.
 
-    `active_from` and `active_until` let a model run for only part of the run,
-    both measured from the start of the run: it takes its first step at
-    active_from and stops by active_until. By default it runs for the whole run.
+    `active_from` is when the model takes its first step, e.g.
+    timedelta(hours=2) for a model that starts two hours in. `active_until`
+    is when the model stops. Both are measured from the start of the run.
+    By default the model is active for the whole run.
     """
 
-    name: str
+    model_name: str
     adapter: type[Adapter]
     timestep_length: timedelta
     params: dict = field(default_factory=dict)
     dependencies: tuple[str, ...] | None = None
     active_from: timedelta = timedelta(0)
-    active_until: timedelta | None = None
+    active_until: timedelta | None = None  # None: active until the end of the run
 
     @property
-    def timestep_seconds(self) -> float:
+    def timestep_s(self) -> float:
         return self.timestep_length.total_seconds()
 
     @property
-    def timing(self) -> dict:
+    def timing_summary(self) -> dict:
         """When and how the model steps, in seconds. A worker sends it when it
         registers, so the supervisor can check both use the same spec."""
         return {
-            "timestep_length": self.timestep_seconds,
+            "timestep_length": self.timestep_s,
             "active_from": self.active_from.total_seconds(),
             "active_until": (
                 None if self.active_until is None else self.active_until.total_seconds()
@@ -54,7 +58,7 @@ class ModelSpec:
 
     @property
     def routing_key(self) -> str:
-        return self.name
+        return self.model_name  # RabbitMQ routing key
 
     def __post_init__(self):
         self._validate_name()
@@ -64,10 +68,8 @@ class ModelSpec:
         self._validate_active_window()
 
     def _validate_name(self):
-        if not isinstance(self.name, str):
-            raise TypeError(
-                f"ModelSpec.name must be a string; got {type(self.name).__name__!r}"
-            )
+        if not isinstance(self.model_name, str):
+            raise TypeError("ModelSpec.model_name must be a string")
 
     def _validate_adapter(self):
         if not (isinstance(self.adapter, type) and issubclass(self.adapter, Adapter)):

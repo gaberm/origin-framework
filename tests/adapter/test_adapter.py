@@ -18,7 +18,10 @@ class MinimalAdapter(Adapter):
 
 def adapter(start_time):
     adapter = MinimalAdapter(
-        name="model", run_id="run_test", timestep_length=timedelta(hours=1)
+        model_name="model",
+        run_id="run_test",
+        timestep_length=timedelta(hours=1),
+        active_from=timedelta(0),
     )
     adapter.start_time = start_time
     return adapter

@@ -25,38 +25,51 @@ class MinimalAdapter(Adapter):
 
 
 def test_wrong_name_type():
-    with pytest.raises(TypeError, match="ModelSpec.name must be a string"):
-        ModelSpec(name=123, adapter=MinimalAdapter, timestep_length=timedelta(seconds=1))
+    with pytest.raises(TypeError, match="ModelSpec.model_name must be a string"):
+        ModelSpec(
+            model_name=123, adapter=MinimalAdapter, timestep_length=timedelta(seconds=1)
+        )
 
 
 def test_wrong_adapter_type():
     with pytest.raises(
         TypeError, match="ModelSpec.adapter must be an Adapter subclass"
     ):
-        ModelSpec(name="model", adapter="not_an_adapter", timestep_length=timedelta(seconds=1))
+        ModelSpec(
+            model_name="model",
+            adapter="not_an_adapter",
+            timestep_length=timedelta(seconds=1),
+        )
 
 
 def test_wrong_timestep_type():
     with pytest.raises(
         TypeError, match="ModelSpec.timestep_length must be a datetime.timedelta"
     ):
-        ModelSpec(name="model", adapter=MinimalAdapter, timestep_length="60")
+        ModelSpec(model_name="model", adapter=MinimalAdapter, timestep_length="60")
 
 
 def test_bare_number_timestep_rejected():
     with pytest.raises(TypeError, match="must be a datetime.timedelta"):
-        ModelSpec(name="model", adapter=MinimalAdapter, timestep_length=60.0)
+        ModelSpec(model_name="model", adapter=MinimalAdapter, timestep_length=60.0)
 
 
 def test_non_positive_timestep():
     with pytest.raises(ValueError, match="ModelSpec.timestep_length must be positive"):
-        ModelSpec(name="model", adapter=MinimalAdapter, timestep_length=timedelta(0))
+        ModelSpec(
+            model_name="model", adapter=MinimalAdapter, timestep_length=timedelta(0)
+        )
 
 
 def test_wrong_dependencies_type():
-    with pytest.raises(TypeError, match="ModelSpec.dependencies must be a tuple or list"):
+    with pytest.raises(
+        TypeError, match="ModelSpec.dependencies must be a tuple or list"
+    ):
         ModelSpec(
-            name="model", adapter=MinimalAdapter, timestep_length=timedelta(seconds=1), dependencies="sumo"
+            model_name="model",
+            adapter=MinimalAdapter,
+            timestep_length=timedelta(seconds=1),
+            dependencies="sumo",
         )
 
 
@@ -65,29 +78,40 @@ def test_dependencies_non_string_elements():
         TypeError, match="ModelSpec.dependencies must be a list of strings"
     ):
         ModelSpec(
-            name="model", adapter=MinimalAdapter, timestep_length=timedelta(seconds=1), dependencies=(1, 2)
+            model_name="model",
+            adapter=MinimalAdapter,
+            timestep_length=timedelta(seconds=1),
+            dependencies=(1, 2),
         )
 
 
 def test_valid_model_spec():
-    spec = ModelSpec(name="model", adapter=MinimalAdapter, timestep_length=timedelta(seconds=1))
-    assert spec.name == "model"
+    spec = ModelSpec(
+        model_name="model", adapter=MinimalAdapter, timestep_length=timedelta(seconds=1)
+    )
+    assert spec.model_name == "model"
     assert spec.routing_key == "model"
     assert spec.dependencies is None
 
 
 def test_timestep_seconds():
     spec = ModelSpec(
-        name="model", adapter=MinimalAdapter, timestep_length=timedelta(minutes=1)
+        model_name="model", adapter=MinimalAdapter, timestep_length=timedelta(minutes=1)
     )
-    assert spec.timestep_seconds == 60.0
+    assert spec.timestep_s == 60.0
 
 
 def test_active_window_defaults_to_whole_run():
-    spec = ModelSpec(name="model", adapter=MinimalAdapter, timestep_length=timedelta(seconds=1))
+    spec = ModelSpec(
+        model_name="model", adapter=MinimalAdapter, timestep_length=timedelta(seconds=1)
+    )
     assert spec.active_from == timedelta(0)
     assert spec.active_until is None
-    assert spec.timing == {"timestep_length": 1.0, "active_from": 0.0, "active_until": None}
+    assert spec.timing_summary == {
+        "timestep_length": 1.0,
+        "active_from": 0.0,
+        "active_until": None,
+    }
 
 
 @pytest.mark.parametrize(
@@ -107,7 +131,7 @@ def test_active_window_defaults_to_whole_run():
 def test_invalid_active_window_rejected(active_window, error, match):
     with pytest.raises(error, match=match):
         ModelSpec(
-            name="model",
+            model_name="model",
             adapter=MinimalAdapter,
             timestep_length=timedelta(seconds=1),
             **active_window,

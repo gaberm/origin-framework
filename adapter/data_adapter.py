@@ -11,11 +11,16 @@ class DataAdapter(SimulationClock, ABC):
     The data is loaded once, before the simulation starts.
 
     `output_types` are the records `load_data` returns.
+
+    `name` is the name of the data adapter
+
+    `start_time` is the run's start as a physical time, or None if the run
+    has none.
     """
 
     output_types: type[Record] | list[type[Record]]
 
-    def __init__(self, name: str, **kwargs):
+    def __init__(self, name: str):
         self.name = name
         self.start_time: datetime | None = None
 

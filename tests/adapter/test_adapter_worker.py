@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from unittest.mock import MagicMock, patch
 from adapter.adapter_worker import AdapterWorker
-from supervisory.comm.messages import Message, Response, Operation
+from comm.messages import Message, Response, Operation
 from dataclasses import dataclass
 from base import Entity
 from _records import Vehicle, Battery
@@ -13,19 +13,21 @@ from _records import Vehicle, Battery
 @dataclass(kw_only=True)
 class Depot(Entity):
     id_field = "depot_id"
-    initialize_only = True
 
     depot_id: str
 
 
 def _spec(**params):
     spec = MagicMock()
-    spec.name = "test_worker"
+    spec.model_name = "test_worker"
     spec.routing_key = "test_rk"
-    spec.queue_name = "test_queue"
     spec.timestep_length = timedelta(seconds=1)
     spec.active_from = timedelta(hours=2)
-    spec.timing = {"timestep_length": 1.0, "active_from": 7200.0, "active_until": None}
+    spec.timing_summary = {
+        "timestep_length": 1.0,
+        "active_from": 7200.0,
+        "active_until": None,
+    }
     spec.params = params
     spec.adapter.return_value.timestep_length = spec.timestep_length
     # After initialize() the model is where its first step starts.
@@ -55,20 +57,20 @@ class TestRunScopedMessaging:
                 "localhost", 5672, "guest", "guest", spec=spec, run_id="run_test"
             )
         spec.adapter.assert_called_once_with(
-            name="test_worker",
+            model_name="test_worker",
             run_id="run_test",
             timestep_length=timedelta(seconds=1),
+            active_from=timedelta(hours=2),
             sumo_config="main.sumocfg",
         )
         assert worker.adapter is spec.adapter.return_value
-        assert worker.adapter.active_from == timedelta(hours=2)
 
     def test_queue_and_exchange_are_scoped_to_run(self, worker):
         worker.channel.queue_declare.assert_called_once_with(
-            queue="run_test.test_queue", durable=True, auto_delete=True
+            queue="run_test.test_worker_queue", durable=True, auto_delete=True
         )
         worker.channel.queue_bind.assert_called_once_with(
-            queue="run_test.test_queue",
+            queue="run_test.test_worker_queue",
             exchange="run_test.tasks",
             routing_key="test_rk",
         )
@@ -78,7 +80,7 @@ class TestRunScopedMessaging:
 
     def test_consumes_commands_only_after_registering(self, worker):
         calls = []
-        worker.register = lambda: calls.append("register")
+        worker.register_with_supervisor = lambda: calls.append("register")
         worker.channel.basic_consume.side_effect = (
             lambda **kwargs: calls.append(("consume", kwargs["queue"]))
         )
@@ -88,13 +90,13 @@ class TestRunScopedMessaging:
         worker.channel.basic_consume.assert_not_called()
         worker.run()
 
-        assert calls == ["register", ("consume", "run_test.test_queue"), "start"]
+        assert calls == ["register", ("consume", "run_test.test_worker_queue"), "start"]
 
     def test_registers_on_run_scoped_queue(self, worker):
         worker.channel.basic_consume.return_value = "tag"
         worker.registration_timeout = 0.0
         with pytest.raises(TimeoutError):
-            worker.register()
+            worker.register_with_supervisor()
         worker.channel.queue_declare.assert_any_call(
             queue="run_test.worker_registration", durable=True, auto_delete=True
         )
@@ -109,7 +111,7 @@ class TestRunScopedMessaging:
 
 
 class TestReadOutputs:
-    def test_single_type(self, worker):
+    def test_single_type_is_tagged_too(self, worker):
         worker.adapter.output_types = Vehicle
         worker.adapter.read_outputs.return_value = [
             Vehicle(veh_id="veh_1", soc=0.5, time_s=1.0)
@@ -118,7 +120,8 @@ class TestReadOutputs:
         response = worker.read_outputs(None)
 
         assert response == Response(
-            success=True, payload=[{"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}]
+            success=True,
+            payload=[{"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}],
         )
 
     def test_multi_type_adds_type_tag(self, worker):
@@ -140,60 +143,31 @@ class TestReadOutputs:
 
 
 class TestInitialize:
-    def test_without_outputs(self, worker):
+    def test_replies_with_model_time_when_there_are_no_outputs(self, worker):
         worker.adapter.initialize.return_value = None
 
-        assert worker.initialize(None) == Response(success=True)
-
-    def test_returns_initialize_only_outputs(self, worker):
-        worker.adapter.output_types = [Vehicle, Depot]
-        worker.adapter.initialize.return_value = [
-            Depot(depot_id="d1", start_s=None)
-        ]
-
-        response = worker.initialize(None)
-
-        assert response == Response(
-            success=True,
-            payload=[
-                {"_type": "Depot", "depot_id": "d1", "start_s": None, "end_s": None}
-            ],
+        assert worker.initialize(None) == Response(
+            success=True, payload={"current_time": 7200.0, "records": []}
         )
 
+    def test_replies_with_returned_records(self, worker):
+        worker.adapter.initialize.return_value = [Depot(depot_id="d1", start_s=None)]
 
-    def test_rejects_unflagged_records(self, worker):
-        worker.adapter.output_types = [Vehicle, Depot]
-        worker.adapter.initialize.return_value = [
-            Depot(depot_id="d1", start_s=None),
-            Vehicle(veh_id="veh_1", soc=0.5, time_s=0.0),
-        ]
+        assert worker.initialize(None) == Response(
+            success=True,
+            payload={
+                "current_time": 7200.0,
+                "records": [
+                    {"_type": "Depot", "depot_id": "d1", "start_s": None, "end_s": None}
+                ],
+            },
+        )
 
-        with pytest.raises(
-            ValueError,
-            match=r"initialize\(\) returned \['Vehicle'\], which aren't initialize_only",
-        ):
-            worker.initialize(None)
-
-
-class TestStartsAtActiveFrom:
-    def test_names_simulation_times_when_run_has_no_start_time(self, worker):
-        worker.adapter.current_time.return_value = timedelta(0)
+    def test_rejects_non_timedelta_time(self, worker):
+        worker.adapter.current_time.return_value = 7200.0
 
         with pytest.raises(
-            ValueError,
-            match=r"is at 0:00:00 after initialize\(\), but its first step "
-            r"starts at 2:00:00 \(ModelSpec.active_from\)$",
-        ):
-            worker.initialize(None)
-
-    def test_names_physical_times_when_run_has_start_time(self, worker):
-        worker.adapter.current_time.return_value = timedelta(hours=20)
-        worker.adapter.start_time = datetime(2026, 1, 18)
-
-        with pytest.raises(
-            ValueError,
-            match=r"is at 2026-01-18 20:00:00 after initialize\(\), but its "
-            r"first step starts at 2026-01-18 02:00:00 \(ModelSpec.active_from\)$",
+            TypeError, match=r"current_time\(\) must be a datetime.timedelta"
         ):
             worker.initialize(None)
 
@@ -213,7 +187,8 @@ class TestTerminate:
         response = worker.terminate(None)
 
         assert response == Response(
-            success=True, payload=[{"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}]
+            success=True,
+            payload=[{"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}],
         )
 
 
@@ -232,7 +207,9 @@ class TestOnMessage:
     def test_dispatches_known_command(self, worker):
         worker.adapter.initialize.return_value = None
         reply = self._call(worker, Operation.INITIALIZE)
-        assert reply == Response(success=True)
+        assert reply == Response(
+            success=True, payload={"current_time": 7200.0, "records": []}
+        )
 
     def test_wraps_adapter_exception(self, worker):
         worker.adapter.initialize.side_effect = RuntimeError("adapter failed")
@@ -246,7 +223,8 @@ class TestOnMessage:
         ]
         reply = self._call(worker, Operation.READ_OUTPUTS)
         assert reply == Response(
-            success=True, payload=[{"veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}]
+            success=True,
+            payload=[{"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}],
         )
         assert type(reply.payload[0]["soc"]) is float
 
@@ -323,7 +301,7 @@ class TestRegister:
             worker, Response(success=True, payload={"start_time": None}), "fixed-corr"
         )
         with patch("adapter.adapter_worker.uuid.uuid4", return_value="fixed-corr"):
-            worker.register()  # should not raise
+            worker.register_with_supervisor()  # should not raise
         assert worker.adapter.start_time is None
 
     def test_accepted_sets_run_start_time(self, worker):
@@ -333,7 +311,7 @@ class TestRegister:
             "fixed-corr",
         )
         with patch("adapter.adapter_worker.uuid.uuid4", return_value="fixed-corr"):
-            worker.register()
+            worker.register_with_supervisor()
         assert worker.adapter.start_time == datetime.fromisoformat(
             "2026-01-18T18:00:00+00:00"
         )
@@ -344,17 +322,17 @@ class TestRegister:
         )
         with patch("adapter.adapter_worker.uuid.uuid4", return_value="fixed-corr"):
             with pytest.raises(RuntimeError, match="timing mismatch"):
-                worker.register()
+                worker.register_with_supervisor()
 
     def test_timeout_raises(self, worker):
         worker.channel.basic_consume.return_value = "tag"
         worker.registration_timeout = 0.0
         with pytest.raises(TimeoutError):
-            worker.register()
+            worker.register_with_supervisor()
 
 
 def test_worker_sets_heartbeat_explicitly():
-    from supervisory.comm.messages import DEFAULT_HEARTBEAT_SECONDS
+    from comm.connection import DEFAULT_HEARTBEAT_SECONDS
 
     with patch("adapter.adapter_worker.pika.BlockingConnection"), patch(
         "adapter.adapter_worker.pika.ConnectionParameters"

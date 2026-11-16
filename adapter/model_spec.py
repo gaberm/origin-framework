@@ -45,13 +45,13 @@ class ModelSpec:
         return self.timestep_length.total_seconds()
 
     @property
-    def timing_summary(self) -> dict:
+    def step_schedule(self) -> dict:
         """When and how the model steps, in seconds. A worker sends it when it
         registers, so the supervisor can check both use the same spec."""
         return {
-            "timestep_length": self.timestep_s,
-            "active_from": self.active_from.total_seconds(),
-            "active_until": (
+            "timestep_s": self.timestep_s,
+            "active_from_s": self.active_from.total_seconds(),
+            "active_until_s": (
                 None if self.active_until is None else self.active_until.total_seconds()
             ),
         }

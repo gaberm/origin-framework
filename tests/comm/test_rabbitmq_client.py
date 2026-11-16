@@ -2,7 +2,7 @@ import json
 import pytest
 from unittest.mock import MagicMock, patch
 from comm.rabbitmq_client import RabbitMQClient
-from comm.messages import Message, Response, Registration, Operation
+from comm.messages import Request, Response, Registration, Command
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ class TestRunScopedMessaging:
         )
 
     def test_sends_to_run_scoped_exchange(self, client):
-        client._send("sumo", Message(Operation.ADVANCE), lambda r: None)
+        client._send_request("sumo", Request(Command.ADVANCE), lambda r: None)
         publish = client.channel.basic_publish.call_args.kwargs
         assert publish["exchange"] == "run_test.tasks"
         assert publish["routing_key"] == "sumo"
@@ -26,7 +26,9 @@ class TestRunScopedMessaging:
     def test_collects_registrations_from_run_scoped_queue(self, client):
         client.channel.basic_consume.return_value = "consumer-tag"
         with pytest.raises(TimeoutError):
-            client.collect_registrations(lambda r: (True, None), expected=1, timeout=0.0)
+            client.collect_registrations(
+                lambda r: (True, None), worker_count=1, timeout=0.0
+            )
         client.channel.queue_declare.assert_any_call(
             queue="run_test.worker_registration", durable=True, auto_delete=True
         )
@@ -38,7 +40,9 @@ class TestRunScopedMessaging:
 class TestSendReplyRoundTrip:
     def test_callback_fired_with_response(self, client):
         received = []
-        client._send("worker", Message(Operation.ADVANCE), lambda r: received.append(r))
+        client._send_request(
+            "worker", Request(Command.ADVANCE), lambda r: received.append(r)
+        )
 
         props = client.channel.basic_publish.call_args.kwargs["properties"]
         reply_body = json.dumps(Response(success=True).to_dict())
@@ -47,9 +51,9 @@ class TestSendReplyRoundTrip:
 
         assert received == [Response(success=True)]
 
-    def test_callback_removed_from_pending_after_reply(self, client):
-        client._send("worker", Message(Operation.ADVANCE), lambda r: None)
-        assert len(client.pending) == 1
+    def test_response_callback_removed_after_reply(self, client):
+        client._send_request("worker", Request(Command.ADVANCE), lambda r: None)
+        assert len(client.response_callbacks) == 1
 
         props = client.channel.basic_publish.call_args.kwargs["properties"]
         mock_props = MagicMock(correlation_id=props.correlation_id)
@@ -57,11 +61,13 @@ class TestSendReplyRoundTrip:
             None, None, mock_props, json.dumps(Response(success=True).to_dict())
         )
 
-        assert len(client.pending) == 0
+        assert len(client.response_callbacks) == 0
 
     def test_unknown_correlation_id_is_ignored(self, client):
         received = []
-        client._send("worker", Message(Operation.ADVANCE), lambda r: received.append(r))
+        client._send_request(
+            "worker", Request(Command.ADVANCE), lambda r: received.append(r)
+        )
 
         mock_props = MagicMock(correlation_id="unknown-id")
         client._on_reply(
@@ -69,7 +75,7 @@ class TestSendReplyRoundTrip:
         )
 
         assert received == []
-        assert len(client.pending) == 1
+        assert len(client.response_callbacks) == 1
 
 
 class TestCall:
@@ -80,7 +86,10 @@ class TestCall:
             for call in client.channel.basic_publish.call_args_list:
                 worker = call.kwargs["routing_key"]
                 correlation_id = call.kwargs["properties"].correlation_id
-                if worker in responses_by_worker and correlation_id in client.pending:
+                if (
+                    worker in responses_by_worker
+                    and correlation_id in client.response_callbacks
+                ):
                     client._on_reply(
                         None,
                         None,
@@ -90,14 +99,16 @@ class TestCall:
 
         client.connection.process_data_events.side_effect = deliver_replies
 
-    def test_call_returns_reply_payload(self, client):
-        self._reply_while_waiting(client, {"sumo": Response(success=True, payload=10.0)})
+    def test_call_worker_returns_reply_payload(self, client):
+        self._reply_while_waiting(
+            client, {"sumo": Response(success=True, payload=10.0)}
+        )
 
-        assert client.call("sumo", Operation.ADVANCE, timeout=1.0) == 10.0
-        message = json.loads(client.channel.basic_publish.call_args.kwargs["body"])
-        assert message == {"command": "advance", "payload": None}
+        assert client.call_worker("sumo", Command.ADVANCE, timeout=1.0) == 10.0
+        request = json.loads(client.channel.basic_publish.call_args.kwargs["body"])
+        assert request == {"command": "advance", "payload": None}
 
-    def test_call_all_sends_to_every_worker_before_waiting(self, client):
+    def test_call_workers_sends_to_every_worker_before_waiting(self, client):
         self._reply_while_waiting(
             client, {"sumo": Response(success=True), "charging": Response(success=True)}
         )
@@ -110,13 +121,13 @@ class TestCall:
 
         client.connection.process_data_events.side_effect = count_sent_then_reply
 
-        client.call_all(
-            {"sumo": "sumo", "charging": "charging"}, Operation.INITIALIZE, timeout=1.0
+        client.call_workers(
+            {"sumo": "sumo", "charging": "charging"}, Command.INITIALIZE, timeout=1.0
         )
 
         assert sent_before_waiting[0] == 2
 
-    def test_call_all_returns_payloads_by_worker_name(self, client):
+    def test_call_workers_returns_payloads_by_worker_name(self, client):
         self._reply_while_waiting(
             client,
             {
@@ -126,15 +137,33 @@ class TestCall:
         )
         replied = []
 
-        payloads = client.call_all(
+        payloads = client.call_workers(
             {"sumo": "sumo_key", "charging": "charging_key"},
-            Operation.INITIALIZE,
+            Command.INITIALIZE,
             timeout=1.0,
             on_reply=replied.append,
         )
 
         assert payloads == {"sumo": [{"id": 1}], "charging": None}
         assert sorted(replied) == ["charging", "sumo"]
+
+    def test_call_workers_sends_each_worker_its_own_payload(self, client):
+        self._reply_while_waiting(
+            client, {"sumo": Response(success=True), "charging": Response(success=True)}
+        )
+
+        client.call_workers(
+            {"sumo": "sumo", "charging": "charging"},
+            Command.WRITE_INPUTS,
+            payloads={"sumo": {"rows": [1]}, "charging": {"rows": [2]}},
+            timeout=1.0,
+        )
+
+        sent_payloads = {
+            call.kwargs["routing_key"]: json.loads(call.kwargs["body"])["payload"]
+            for call in client.channel.basic_publish.call_args_list
+        }
+        assert sent_payloads == {"sumo": {"rows": [1]}, "charging": {"rows": [2]}}
 
     def test_failed_reply_raises(self, client):
         self._reply_while_waiting(
@@ -144,7 +173,7 @@ class TestCall:
         with pytest.raises(
             RuntimeError, match="advance failed for 'sumo': ValueError: bad input"
         ):
-            client.call("sumo", Operation.ADVANCE, timeout=1.0)
+            client.call_worker("sumo", Command.ADVANCE, timeout=1.0)
 
     def test_missing_reply_times_out_naming_worker(self, client):
         self._reply_while_waiting(client, {"sumo": Response(success=True)})
@@ -152,9 +181,9 @@ class TestCall:
         with pytest.raises(
             TimeoutError, match=r"terminate timed out; no response from: \['charging'\]"
         ):
-            client.call_all(
+            client.call_workers(
                 {"sumo": "sumo", "charging": "charging"},
-                Operation.TERMINATE,
+                Command.TERMINATE,
                 timeout=0.05,
             )
 
@@ -174,41 +203,42 @@ class TestCollectRegistrations:
         return fake_consume
 
     def test_accepts_valid_registration(self, client):
-        reg = Registration(name="worker_a", routing_key="rk")
+        reg = Registration(model_name="worker_a", routing_key="rk")
         client.channel.basic_consume.side_effect = self._make_handler_invoker([reg])
 
-        result = client.collect_registrations(lambda r: (True, None), expected=1)
+        result = client.collect_registrations(lambda r: (True, None), worker_count=1)
 
         assert result == {"worker_a": reg}
 
     def test_accepted_worker_gets_payload_rejected_does_not(self, client):
         channel = MagicMock()
         registrations = [
-            Registration(name="worker_a", routing_key="rk"),
-            Registration(name="unexpected", routing_key="rk"),
+            Registration(model_name="worker_a", routing_key="rk"),
+            Registration(model_name="unexpected", routing_key="rk"),
         ]
         client.channel.basic_consume.side_effect = self._make_handler_invoker(
             registrations, channel
         )
 
         client.collect_registrations(
-            lambda r: (r.name == "worker_a", None),
-            expected=1,
+            lambda r: (r.model_name == "worker_a", None),
+            worker_count=1,
             accepted_payload={"start_time": None},
         )
 
         replies = [
-            json.loads(call.kwargs["body"]) for call in channel.basic_publish.call_args_list
+            json.loads(call.kwargs["body"])
+            for call in channel.basic_publish.call_args_list
         ]
         assert [reply["payload"] for reply in replies] == [{"start_time": None}, None]
 
     def test_rejected_registration_not_included(self, client):
-        reg = Registration(name="unexpected", routing_key="rk")
+        reg = Registration(model_name="unexpected", routing_key="rk")
         client.channel.basic_consume.side_effect = self._make_handler_invoker([reg])
 
         with pytest.raises(TimeoutError) as exc_info:
             client.collect_registrations(
-                lambda r: (False, "unexpected"), expected=1, timeout=0.0
+                lambda r: (False, "unexpected"), worker_count=1, timeout=0.0
             )
 
         assert exc_info.value.args[0] == {}
@@ -218,17 +248,18 @@ class TestCollectRegistrations:
 
         with pytest.raises(TimeoutError):
             client.collect_registrations(
-                lambda r: (True, None), expected=1, timeout=0.0
+                lambda r: (True, None), worker_count=1, timeout=0.0
             )
 
 
 def test_heartbeat_is_set_explicitly():
-    from comm.connection import DEFAULT_HEARTBEAT_SECONDS
+    from comm.connection import DEFAULT_HEARTBEAT_S
 
-    with patch("comm.rabbitmq_client.pika.BlockingConnection"), patch(
-        "comm.rabbitmq_client.pika.ConnectionParameters"
-    ) as parameters:
+    with (
+        patch("comm.rabbitmq_client.pika.BlockingConnection"),
+        patch("comm.rabbitmq_client.pika.ConnectionParameters") as parameters,
+    ):
         RabbitMQClient(run_id="run_test")
         RabbitMQClient(run_id="run_test", heartbeat=30)
     heartbeats = [call.kwargs["heartbeat"] for call in parameters.call_args_list]
-    assert heartbeats == [DEFAULT_HEARTBEAT_SECONDS, 30]
+    assert heartbeats == [DEFAULT_HEARTBEAT_S, 30]

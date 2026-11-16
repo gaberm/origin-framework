@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from unittest.mock import MagicMock, patch
 from adapter.adapter_worker import AdapterWorker
-from comm.messages import Message, Response, Operation
+from comm.messages import Request, Response, Command
 from dataclasses import dataclass
 from base import Entity
 from _records import Vehicle, Battery
@@ -23,10 +23,10 @@ def _spec(**params):
     spec.routing_key = "test_rk"
     spec.timestep_length = timedelta(seconds=1)
     spec.active_from = timedelta(hours=2)
-    spec.timing_summary = {
-        "timestep_length": 1.0,
-        "active_from": 7200.0,
-        "active_until": None,
+    spec.step_schedule = {
+        "timestep_s": 1.0,
+        "active_from_s": 7200.0,
+        "active_until_s": None,
     }
     spec.params = params
     spec.adapter.return_value.timestep_length = spec.timestep_length
@@ -81,8 +81,8 @@ class TestRunScopedMessaging:
     def test_consumes_commands_only_after_registering(self, worker):
         calls = []
         worker.register_with_supervisor = lambda: calls.append("register")
-        worker.channel.basic_consume.side_effect = (
-            lambda **kwargs: calls.append(("consume", kwargs["queue"]))
+        worker.channel.basic_consume.side_effect = lambda **kwargs: calls.append(
+            ("consume", kwargs["queue"])
         )
         worker.channel.start_consuming.side_effect = lambda: calls.append("start")
 
@@ -102,11 +102,10 @@ class TestRunScopedMessaging:
         )
         publish = worker.channel.basic_publish.call_args.kwargs
         assert publish["routing_key"] == "run_test.worker_registration"
-        # The timing is sent in seconds.
-        assert json.loads(publish["body"])["metadata"] == {
-            "timestep_length": 1.0,
-            "active_from": 7200.0,
-            "active_until": None,
+        assert json.loads(publish["body"])["step_schedule"] == {
+            "timestep_s": 1.0,
+            "active_from_s": 7200.0,
+            "active_until_s": None,
         }
 
 
@@ -121,7 +120,9 @@ class TestReadOutputs:
 
         assert response == Response(
             success=True,
-            payload=[{"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}],
+            payload=[
+                {"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}
+            ],
         )
 
     def test_multi_type_adds_type_tag(self, worker):
@@ -188,7 +189,9 @@ class TestTerminate:
 
         assert response == Response(
             success=True,
-            payload=[{"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}],
+            payload=[
+                {"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}
+            ],
         )
 
 
@@ -202,18 +205,18 @@ class TestOnMessage:
         )
 
     def _call(self, worker, operation):
-        return self._call_raw(worker, json.dumps(Message(operation).to_dict()))
+        return self._call_raw(worker, json.dumps(Request(operation).to_dict()))
 
     def test_dispatches_known_command(self, worker):
         worker.adapter.initialize.return_value = None
-        reply = self._call(worker, Operation.INITIALIZE)
+        reply = self._call(worker, Command.INITIALIZE)
         assert reply == Response(
             success=True, payload={"current_time": 7200.0, "records": []}
         )
 
     def test_wraps_adapter_exception(self, worker):
         worker.adapter.initialize.side_effect = RuntimeError("adapter failed")
-        reply = self._call(worker, Operation.INITIALIZE)
+        reply = self._call(worker, Command.INITIALIZE)
         assert reply == Response(success=False, error="RuntimeError: adapter failed")
 
     def test_converts_numpy_values(self, worker):
@@ -221,19 +224,23 @@ class TestOnMessage:
         worker.adapter.read_outputs.return_value = [
             Vehicle(veh_id="veh_1", soc=np.float32(0.5), time_s=1.0)
         ]
-        reply = self._call(worker, Operation.READ_OUTPUTS)
+        reply = self._call(worker, Command.READ_OUTPUTS)
         assert reply == Response(
             success=True,
-            payload=[{"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}],
+            payload=[
+                {"_type": "Vehicle", "veh_id": "veh_1", "soc": 0.5, "time_s": 1.0}
+            ],
         )
         assert type(reply.payload[0]["soc"]) is float
 
     def test_converts_numpy_arrays(self, worker):
         worker.adapter.output_types = Vehicle
         worker.adapter.read_outputs.return_value = [
-            Vehicle(veh_id="veh_1", soc=np.array([1.5, 2.5], dtype=np.float32), time_s=1.0)
+            Vehicle(
+                veh_id="veh_1", soc=np.array([1.5, 2.5], dtype=np.float32), time_s=1.0
+            )
         ]
-        reply = self._call(worker, Operation.READ_OUTPUTS)
+        reply = self._call(worker, Command.READ_OUTPUTS)
         assert reply.payload[0]["soc"] == [1.5, 2.5]
 
     def test_unserializable_reply_becomes_error(self, worker):
@@ -241,7 +248,7 @@ class TestOnMessage:
         worker.adapter.read_outputs.return_value = [
             Vehicle(veh_id="veh_1", soc=object(), time_s=1.0)
         ]
-        reply = self._call(worker, Operation.READ_OUTPUTS)
+        reply = self._call(worker, Command.READ_OUTPUTS)
         assert not reply.success
         assert reply.error.startswith("TypeError: Object of type object")
 
@@ -257,27 +264,27 @@ class TestOnMessage:
 
     def test_advance_replies_with_model_time_in_seconds(self, worker):
         worker.adapter.current_time.return_value = timedelta(minutes=2)
-        reply = self._call(worker, Operation.ADVANCE)
+        reply = self._call(worker, Command.ADVANCE)
         worker.adapter.advance.assert_called_once()
         assert reply == Response(success=True, payload=120.0)
 
     def test_advance_rejects_non_timedelta_time(self, worker):
         worker.adapter.current_time.return_value = 120.0
-        reply = self._call(worker, Operation.ADVANCE)
+        reply = self._call(worker, Command.ADVANCE)
         assert not reply.success
         assert "current_time() must be a datetime.timedelta" in reply.error
 
     def test_stops_after_successful_terminate(self, worker):
         worker.adapter.terminate.return_value = None
         mock_ch = MagicMock()
-        body = json.dumps(Message(Operation.TERMINATE).to_dict())
+        body = json.dumps(Request(Command.TERMINATE).to_dict())
         worker._on_message(mock_ch, MagicMock(), MagicMock(), body)
         mock_ch.stop_consuming.assert_called_once()
 
     def test_keeps_consuming_after_failed_terminate(self, worker):
         worker.adapter.terminate.side_effect = RuntimeError("close failed")
         mock_ch = MagicMock()
-        body = json.dumps(Message(Operation.TERMINATE).to_dict())
+        body = json.dumps(Request(Command.TERMINATE).to_dict())
         worker._on_message(mock_ch, MagicMock(), MagicMock(), body)
         mock_ch.stop_consuming.assert_not_called()
 
@@ -318,10 +325,12 @@ class TestRegister:
 
     def test_rejected_raises(self, worker):
         self._setup_reply(
-            worker, Response(success=False, error="timing mismatch"), "fixed-corr"
+            worker,
+            Response(success=False, error="step schedule mismatch"),
+            "fixed-corr",
         )
         with patch("adapter.adapter_worker.uuid.uuid4", return_value="fixed-corr"):
-            with pytest.raises(RuntimeError, match="timing mismatch"):
+            with pytest.raises(RuntimeError, match="step schedule mismatch"):
                 worker.register_with_supervisor()
 
     def test_timeout_raises(self, worker):
@@ -332,10 +341,11 @@ class TestRegister:
 
 
 def test_worker_sets_heartbeat_explicitly():
-    from comm.connection import DEFAULT_HEARTBEAT_SECONDS
+    from comm.connection import DEFAULT_HEARTBEAT_S
 
-    with patch("adapter.adapter_worker.pika.BlockingConnection"), patch(
-        "adapter.adapter_worker.pika.ConnectionParameters"
-    ) as parameters:
+    with (
+        patch("adapter.adapter_worker.pika.BlockingConnection"),
+        patch("adapter.adapter_worker.pika.ConnectionParameters") as parameters,
+    ):
         AdapterWorker("localhost", 5672, "guest", "guest", _spec(), "run_test")
-    assert parameters.call_args.kwargs["heartbeat"] == DEFAULT_HEARTBEAT_SECONDS
+    assert parameters.call_args.kwargs["heartbeat"] == DEFAULT_HEARTBEAT_S

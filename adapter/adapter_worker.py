@@ -7,9 +7,9 @@ import numpy as np
 import pika
 from base import validate_run_id
 from comm import (
-    DEFAULT_HEARTBEAT_SECONDS,
-    Message,
-    Operation,
+    DEFAULT_HEARTBEAT_S,
+    Request,
+    Command,
     Response,
     Registration,
     registration_queue,
@@ -54,14 +54,14 @@ class AdapterWorker:
         spec: ModelSpec,
         run_id: str,
         registration_timeout: float = 30.0,
-        heartbeat_s: int = DEFAULT_HEARTBEAT_SECONDS,
+        heartbeat_s: int = DEFAULT_HEARTBEAT_S,
     ):
         validate_run_id(run_id)
 
         self.run_id = run_id
-        self.name = spec.model_name
+        self.model_name = spec.model_name
         self.routing_key = spec.routing_key
-        self.timing = spec.timing_summary
+        self.step_schedule = spec.step_schedule
         self.registration_timeout = registration_timeout
 
         self.adapter = self._build_adapter(spec, run_id)
@@ -141,7 +141,9 @@ class AdapterWorker:
             queue=registration_queue_name, durable=True, auto_delete=True
         )
         registration = Registration(
-            name=self.name, routing_key=self.routing_key, metadata=self.timing
+            model_name=self.model_name,
+            routing_key=self.routing_key,
+            step_schedule=self.step_schedule,
         )
         self.channel.basic_publish(
             exchange="",
@@ -168,9 +170,9 @@ class AdapterWorker:
         """
         command = None
         try:
-            message = Message.from_dict(json.loads(body))
-            command = message.command
-            reply = self._handlers[command](message.payload)
+            request = Request.from_dict(json.loads(body))
+            command = request.command
+            reply = self._handlers[command](request.payload)
             reply_body = json.dumps(reply.to_dict(), default=self._numpy_to_builtin)
         except Exception as error:
             traceback.print_exc()
@@ -183,7 +185,7 @@ class AdapterWorker:
             body=reply_body,
         )
         channel.basic_ack(delivery_tag=method.delivery_tag)
-        if command == Operation.TERMINATE and reply.success:
+        if command == Command.TERMINATE and reply.success:
             channel.stop_consuming()
 
     def initialize(self, payload) -> Response:

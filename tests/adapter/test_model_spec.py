@@ -107,10 +107,10 @@ def test_active_window_defaults_to_whole_run():
     )
     assert spec.active_from == timedelta(0)
     assert spec.active_until is None
-    assert spec.timing_summary == {
-        "timestep_length": 1.0,
-        "active_from": 0.0,
-        "active_until": None,
+    assert spec.step_schedule == {
+        "timestep_s": 1.0,
+        "active_from_s": 0.0,
+        "active_until_s": None,
     }
 
 

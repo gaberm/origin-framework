@@ -7,11 +7,9 @@ from comm.connection import BrokerConnectionError, connect
 
 
 def _connect_failing_with(error):
-    with patch(
-        "comm.connection.pika.BlockingConnection", side_effect=error
-    ):
+    with patch("comm.connection.pika.BlockingConnection", side_effect=error):
         with pytest.raises(BrokerConnectionError) as raised:
-            connect("broker-host", 55672, "user", "password", heartbeat=600)
+            connect("broker-host", 55672, "user", "password", heartbeat_s=600)
     assert raised.value.__cause__ is error
     return str(raised.value)
 

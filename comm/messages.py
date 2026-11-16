@@ -17,7 +17,7 @@ def task_queue(run_id: str, model_name: str) -> str:
     return f"{run_id}.{model_name}_queue"
 
 
-class Operation(str, Enum):
+class Command(str, Enum):
     INITIALIZE = "initialize"
     WRITE_INPUTS = "write_inputs"
     READ_OUTPUTS = "read_outputs"
@@ -26,8 +26,10 @@ class Operation(str, Enum):
 
 
 @dataclass
-class Message:
-    command: Operation
+class Request:
+    """Sent from the supervisor to a worker to run a command."""
+
+    command: Command
     payload: Any = None
 
     def to_dict(self) -> dict:
@@ -37,15 +39,18 @@ class Message:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "Message":
-        return cls(command=Operation(data["command"]), payload=data.get("payload"))
+    def from_dict(cls, data: dict) -> "Request":
+        return cls(command=Command(data["command"]), payload=data.get("payload"))
 
 
 @dataclass
 class Response:
+    """Sent from a worker to the supervisor as a reply to a Request, or from
+    the supervisor to a worker as a reply to a Registration."""
+
     success: bool
     payload: Any = None
-    error: str = None
+    error: str | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -65,23 +70,27 @@ class Response:
 
 @dataclass
 class Registration:
-    name: str
+    """Sent from a worker to the supervisor to request registration. The
+    step_schedule must match the supervisor's ModelSpec, or registration is
+    rejected."""
+
+    model_name: str
     routing_key: str
-    metadata: dict | None = None
+    step_schedule: dict | None = None
 
     def to_dict(self) -> dict:
         return {
-            "name": self.name,
+            "model_name": self.model_name,
             "routing_key": self.routing_key,
-            "metadata": self.metadata,
+            "step_schedule": self.step_schedule,
         }
 
     @classmethod
     def from_dict(cls, data: dict) -> "Registration":
         return cls(
-            name=data["name"],
+            model_name=data["model_name"],
             routing_key=data["routing_key"],
-            metadata=data.get("metadata"),
+            step_schedule=data.get("step_schedule"),
         )
 
 

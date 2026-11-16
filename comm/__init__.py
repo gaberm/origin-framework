@@ -1,8 +1,8 @@
-from .connection import DEFAULT_HEARTBEAT_SECONDS, BrokerConnectionError, connect
+from .connection import DEFAULT_HEARTBEAT_S, BrokerConnectionError, connect
 from .messages import (
-    Message,
-    Operation,
+    Command,
     Registration,
+    Request,
     Response,
     payloads_to_records,
     records_to_payloads,
@@ -13,12 +13,12 @@ from .messages import (
 from .rabbitmq_client import RabbitMQClient
 
 __all__ = [
-    "DEFAULT_HEARTBEAT_SECONDS",
+    "DEFAULT_HEARTBEAT_S",
     "BrokerConnectionError",
-    "Message",
-    "Operation",
+    "Command",
     "RabbitMQClient",
     "Registration",
+    "Request",
     "Response",
     "connect",
     "payloads_to_records",

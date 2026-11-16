@@ -4,7 +4,7 @@ from adapter.adapter import Adapter
 from dataclasses import dataclass
 from base import Entity, StartObservation, ModelSpec
 from supervisory.supervisory_model import SupervisoryModel
-from supervisory.comm.messages import Operation, Registration
+from comm import Command, Registration
 from _records import Vehicle, Battery
 from unittest.mock import MagicMock
 from supervisory.comm.messages import Response
@@ -86,44 +86,46 @@ def test_record_types_add_start_observations():
 
 
 class TestValidateRegistration:
-    timing = {"timestep_length": 1.0, "active_from": 0.0, "active_until": None}
+    step_schedule = {"timestep_s": 1.0, "active_from_s": 0.0, "active_until_s": None}
 
     def setup_method(self):
-        model.timings = {"model_a": self.timing}
+        model.step_schedules = {"model_a": self.step_schedule}
 
-    def test_accepts_known_worker_with_matching_timing(self):
+    def test_accepts_known_worker_with_matching_step_schedule(self):
         accepted, error = model._validate_registration(
-            Registration(name="model_a", routing_key="rk", metadata=self.timing)
+            Registration(
+                model_name="model_a", routing_key="rk", step_schedule=self.step_schedule
+            )
         )
         assert accepted is True
         assert error is None
 
     def test_rejects_unknown_worker(self):
         accepted, error = model._validate_registration(
-            Registration(name="model_b", routing_key="rk", metadata={})
+            Registration(model_name="model_b", routing_key="rk", step_schedule={})
         )
         assert accepted is False
         assert "model_b" in error
 
     @pytest.mark.parametrize(
-        "changed_timing",
-        [{"timestep_length": 2.0}, {"active_from": 60.0}, {"active_until": 3600.0}],
+        "changed_entry",
+        [{"timestep_s": 2.0}, {"active_from_s": 60.0}, {"active_until_s": 3600.0}],
         ids=["timestep", "active_from", "active_until"],
     )
-    def test_rejects_timing_mismatch(self, changed_timing):
+    def test_rejects_step_schedule_mismatch(self, changed_entry):
         accepted, error = model._validate_registration(
             Registration(
-                name="model_a",
+                model_name="model_a",
                 routing_key="rk",
-                metadata={**self.timing, **changed_timing},
+                step_schedule={**self.step_schedule, **changed_entry},
             )
         )
         assert accepted is False
-        assert "timing mismatch for 'model_a'" in error
+        assert "step schedule mismatch for 'model_a'" in error
 
-    def test_rejects_missing_timing_in_metadata(self):
+    def test_rejects_missing_step_schedule(self):
         accepted, error = model._validate_registration(
-            Registration(name="model_a", routing_key="rk", metadata=None)
+            Registration(model_name="model_a", routing_key="rk", step_schedule=None)
         )
         assert accepted is False
         assert "model_a" in error
@@ -172,7 +174,7 @@ def test_terminate_stores_final_outputs_before_closing():
     supervisor.output_types = {"model_a": Vehicle, "model_b": Vehicle}
     supervisor.scheduler.model_times = {"model_a": 1.0, "model_b": 1.0}
     supervisor.scheduler.timestep_lengths = {"model_a": 1.0, "model_b": 1.0}
-    supervisor.rabbitmq_client.call_all.return_value = {
+    supervisor.rabbitmq_client.call_workers.return_value = {
         "model_a": [vehicle_dict_1],
         "model_b": None,
     }
@@ -255,7 +257,7 @@ def test_initialize_components_stores_returned_outputs():
     supervisor.model_names = ["charging", "sumo"]
     supervisor.routing_keys = {"charging": "charging", "sumo": "sumo"}
     supervisor.output_types = {"charging": Battery, "sumo": Vehicle}
-    client.call_all.return_value = {"charging": [battery_dict], "sumo": None}
+    client.call_workers.return_value = {"charging": [battery_dict], "sumo": None}
 
     supervisor.initialize_components()
 
@@ -286,7 +288,7 @@ def test_advance_checks_reported_time():
         rabbitmq_client=MagicMock(),
         duration=timedelta(minutes=1),
     )
-    supervisor.rabbitmq_client.call.return_value = 10.0
+    supervisor.rabbitmq_client.call_worker.return_value = 10.0
     supervisor.advance("model_a")
     assert supervisor.scheduler.model_times["model_a"] == 10.0
 
@@ -308,7 +310,7 @@ class TestShutdownAfterError:
         supervisor.display = MagicMock()
         supervisor.routing_keys = {"model_a": "model_a", "model_b": "model_b"}
         # Workers confirm termination right away.
-        client.call_all.return_value = {"model_a": None, "model_b": None}
+        client.call_workers.return_value = {"model_a": None, "model_b": None}
         return supervisor
 
     def test_failed_run_stops_workers_and_closes(self):
@@ -319,9 +321,9 @@ class TestShutdownAfterError:
         with pytest.raises(TimeoutError, match="advance timed out"):
             supervisor.run()
 
-        supervisor.rabbitmq_client.call_all.assert_called_once_with(
+        supervisor.rabbitmq_client.call_workers.assert_called_once_with(
             {"model_a": "model_a", "model_b": "model_b"},
-            Operation.TERMINATE,
+            Command.TERMINATE,
             timeout=0.0,
         )
         supervisor.state_memory.close_conn.assert_called_once()
@@ -332,14 +334,16 @@ class TestShutdownAfterError:
         supervisor._run_steps = MagicMock(side_effect=KeyboardInterrupt)
         with pytest.raises(KeyboardInterrupt):
             supervisor.run()
-        supervisor.rabbitmq_client.call_all.assert_called_once()
+        supervisor.rabbitmq_client.call_workers.assert_called_once()
         supervisor.state_memory.close_conn.assert_called_once()
 
     def test_cleanup_problems_do_not_hide_original_error(self):
         state_memory = MagicMock()
         state_memory.close_conn.side_effect = RuntimeError("pool broken")
         supervisor = self._supervisor(state_memory)
-        supervisor.rabbitmq_client.call_all.side_effect = ConnectionError("broker gone")
+        supervisor.rabbitmq_client.call_workers.side_effect = ConnectionError(
+            "broker gone"
+        )
         supervisor._run_steps = MagicMock(side_effect=ValueError("bad input"))
 
         with pytest.raises(ValueError, match="bad input"):
@@ -350,7 +354,7 @@ class TestShutdownAfterError:
 
     def test_unconfirmed_termination_is_reported(self):
         supervisor = self._supervisor()
-        supervisor.rabbitmq_client.call_all.side_effect = TimeoutError(
+        supervisor.rabbitmq_client.call_workers.side_effect = TimeoutError(
             "terminate timed out; no response from: ['model_a', 'model_b']"
         )
         supervisor._run_steps = MagicMock(side_effect=ValueError("bad input"))
@@ -361,7 +365,7 @@ class TestShutdownAfterError:
 
     def test_failed_terminate_still_closes(self):
         supervisor = self._supervisor()
-        supervisor.rabbitmq_client.call_all.side_effect = RuntimeError(
+        supervisor.rabbitmq_client.call_workers.side_effect = RuntimeError(
             "terminate failed"
         )
         with pytest.raises(RuntimeError, match="terminate failed"):

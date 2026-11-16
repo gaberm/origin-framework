@@ -1,6 +1,6 @@
 import pika
 
-DEFAULT_HEARTBEAT_SECONDS = 600
+DEFAULT_HEARTBEAT_S = 600
 
 
 class BrokerConnectionError(ConnectionError):
@@ -12,7 +12,7 @@ def connect(
     port: int,
     username: str,
     password: str,
-    heartbeat: int = DEFAULT_HEARTBEAT_SECONDS,
+    heartbeat_s: int = DEFAULT_HEARTBEAT_S,
 ) -> pika.BlockingConnection:
     """Open a blocking connection to the broker.
 
@@ -25,7 +25,7 @@ def connect(
                 host=host,
                 port=port,
                 credentials=pika.PlainCredentials(username, password),
-                heartbeat=heartbeat,
+                heartbeat=heartbeat_s,
             )
         )
     # OSError: pika lets a failed hostname lookup (socket.gaierror) through.

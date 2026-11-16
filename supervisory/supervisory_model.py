@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 from typing import TYPE_CHECKING
 from adapter import DataAdapter, ModelSpec
 from base import TIME_TOLERANCE, Entity, Timestamp, as_list
-from comm import Operation, RabbitMQClient, Registration, payloads_to_records
+from comm import Command, RabbitMQClient, Registration, payloads_to_records
 from supervisory.console_display import ConsoleDisplay
 from supervisory.scheduling.scheduler import Scheduler
 
@@ -31,7 +31,7 @@ class SupervisoryModel:
             spec.name: spec.adapter.output_types for spec in model_specs
         }
         self.input_types = {spec.name: spec.adapter.input_types for spec in model_specs}
-        self.timings = {spec.name: spec.timing for spec in model_specs}
+        self.step_schedules = {spec.name: spec.step_schedule for spec in model_specs}
 
         self.scheduler = Scheduler(model_specs, duration)
         self.state_memory = state_memory
@@ -89,13 +89,14 @@ class SupervisoryModel:
                 raise RuntimeError(f"workers never registered: {missing}")
 
     def _validate_registration(self, registration: Registration):
-        if registration.name not in self.timings:
-            return False, f"unexpected worker '{registration.name}'"
-        expected_timing = self.timings[registration.name]
-        if registration.metadata != expected_timing:
+        if registration.model_name not in self.step_schedules:
+            return False, f"unexpected worker '{registration.model_name}'"
+        expected_schedule = self.step_schedules[registration.model_name]
+        if registration.step_schedule != expected_schedule:
             return False, (
-                f"timing mismatch for '{registration.name}': worker sent "
-                f"{registration.metadata}, supervisor expects {expected_timing}"
+                f"step schedule mismatch for '{registration.model_name}': worker "
+                f"sent {registration.step_schedule}, supervisor expects "
+                f"{expected_schedule}"
             )
         return True, None
 
@@ -118,9 +119,9 @@ class SupervisoryModel:
         self.display.warning("Resetting state memory tables.")
         self.state_memory.reset_tables(drop_tables=drop_tables)
 
-    def _call_worker(self, name: str, operation: Operation, payload=None):
+    def _call_worker(self, name: str, operation: Command, payload=None):
         """Send one command to a model's worker and return its reply's payload."""
-        return self.rabbitmq_client.call(
+        return self.rabbitmq_client.call_worker(
             self.routing_keys[name], operation, payload, timeout=self.response_timeout
         )
 
@@ -130,9 +131,9 @@ class SupervisoryModel:
         with self.display.wait_list(
             self.model_names, "Initialize Components"
         ) as wait_list:
-            replies = self.rabbitmq_client.call_all(
+            replies = self.rabbitmq_client.call_workers(
                 self.routing_keys,
-                Operation.INITIALIZE,
+                Command.INITIALIZE,
                 timeout=self.response_timeout,
                 on_reply=wait_list.mark_done,
             )
@@ -174,10 +175,10 @@ class SupervisoryModel:
         inputs = self.state_memory.load_inputs(
             self.input_types[name], self.scheduler.time_window(name)
         )
-        self._call_worker(name, Operation.WRITE_INPUTS, inputs)
+        self._call_worker(name, Command.WRITE_INPUTS, inputs)
 
     def advance(self, name: str):
-        self.scheduler.complete_step(name, self._call_worker(name, Operation.ADVANCE))
+        self.scheduler.complete_step(name, self._call_worker(name, Command.ADVANCE))
 
     def read_outputs(self, name: str, record_dicts: list[dict]):
         records = payloads_to_records(record_dicts, self.output_types[name])
@@ -221,8 +222,8 @@ class SupervisoryModel:
 
     def terminate(self):
         try:
-            replies = self.rabbitmq_client.call_all(
-                self.routing_keys, Operation.TERMINATE, timeout=self.response_timeout
+            replies = self.rabbitmq_client.call_workers(
+                self.routing_keys, Command.TERMINATE, timeout=self.response_timeout
             )
             # Models may hand back final outputs; store them before the
             # connection closes.
@@ -247,8 +248,8 @@ class SupervisoryModel:
 
     def _shut_down_after_error(self):
         try:
-            self.rabbitmq_client.call_all(
-                self.routing_keys, Operation.TERMINATE, timeout=self.shutdown_timeout
+            self.rabbitmq_client.call_workers(
+                self.routing_keys, Command.TERMINATE, timeout=self.shutdown_timeout
             )
         except TimeoutError as error:
             self.display.warning(f"Workers did not confirm termination: {error}")
@@ -269,7 +270,7 @@ class SupervisoryModel:
             while (name := self.scheduler.select_next()) is not None:
                 self.write_inputs(name)
                 self.advance(name)
-                self.read_outputs(name, self._call_worker(name, Operation.READ_OUTPUTS))
+                self.read_outputs(name, self._call_worker(name, Command.READ_OUTPUTS))
                 dashboard.update(
                     max(self.scheduler.model_times.values()), self.scheduler.model_times
                 )

@@ -125,8 +125,8 @@ class SupervisoryModel:
         )
 
     def initialize_components(self):
-        """Initialize every model and store the outputs they return, e.g.
-        their initialize_only entities, before stepping."""
+        """Initialize every model and store the outputs they return, before
+        stepping."""
         with self.display.wait_list(
             self.model_names, "Initialize Components"
         ) as wait_list:
@@ -139,7 +139,6 @@ class SupervisoryModel:
         for name, reply in replies.items():
             self._check_at_active_from(name, reply["current_time"])
             records = payloads_to_records(reply["records"], self.output_types[name])
-            self._check_initialize_only(name, records)
             if records:
                 self.state_memory.insert_records(records)
 
@@ -160,25 +159,6 @@ class SupervisoryModel:
             f"'{name}' is at {current_time} after initialize(), but its first "
             f"step starts at {active_from} (ModelSpec.active_from)"
         )
-
-    @staticmethod
-    def _check_initialize_only(name: str, records: list):
-        """Records from initialize must be flagged initialize_only, so the
-        scheduler doesn't make the models that read them wait. A missing
-        flag fails here, before the first step."""
-        unflagged_record_types = sorted(
-            {
-                type(record).__name__
-                for record in records
-                if not getattr(record, "initialize_only", False)
-            }
-        )
-        if unflagged_record_types:
-            raise RuntimeError(
-                f"'{name}' returned {unflagged_record_types} from initialize(), "
-                f"which aren't initialize_only entities; set initialize_only = "
-                f"True on them"
-            )
 
     def load_data(self):
         records = []

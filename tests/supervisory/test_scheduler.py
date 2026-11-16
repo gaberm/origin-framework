@@ -2,7 +2,7 @@ import pytest
 from datetime import timedelta
 from dataclasses import dataclass
 from adapter import ModelSpec
-from base import Entity, Record, Input, Fields, KeyJoin, Latest
+from base import Record, Input, Fields, KeyJoin, Latest
 from adapter.adapter import Adapter
 from supervisory.scheduling.scheduler import Scheduler
 from base import TimeWindow
@@ -137,31 +137,6 @@ class TestTwoModelChain:
     def test_latest_does_not_block(self):
         scheduler = Scheduler(
             [spec("model_a", self.AdapterA), spec("model_b", self.AdapterBLatest)],
-            duration=timedelta(seconds=2.0),
-        )
-        assert scheduler.dependencies["model_b"] == ()
-
-
-@dataclass(kw_only=True)
-class Depot(Entity):
-    id_field = "depot_id"
-    initialize_only = True
-
-    depot_id: str
-
-
-class TestInitializeOnlyOutputs:
-    class AdapterA(_Base):
-        input_types = []
-        output_types = [RecordA, Depot]
-
-    class AdapterB(_Base):
-        input_types = Input(name="depot", from_=Depot, select=Fields("depot_id"))
-        output_types = RecordB
-
-    def test_reading_them_does_not_block(self):
-        scheduler = Scheduler(
-            [spec("model_a", self.AdapterA), spec("model_b", self.AdapterB)],
             duration=timedelta(seconds=2.0),
         )
         assert scheduler.dependencies["model_b"] == ()

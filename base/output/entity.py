@@ -102,23 +102,16 @@ class Entity(Record, Identifier, abstract=True):
     `start_observation` is a StartObservation holding the entity's values at
     `start_s`, e.g. `start_observation = Departure`. The entity completes it
     into an Observation of itself when the class is defined.
-
-    `initialize_only` marks entities a model returns only from `initialize`,
-    e.g. infrastructure that exists for the whole run. They are stored before
-    the first step, so reading them never makes a model wait for the one
-    producing them. They have no `start_s` or `end_s`. The default is False.
     """
 
     start_s: float | timedelta | None
     end_s: float | timedelta | None = None
     start_observation: ClassVar[type[Record] | None] = None
-    initialize_only: ClassVar[bool] = False
 
     def __post_init__(self):
         super().__post_init__()
         self._normalize_start_end()
         self._validate_start_end()
-        self._validate_initialize_only_times()
 
     def _normalize_start_end(self):
         for attr in ("start_s", "end_s"):
@@ -138,36 +131,14 @@ class Entity(Record, Identifier, abstract=True):
                 f"got start_s={self.start_s}, end_s={self.end_s}"
             )
 
-    def _validate_initialize_only_times(self):
-        # Stored at initialize, before there is a simulation time to have
-        # been created or ended at.
-        if not self.initialize_only:
-            return
-        for attr in ("start_s", "end_s"):
-            if getattr(self, attr) is not None:
-                raise ValueError(
-                    f"{type(self).__name__} is initialize_only, so it exists "
-                    f"for the whole run and {attr} must be None; "
-                    f"got {getattr(self, attr)}"
-                )
-
     def __init_subclass__(cls, abstract: bool = False, **kwargs):
         if not abstract and "primary_key" not in cls.__dict__:
             cls.primary_key = cls.id_field
         super().__init_subclass__(abstract=abstract, **kwargs)
         if abstract:
             return
-        cls._validate_initialize_only()
         if "start_observation" in cls.__dict__:
             cls._complete_start_observation()
-
-    @classmethod
-    def _validate_initialize_only(cls):
-        if not isinstance(cls.initialize_only, bool):
-            raise TypeError(
-                f"{cls.__name__}.initialize_only must be a boolean; "
-                f"got {cls.initialize_only!r}"
-            )
 
     @classmethod
     def _complete_start_observation(cls):

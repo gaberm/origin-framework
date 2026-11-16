@@ -76,14 +76,16 @@ class KeyJoin:
         context = f"KeyJoin({self.left_record.__name__} → {self.right_record.__name__})"
         if self.left_record is self.right_record:
             raise ValueError(f"{context}: left and right records must be different")
-        for record, field in (
+        for record, field_name in (
             (self.left_record, self.left_field),
             (self.right_record, self.right_field),
         ):
-            valid_fields = {field.name for field in dataclass_fields(record)}
-            if field not in valid_fields:
+            valid_fields = {
+                record_field.name for record_field in dataclass_fields(record)
+            }
+            if field_name not in valid_fields:
                 raise ValueError(
-                    f"{context}: {record.__name__} has no field {field!r}. Valid: {sorted(valid_fields)}"
+                    f"{context}: {record.__name__} has no field {field_name!r}. Valid: {sorted(valid_fields)}"
                 )
         if self.join_type not in _JOIN_TYPES:
             raise ValueError(

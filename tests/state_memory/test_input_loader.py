@@ -138,7 +138,7 @@ def test_spatial_join_fans_out(spatial_loader):
     spec = Input(
         name="vehicle_location",
         from_=VehicleLocation,
-        on=SpatialJoin(VehicleLocation, Zone, predicate="exact"),
+        join=SpatialJoin(VehicleLocation, Zone, predicate="exact"),
         select=Fields((VehicleLocation, "veh_id"), (Zone, "zone_id")),
     )
     result = spatial_loader.load_inputs(spec, TimeWindow(0.0, 2.0))
@@ -154,7 +154,7 @@ def test_spatial_join_nearest(spatial_loader):
     spec = Input(
         name="vehicle_location",
         from_=VehicleLocation,
-        on=SpatialJoin(VehicleLocation, Zone, predicate="nearest"),
+        join=SpatialJoin(VehicleLocation, Zone, predicate="nearest"),
         select=Fields((VehicleLocation, "veh_id"), (Zone, "zone_id")),
     )
     result = spatial_loader.load_inputs(spec, TimeWindow(0.0, 2.0))
@@ -172,7 +172,7 @@ def test_spatial_join_nearest_max_distance(spatial_loader, join_type, expected_r
     spec = Input(
         name="vehicle_location",
         from_=VehicleLocation,
-        on=SpatialJoin(
+        join=SpatialJoin(
             VehicleLocation,
             Zone,
             join_type=join_type,
@@ -197,7 +197,7 @@ def test_spatial_join_nearest_where(spatial_loader):
     spec = Input(
         name="vehicle_location",
         from_=VehicleLocation,
-        on=SpatialJoin(
+        join=SpatialJoin(
             VehicleLocation,
             Zone,
             predicate="nearest",
@@ -219,7 +219,7 @@ def test_spatial_join_exact_where(spatial_loader):
     spec = Input(
         name="vehicle_location",
         from_=VehicleLocation,
-        on=SpatialJoin(
+        join=SpatialJoin(
             VehicleLocation,
             Zone,
             predicate="exact",
@@ -238,7 +238,7 @@ def test_spatial_join_where_values_precede_input_filters(spatial_loader):
         name="vehicle_location",
         from_=VehicleLocation,
         where=Filter(VehicleLocation, "veh_id", Equal("veh_3")),
-        on=SpatialJoin(
+        join=SpatialJoin(
             VehicleLocation,
             Zone,
             predicate="nearest",
@@ -254,7 +254,7 @@ def test_join(loader):
     spec = Input(
         name="vehicle",
         from_=Vehicle,
-        on=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
+        join=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
         select=Fields((Vehicle, "veh_id", "soc"), (Battery, "capacity")),
     )
     result = loader.load_inputs(spec, TimeWindow(1.0, 2.0))
@@ -273,7 +273,7 @@ def test_join_fans_out(loader, postgresql):
     spec = Input(
         name="vehicle",
         from_=Vehicle,
-        on=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
+        join=KeyJoin((Vehicle, "veh_id"), (Battery, "veh_id")),
         select=Fields((Vehicle, "veh_id", "soc"), (Battery, "capacity")),
     )
     result = loader.load_inputs(spec, TimeWindow(1.0, 2.0))
@@ -314,7 +314,7 @@ def test_join_fan_out_is_ordered_by_joined_key(zone_added_last):
     spec = Input(
         name="vehicle_location",
         from_=VehicleLocation,
-        on=SpatialJoin(VehicleLocation, Zone, predicate="exact"),
+        join=SpatialJoin(VehicleLocation, Zone, predicate="exact"),
         select=Fields((VehicleLocation, "veh_id"), (Zone, "zone_id")),
     )
     rows = zone_added_last.load_inputs(spec, TimeWindow(0.0, 2.0))["vehicle_location"]
@@ -369,7 +369,7 @@ def test_entity_join(trip_loader):
     spec = Input(
         name="trip",
         from_=Trip,
-        on=KeyJoin((Trip, "veh_id"), (Battery, "veh_id")),
+        join=KeyJoin((Trip, "veh_id"), (Battery, "veh_id")),
         select=Fields((Trip, "veh_id"), (Battery, "capacity")),
     )
     rows = trip_loader.load_inputs(spec, TimeWindow(10.0, 20.0))["trip"]

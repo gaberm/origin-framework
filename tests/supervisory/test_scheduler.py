@@ -231,7 +231,7 @@ class TestQuadrupleModel:
         input_types = Input(
             name="record_b_c",
             from_=RecordB,
-            on=KeyJoin((RecordB, "id"), (RecordC, "id")),
+            join=KeyJoin((RecordB, "id"), (RecordC, "id")),
             select=Fields((RecordB, "id"), (RecordC, "id")),
         )
         output_types = RecordD

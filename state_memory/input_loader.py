@@ -161,10 +161,10 @@ class InputLoader:
 
     def _from_clause(self, input_spec: Input) -> tuple[str, list]:
         primary_name = input_spec.from_.table_name
-        if not input_spec.on:
+        if not input_spec.join:
             return f"{self.run_id}.{primary_name}", []
         join_clauses, values = [], []
-        for join in input_spec.on:
+        for join in input_spec.join:
             if isinstance(join, SpatialJoin):
                 clause, join_values = self._spatial_join_clause(join)
                 values += join_values
@@ -232,7 +232,7 @@ class InputLoader:
     def _joined_keys(input_spec: Input) -> list[str]:
         keys = [
             f"{join.right_record.table_name}.{key}"
-            for join in input_spec.on
+            for join in input_spec.join
             for key in join.right_record.primary_key
         ]
         return list(dict.fromkeys(keys))

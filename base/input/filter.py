@@ -52,6 +52,7 @@ def _not_none(value: Any, name: str) -> Any:
 
 
 def _real_value(value: Any, name: str) -> Real:
+    """Less, LessEqual, Greater, GreaterEqual only accept numbers"""
     if isinstance(value, bool) or not isinstance(value, Real):
         raise TypeError(f"{name}: value must be a real number; got {value!r}")
     return value
@@ -124,10 +125,10 @@ def validate_where(where: list, records: list[type[Record]], context: str):
             raise ValueError(
                 f"{context}.where: filters apply to {names}; got {filter_.from_.__name__}"
             )
-        _validate_fields(records, filter_, context)
+        _validate_filter_field(records, filter_, context)
 
 
-def _validate_fields(records: list[type[Record]], filter_: Filter, context: str):
+def _validate_filter_field(records: list[type[Record]], filter_: Filter, context: str):
     target = filter_.from_ if filter_.from_ is not None else records[0]
     valid_fields = {field.name for field in dataclass_fields(target)}
     if filter_.field not in valid_fields:

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-# Seconds a reported model time may differ from the expected window end.
+# Seconds two simulation times may differ by and still count as equal
 TIME_TOLERANCE = 1e-6
 
 
@@ -15,10 +15,25 @@ class TimeWindow:
     def __post_init__(self):
         if self.start_s < 0:
             raise ValueError(
-                f"TimeWindow.start must be non-negative; got {self.start_s}"
+                f"TimeWindow.start_s must be non-negative; got {self.start_s}"
             )
         if self.start_s >= self.end_s:
             raise ValueError(
-                f"TimeWindow.start must be less than end; "
-                f"got start={self.start_s}, end={self.end_s}"
+                f"TimeWindow.start_s must be less than TimeWindow.end_s; "
+                f"got start_s={self.start_s}, end_s={self.end_s}"
             )
+
+
+@dataclass(frozen=True)
+class LateRecords:
+    """The records from before a model's time window that it has not read
+    yet, because they were written after it read the window they belong to.
+
+    `start_s` is the earliest time such a record can have.
+
+    `written_after_s` is the simulation time their producer had reached when
+    the model last read its inputs; records written later are new to it.
+    """
+
+    start_s: float
+    written_after_s: float

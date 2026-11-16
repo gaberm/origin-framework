@@ -11,6 +11,10 @@ class Fields:
     * Implicit: Fields("veh_id", "soc") selects from the Input's from_ record.
 
     Fields of a joined record can only be selected explicitly.
+
+    `selected_fields` maps each record's `table_name` to its selected field
+    names. Implicit fields are under the key None until the Input resolves
+    them against its from_ record, which is only known there.
     """
 
     __slots__ = ("selected_fields",)

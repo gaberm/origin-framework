@@ -9,24 +9,40 @@ from base.utils import as_list
 
 
 class ReadPolicy:
-    kind: str
+    """Base class for Window and Latest"""
 
 
 @dataclass(frozen=True)
 class Window(ReadPolicy):
     """Return all rows whose timestamp lies in [start, end). For an Entity,
     return those active during it: started before `end` and not ended by
-    `start`, where a missing `start_s` or `end_s` counts as no limit."""
+    `start`, where a missing `start_s` or `end_s` counts as no limit.
 
-    kind: str = "window"
+    For example, veh_1 has rows at 10 s, 70 s and 80 s and veh_2 one at 30 s.
+    For the window [60, 120), Window() returns veh_1's rows at 70 s and 80 s.
+    """
 
 
 @dataclass(frozen=True)
 class Latest(ReadPolicy):
-    """Only return the latest value per `by` key with timestamp in [start, end)."""
+    """Return only the latest row per `by` key whose timestamp lies in
+    [start, end). A key with no row in the window isn't returned.
+
+    For example, EV has these rows:
+
+        EV(veh_id="veh_1", soc=0.50, time_s=1)
+        EV(veh_id="veh_1", soc=0.49, time_s=2)
+        EV(veh_id="veh_1", soc=0.48, time_s=3)
+
+        EV(veh_id="veh_2", soc=0.50, time_s=0)
+        EV(veh_id="veh_2", soc=0.49, time_s=4)
+
+    For the window [1, 3), Latest(by="veh_id") returns
+    {"EV": [{"veh_id": "veh_1", "soc": 0.49}]}. The row at 3 s is at the
+    window's end, so it's left out, and veh_2 has no row in the window.
+    """
 
     by: str
-    kind: str = "latest"
 
 
 class Input:
@@ -40,14 +56,11 @@ class Input:
 
     `where` keeps only the rows that match all its filters (see Filter).
 
-    `on` joins other records, in the order given. Each join starts from
+    `join` joins other records, in the order given. Each join starts from
     `from_` or a record joined before it.
 
     `read_policy` says which rows are read: Window() (the default) or Latest.
     An Entity has one row per id, so it can only be read with Window().
-
-    `name`, `from_` and `select` are required, e.g.
-    Input(name="EV", from_=EV, select=Fields("veh_id", "soc")).
     """
 
     def __init__(
@@ -56,51 +69,52 @@ class Input:
         name: str,
         from_: type[Record],
         select: Fields,
-        where: Filter | list[Filter] = None,
-        on: KeyJoin | SpatialJoin | list[KeyJoin | SpatialJoin] = None,
+        where: Filter | list[Filter] | None = None,
+        join: KeyJoin | SpatialJoin | list[KeyJoin | SpatialJoin] | None = None,
         read_policy: ReadPolicy = Window(),
     ):
         self.name = name
         self.from_ = from_
         self.where = as_list(where) if where is not None else []
-        self.on = as_list(on) if on is not None else []
+        self.join = as_list(join) if join is not None else []
         self.select = select
         self.read_policy = read_policy
         self._validate_from()
-        self._validate_on()
+        self._validate_join()
         validate_where(self.where, self.records(), self.name)
         self._resolve_select()
-        self._validate_policy()
+        self._validate_read_policy()
 
     def _validate_from(self):
         if not (isinstance(self.from_, type) and issubclass(self.from_, Record)):
             raise TypeError(
-                f"{self.name}: from_ must be a Record subclass; got {type(self.from_).__name__!r}"
+                f"{self.name}.from_ must be a Record subclass; got {type(self.from_).__name__!r}"
             )
 
-    def _validate_on(self):
+    def _validate_join(self):
         """Each join must start from `from_` or a record joined before it, and
         join a record not yet in the query."""
         joined = [self.from_]
-        for join in self.on:
+        for join in self.join:
             if not isinstance(join, (KeyJoin, SpatialJoin)):
                 raise TypeError(
-                    f"{self.name}.on: must be (list of) KeyJoin/SpatialJoin; got {type(join).__name__!r}"
+                    f"{self.name}.join must be a KeyJoin or SpatialJoin, or a list of them; "
+                    f"got {type(join).__name__!r}"
                 )
             names = ", ".join(record.__name__ for record in joined)
             if join.left_record not in joined:
                 raise ValueError(
-                    f"{self.name}.on: joins must start from {names}, got {join.left_record.__name__}"
+                    f"{self.name}.join: joins must start from {names}; got {join.left_record.__name__}"
                 )
             if join.right_record in joined:
                 raise ValueError(
-                    f"{self.name}.on: {join.right_record.__name__} is already in the query"
+                    f"{self.name}.join: {join.right_record.__name__} is already in the query"
                 )
             joined.append(join.right_record)
 
     def records(self) -> list[type[Record]]:
         """The records this input reads: `from_` first, then those it joins."""
-        return [self.from_] + [join.right_record for join in self.on]
+        return [self.from_] + [join.right_record for join in self.join]
 
     def _resolve_select(self):
         """Check `select` and set `selected_fields` from it."""
@@ -121,7 +135,7 @@ class Input:
             valid_fields = {field.name for field in dataclass_fields(self.from_)}
             for field_name in field_names:
                 if field_name not in valid_fields:
-                    raise AttributeError(
+                    raise ValueError(
                         f"{self.name}.select: {self.from_.__name__} has no field {field_name!r}. Valid: {sorted(valid_fields)}"
                     )
             self.selected_fields[self.from_.table_name] = field_names
@@ -132,10 +146,10 @@ class Input:
         for table_name in self.selected_fields:
             if table_name not in table_names:
                 raise ValueError(
-                    f"{self.name}.select: fields must come from {', '.join(table_names)}, got {table_name}"
+                    f"{self.name}.select: fields must come from {', '.join(table_names)}; got {table_name}"
                 )
 
-    def _validate_policy(self):
+    def _validate_read_policy(self):
         if not isinstance(self.read_policy, (Window, Latest)):
             raise TypeError(
                 f"{self.name}.read_policy must be Window() or Latest(...); got {type(self.read_policy).__name__!r}"

@@ -10,7 +10,7 @@ class Timestamp(Abstractable):
     """Base class for records that happen at a point in simulation time.
 
     `time_field` names the field that holds the time, in seconds or as a
-    timedelta. The default is "time_s" but can be overridden.
+    timedelta. The default is "time_s".
     """
 
     time_field: ClassVar[str] = "time_s"

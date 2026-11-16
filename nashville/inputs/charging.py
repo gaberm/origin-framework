@@ -22,7 +22,7 @@ def _arrived(
         name=name,
         from_=Arrival,
         where=vehicle_filters,
-        on=[
+        join=[
             KeyJoin((Arrival, "veh_id"), (Trip, "veh_id")),
             KeyJoin(Trip, EV),
             KeyJoin((Arrival, "veh_id"), (VehicleBattery, "veh_id")),
@@ -58,6 +58,6 @@ arrived_phevs = _arrived(
 departed_vehicles = Input(
     name="departed_vehicles",
     from_=Departure,
-    on=KeyJoin((Departure, "veh_id"), (Trip, "veh_id")),
+    join=KeyJoin((Departure, "veh_id"), (Trip, "veh_id")),
     select=Fields((Departure, "veh_id", "time_s"), (Trip, "driver_id")),
 )

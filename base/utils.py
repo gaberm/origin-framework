@@ -8,17 +8,17 @@ def as_list(value: Any) -> list[Any]:
     return list(value) if isinstance(value, (list, tuple)) else [value]
 
 
-def to_seconds(time: float | timedelta, time_name: str) -> float:
+def to_seconds(time: float | timedelta, label: str) -> float:
     """Checks that a time is non-negative and converts a timedelta to seconds."""
     if isinstance(time, timedelta):
         time = time.total_seconds()
     elif isinstance(time, bool) or not isinstance(time, Real):
         raise TypeError(
-            f"{time_name} must be a number of seconds or a timedelta; "
+            f"{label} must be a number of seconds or a timedelta; "
             f"got {type(time).__name__!r}"
         )
     if time < 0:
-        raise ValueError(f"{time_name} must be non-negative")
+        raise ValueError(f"{label} must be non-negative")
     return float(time)
 
 
@@ -42,7 +42,7 @@ def declare_field(cls: type, name: str, field_type: Any) -> None:
 
 
 def validate_run_id(run_id: str) -> None:
-    """A run's id names its PostgreSQL schema and its RabbitMQ queues."""
+    """Checks that a run id is a valid PostgreSQL schema name, since it names the run's schema."""
     if not isinstance(run_id, str):
         raise TypeError(f"run_id must be a str; got {type(run_id).__name__!r}")
     if not re.match(r"^[a-z_][a-z0-9_]{0,62}$", run_id):

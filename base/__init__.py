@@ -20,7 +20,7 @@ from .output.identifier import Identifier
 from .output.observation import Observation, StartObservation
 from .output.record import Record
 from .output.timestamp import Timestamp
-from .time_window import TIME_TOLERANCE, TimeWindow
+from .time_window import TIME_TOLERANCE, LateRecords, TimeWindow
 from .utils import (
     as_list,
     declare_field,
@@ -46,6 +46,7 @@ __all__ = [
     "In",
     "Input",
     "KeyJoin",
+    "LateRecords",
     "Latest",
     "Less",
     "LessEqual",

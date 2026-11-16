@@ -2,5 +2,6 @@ from abc import ABC, abstractmethod
 
 
 class Transform(ABC):
+
     @abstractmethod
-    def __call__(self, rows: list[dict]) -> list[dict]: ...
+    def transform(self, rows: list[dict]) -> list[dict]: ...
